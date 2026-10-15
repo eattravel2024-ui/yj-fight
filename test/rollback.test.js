@@ -19,8 +19,8 @@ test('deterministic 60Hz snapshot hashes match for same inputs',()=>{
  const [a,b]=runInputs(150);assert.equal(a.frame,150);assert.equal(a.digest(),b.digest());
 });
 test('predicted input is corrected by rollback of the past',()=>{
- const source=new RB.Session(C.create('azhi','sam',{seed:888}));
- const delayed=new RB.Session(C.create('azhi','sam',{seed:888}));
+ const source=new RB.Session(C.create('azhi','winnie',{seed:888}));
+ const delayed=new RB.Session(C.create('azhi','winnie',{seed:888}));
  for(let f=1;f<=25;f++){
   const p0={keys:{right:f<20},pulses:f===7?['light']:[]};
   const p1={keys:{left:f<14},pulses:f===9?['heavy']:[]};
@@ -66,7 +66,7 @@ test('projectile RNG remains deterministic across late command rewind',()=>{
  assert.equal(a.digest(),b.digest());
 });
 test('serialize snapshot does not consume rollback event history',()=>{
- const s=new RB.Session(C.create('azhi','sam'));s.submit(0,1,{pulses:['light']});s.advance();
+ const s=new RB.Session(C.create('azhi','winnie'));s.submit(0,1,{pulses:['light']});s.advance();
  const before=s.events.get(1).length;C.serialize(RB.clone(s.game));assert.equal(s.events.get(1).length,before);
 });
 test('server locks existing submitted frame to prevent history rewriting exploit',()=>{
@@ -83,8 +83,8 @@ test('future accepted inputs can be scheduled without advancing early',()=>{
  s.advance();assert.equal(s.game.players[0].move?.name,'light');
 });
 test('late packets with variable network jitter converge to 60Hz reference state',()=>{
- const ref=new RB.Session(C.create('sam','sezi',{seed:15438}));
- const wire=new RB.Session(C.create('sam','sezi',{seed:15438}));
+ const ref=new RB.Session(C.create('winnie','sezi',{seed:15438}));
+ const wire=new RB.Session(C.create('winnie','sezi',{seed:15438}));
  const pending=[];const N=170;
  for(let f=1;f<=N+18;f++){
   if(f<=N)for(let slot=0;slot<2;slot++){

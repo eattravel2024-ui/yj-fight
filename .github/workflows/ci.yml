@@ -18,10 +18,16 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Install dependencies
-        run: npm install --ignore-scripts --no-audit --no-fund
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Syntax validation
         run: npm run check
       - name: Tests
         run: npm test
       - name: Deployment script syntax
         run: bash -n deploy/*.sh
+      - name: Install browser for end-to-end tests
+        if: matrix.node == 24
+        run: npx playwright install --with-deps chromium
+      - name: Real browser gameplay and mobile smoke tests
+        if: matrix.node == 24
+        run: npm run test:e2e

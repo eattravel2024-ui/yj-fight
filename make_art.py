@@ -1,6 +1,5 @@
 from pathlib import Path
-from PIL import Image,ImageEnhance,ImageFilter
-import math, random, html
+import random
 root=Path(__file__).parent/'public'; art=root/'art';art.mkdir(parents=True,exist_ok=True)
 random.seed(7)
 colors={'night':['#101b3e','#1b1636','#ff55a8','#51ddeb','#f9b45a'], 'garage':['#101b2f','#192d40','#6ecbf3','#f6a747','#e85c8d'], 'harbor':['#10182e','#182944','#54f0d0','#ffb870','#8b8ff9']}
@@ -52,14 +51,6 @@ for name in colors:
   p.append(f'<path d="M{x} {y}h{w}" stroke="{random.choice([accent,accent2,warm])}" stroke-opacity="{random.uniform(.05,.23):.2f}" stroke-width="{random.randint(1,3)}"/>')
  p.append('<path d="M0 496Q360 474 960 502V540H0" fill="#060d1e" opacity=".3"/></svg>')
  (art/f'{name}.svg').write_text('\n'.join(p),encoding='utf8')
-# crop promotional generated art into actual portrait thumbnails (source generated for this game)
-source=Path('/mnt/data/a_wide_colorful_promotional_game_interface_collag.png')
-if source.exists():
- im=Image.open(source).convert('RGB'); print('source art:', im.size)
- # first three fighter thumbnails, crop only faces/upper bodies without text
- boxes={'azhi':(12,632,163,752),'xiaotao':(172,632,313,752),'akai':(327,632,473,752)}
- for key,box in boxes.items():
-  crop=im.crop(box).resize((320,256),Image.Resampling.LANCZOS)
-  crop=ImageEnhance.Contrast(crop).enhance(1.08)
-  crop.save(art/f'portrait_{key}.webp',quality=92)
-print('Assets:',[(p.name,p.stat().st_size) for p in art.iterdir()])
+# Character portraits are rights-cleared source assets maintained separately.
+# This stage generator never crops a historical promo or overwrites a fighter's likeness.
+print('Stage assets:', [(art/f'{name}.svg').name for name in colors])

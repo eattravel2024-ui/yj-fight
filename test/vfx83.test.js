@@ -35,7 +35,7 @@ test('web page loads self-hosted transparent atlas and offers graphical quality 
  const base=path.join(__dirname,'../public');
  const html=fs.readFileSync(path.join(base,'index.html'),'utf8');
  const js=fs.readFileSync(path.join(base,'game.js'),'utf8');
- assert.match(html,/vfx\.js\?v=86\d/);assert.match(html,/id="fxToggle"/);
+ assert.match(html,/src="vfx\.js(?:\?v=\d+)?"/);assert.match(html,/id="fxToggle"/);
  assert.match(js,/effects\.emit\(/);assert.match(js,/effects\.front\(/);assert.match(js,/effects\.back\(/);
  const buf=fs.readFileSync(path.join(base,'art/vfx/impact_energy.png'));
  assert.equal(buf.toString('hex',0,8),'89504e470d0a1a0a');assert.equal(buf.readUInt32BE(16),1024);assert.equal(buf.readUInt32BE(20),256);

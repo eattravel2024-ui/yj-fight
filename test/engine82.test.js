@@ -45,10 +45,10 @@ test('corner knockback transfers excess velocity to the attacker',()=>{
  a.x=48;b.x=48;C.resolvePushboxes(a,b);
  assert.ok(b.x-a.x>=58-1e-6,'pushboxes should not intersect at the left wall');
 });
-test('gallery artwork and transparent effect atlas are shipped with all five originals',()=>{
+test('gallery artwork and transparent effect atlas are shipped with all four originals',()=>{
  const art=path.join(__dirname,'../public/art');
  for(const id of Object.keys(C.CHAR))assert.ok(fs.statSync(path.join(art,'moves',id+'.webp')).size>10_000);
- assert.ok(fs.statSync(path.join(art,'roster_promo.webp')).size>10_000);
+ for(const id of Object.keys(C.CHAR))assert.ok(fs.statSync(path.join(art,'portrait_'+id+'.webp')).size>10_000);
  const fx=fs.readFileSync(path.join(art,'vfx','impacts.png'));
  assert.equal(fx.toString('hex',0,8),'89504e470d0a1a0a');
  assert.equal(fx.readUInt32BE(16),1440);assert.equal(fx.readUInt32BE(20),540);
@@ -62,7 +62,7 @@ test('browser includes I uppercut, O super and rematch controls',()=>{
  assert.match(server,/msg\.type==='rematch'/);assert.match(server,/room\.rematchVotes\.size===room\.maxPlayers/);
 });
 test('Azhi black-gold armor absorbs the first light hit without hitstun',()=>{
- const m=C.create('sam','azhi');const attacker=m.players[0],foe=m.players[1];
+ const m=C.create('winnie','azhi');const attacker=m.players[0],foe=m.players[1];
  attacker.x=430;foe.x=510;foe.armorTimer=90;foe.armorCharges=1;
  C.input(m,0,{pulses:['light']});
  for(let i=0;i<8;i++)C.step(m);
@@ -70,7 +70,7 @@ test('Azhi black-gold armor absorbs the first light hit without hitstun',()=>{
  assert.ok(m.events.some(e=>e.kind==='armor'));
 });
 test('Gambler fortune effects use deterministic seeded RNG, not Math.random',()=>{
- const a=C.create('gambler','sam',{seed:199}),b=C.create('gambler','sam',{seed:199});
+ const a=C.create('gambler','winnie',{seed:199}),b=C.create('gambler','winnie',{seed:199});
  for(const m of [a,b]){
   m.players[0].meter=100;
   C.input(m,0,{pulses:['special']});
