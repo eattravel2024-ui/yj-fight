@@ -19,6 +19,7 @@
 - 8.9.3: Gambler also has 21 transparent video-referenced key poses; shared packing preserves both imported fighters.
 - 8.9.4: user-provided arcade UI integrated with real HP, energy, damage trails and round wins; preserves viewport fit and accessible reduced motion.
 - 8.9.5: animated in-game panels, fixed selection confirmation, keyboard focus/Escape, local menu pause, neutral online menu input and automatic room navigation after disconnect. Native fullscreen is optional; responsive viewport fit works without it.
+- 8.9.6: mode/fighter selection combined in the lobby, uniform photo crops and card states, one fixed primary action and no Fight Fund panel.
 - Private local stats, achievements, match replay export with privacy safeguards.
 - Spectator camera/timeline and safe anonymized display names.
 - Gamepad support, captions for effects, reduced motion and low-end device mode.

@@ -135,7 +135,7 @@ body.game-app{
 /* Native modal dialog supplies focus containment and Escape handling. */
 .app-menu{
   color:var(--text);
-  width:min(1000px,calc(100vw - 40px));
+  width:min(1160px,calc(100vw - 40px));
   max-width:none;
   height:min(730px,calc(100dvh - 80px));
   max-height:calc(100dvh - 80px);
@@ -158,7 +158,7 @@ body.game-app{
 .app-tabs button{flex:1;min-width:76px;padding-inline:10px}
 .app-menu-body{flex:1 1 0;min-height:0;overflow:auto;overscroll-behavior:contain;padding:24px;scrollbar-width:thin;scrollbar-color:#376174 #101a29;scroll-padding:20px}
 .app-menu-foot{display:flex;align-items:center;flex:0 0 auto;gap:18px;padding:12px 24px;border-top:1px solid #3c647c;background:linear-gradient(105deg,#0b2838,#15182b);box-shadow:0 -8px 24px #0004}
-.app-menu-foot .app-selection-summary{flex:1;min-width:0;margin:0;padding:0;border:0;background:transparent;font-size:13px;line-height:1.6;color:#b9f3f8}
+.app-menu-foot .app-selection-summary{margin:0;padding:0;border:0;background:transparent}
 .app-menu-foot .app-confirm-action{flex:0 0 auto;width:auto;min-width:230px;min-height:48px;margin:0;padding:10px 20px;font-size:14px}
 .app-pane:not([hidden]){animation:app-pane-enter .2s ease-out both}
 .app-pane > h3{font-size:21px;margin:0 0 12px}
@@ -198,35 +198,54 @@ body.game-app{
 .app-pane .palette button{font-size:12px}
 .app-pane .fighter-select-link{display:none}
 
-.app-home{position:relative}
-.app-home-title{margin:0 0 22px}
-.app-home-title > small{display:block;color:#66dfed;font:800 10px ui-monospace,monospace;letter-spacing:.2em;margin-bottom:12px}
-.app-home-title h1{font-size:clamp(34px,5vw,54px);line-height:1.15;letter-spacing:.02em;font-weight:950;margin:0 0 12px;color:#e9faff;text-shadow:3px 3px #0a3a4e}
-.app-home-title h1 em{color:#79eeff;font-style:normal}
-.app-home-title p{font-size:13px;line-height:1.8;color:#a8bfce;max-width:620px;margin:0}
-.app-home-art{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:20px;isolation:isolate}
-.app-home-art img{display:block;object-fit:cover;object-position:50% 18%;width:100%;height:clamp(105px,19dvh,170px);border:1px solid #486478;border-radius:3px;filter:saturate(.85);background:#192939}
-.app-home-art img:nth-child(even){border-bottom-color:#ca4a80}
-.app-home-art img:nth-child(odd){border-bottom-color:#58d5e7}
-.app-home-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.app-home-actions button,.app-home-actions a{display:flex;align-items:center;justify-content:center;gap:9px;min-height:62px;padding:13px 17px;border:1px solid #416783;border-radius:5px;background:linear-gradient(120deg,#102d42,#101c31);color:#dbfaff;text-align:center;font-size:15px;font-weight:850;line-height:1.5;text-decoration:none}
-.app-home-actions button:first-child{border-color:#55c8d9;background:linear-gradient(110deg,#136071,#16314d);box-shadow:inset 3px 0 var(--cyan)}
-.app-home-actions button:hover,.app-home-actions a:hover{border-color:#7ee5f4;background:linear-gradient(120deg,#164255,#19253f);text-decoration:none}
-.app-home-actions small{display:block;font-size:10px;color:#8fbacb;font-weight:500}
-.app-selection-summary{padding:11px 14px;border:1px solid #315265;border-radius:4px;background:#0a202e;color:#9bdfeb;font-size:12px;line-height:1.7;margin:16px 0 0}
-.app-confirm-action{display:block;width:100%;margin-top:15px;min-height:48px;padding:10px 18px;font-size:14px}
-.game-app .app-menu #fighterSelect:not([hidden]),.game-app.fight-focus .app-menu #fighterSelect:not([hidden]){display:block;width:100%;max-width:none;margin:0;padding:18px;border-color:#375c74;background:linear-gradient(125deg,#10303d88,#182037 65%,#2d1831)}
-.app-menu #fighterSelect .section-title{font-size:24px;margin-bottom:8px}
-.app-menu #fighterSelect .selection-summary{font-size:16px!important}
-.app-menu #fighterSelect .selection-hint{font-size:12px!important;margin-bottom:20px!important}
-.app-menu #fighterSelect .character-list,.app-menu #fighterSelect .char-choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.app-menu #fighterSelect .char-card,.app-menu #fighterSelect .char-choices button{display:flex;flex-direction:column;align-items:stretch;min-height:0;text-align:left;overflow:hidden;border-radius:5px}
-.app-menu #fighterSelect .char-card img,.app-menu #fighterSelect .char-choices img{width:100%;height:clamp(130px,25dvh,210px);object-fit:cover;object-position:50% 18%;transition:filter .18s,transform .18s}
-.app-menu #fighterSelect .char-card .data,.app-menu #fighterSelect .char-choices span{padding:12px;min-height:91px;background:linear-gradient(130deg,#162d3d,#141e30)}
-.app-menu #fighterSelect .char-card strong,.app-menu #fighterSelect .char-choices span{font-size:15px}
-.app-menu #fighterSelect .char-card small,.app-menu #fighterSelect .char-choices small{font-size:11px;line-height:1.6}
-.app-menu #fighterSelect .char-card.selected img,.app-menu #fighterSelect .char-choices button.on img{filter:saturate(1.15);transform:scale(1.025)}
-.app-menu #fighterSelect #charDescription,.app-menu #fighterSelect .character-descr{margin:18px 0 0;font-size:13px;line-height:1.9;min-height:0}
+/* One clear flow: mode on the left, fighter on the right, action in the footer. */
+.app-home{display:grid;grid-template-columns:minmax(260px,.85fr) minmax(0,1.6fr);gap:32px;align-items:start}
+.app-home-modes,.app-home-fighters{min-width:0}
+.app-home-title{margin:0 0 20px}
+.app-home-title > small{display:block;color:#7898ad;font:700 9px ui-monospace,monospace;letter-spacing:.15em;margin-bottom:7px}
+.app-home-title h1{font-size:24px;line-height:1.35;font-weight:850;margin:0 0 8px;color:#edf7ff}
+.app-home-title p{font-size:12px;line-height:1.7;color:#91a9bc;margin:0}
+.app-home-actions{display:grid;grid-template-columns:1fr;gap:9px;margin:0}
+.app-home-actions button,.app-home-actions a{display:flex;align-items:center;justify-content:flex-start;gap:14px;min-height:66px;padding:12px 16px;border:1px solid #2c4359;border-radius:5px;background:#101d2c;color:#c3d2df;text-align:left;font-size:14px;font-weight:750;line-height:1.45;text-decoration:none;box-shadow:none}
+.app-home-actions .mode-index{font:italic 18px ui-monospace,monospace;color:#5d788f}
+.app-home-actions small{display:block;font-size:9px;color:#7f9bb1;font-weight:500;margin-top:3px;letter-spacing:.04em}
+.app-home-actions button.active,.app-home-actions a.active{border-color:#4bc9d8;background:linear-gradient(110deg,#133947,#142638);color:#e2fbff;box-shadow:inset 3px 0 #53d9e4}
+.app-home-actions button.active .mode-index{color:#69dce5}
+.app-home-actions button:hover,.app-home-actions a:hover{border-color:#64859e;background:#162b3d;text-decoration:none}
+.app-home-modes #appResume{margin-top:12px;width:100%;min-height:44px;background:transparent;border-color:#34485d;font-size:11px;color:#9eb5c7}
+.app-selection-summary{display:block;color:#d8f3fa;font-size:13px;line-height:1.6}
+.app-confirm-info{flex:1;min-width:0}
+.app-confirm-info > small{display:block;font-size:10px;letter-spacing:.05em;color:#81a5bb;margin-bottom:3px}
+.app-confirm-action{display:block;min-height:52px;padding:12px 24px;font-size:15px;font-weight:850}
+.app-menu-foot .app-confirm-action{border:1px solid #83edf5;color:#071b25;background:linear-gradient(110deg,#64e3ec,#35bdd5);box-shadow:0 4px 20px #00c8df22;min-width:250px}
+.app-menu-foot .app-confirm-action:hover{background:#8bf1f5;box-shadow:0 4px 25px #00c8df44}
+.game-app .app-menu #fighterSelect:not([hidden]),.game-app.fight-focus .app-menu #fighterSelect:not([hidden]){display:block;width:100%;max-width:none;margin:0;padding:0;border:0;background:transparent;box-shadow:none}
+.app-menu #fighterSelect .section-kicker,.app-menu #fighterSelect .section-label{font:700 9px ui-monospace,monospace;letter-spacing:.15em;color:#7898ad;margin-bottom:7px}
+.app-menu #fighterSelect .section-title{font-size:24px;line-height:1.35;margin:0 0 22px}
+.app-menu #fighterSelect .section-title > span{display:none}
+.app-menu #fighterSelect .selection-summary{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.app-menu #fighterSelect .selection-hint,.app-menu #fighterSelect .roster-footer{display:none}
+.app-menu #fighterSelect .character-list,.app-menu #fighterSelect .char-choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.app-menu #fighterSelect .char-card,.app-menu #fighterSelect .char-choices button{position:relative;display:flex;flex-direction:column;align-items:stretch;min-width:0;min-height:0;padding:0;overflow:hidden;border:1px solid #344b62;border-radius:5px;text-align:left;background:#101e2d;box-shadow:none;transition:border-color .16s,background .16s}
+.app-menu #fighterSelect .fighter-portrait{position:relative;display:block;width:100%;aspect-ratio:1;overflow:hidden;background:#e8edef;padding:0;min-height:0}
+/* Crop the shared inner photo region; baked-in ribbons and names stay outside it. */
+.app-menu #fighterSelect .fighter-portrait img{position:absolute;display:block;width:var(--portrait-width,123.2%);max-width:none;height:auto;left:var(--portrait-left,-11.6%);top:0;object-fit:initial;transform:translateY(var(--portrait-y,-9.28%));filter:none;transition:none}
+/* Different source frames have different photo insets; every visible crop is square. */
+.app-menu #fighterSelect [data-char="sezi"]{--portrait-width:156.45%;--portrait-left:-28.22%;--portrait-y:-17.76%}
+.app-menu #fighterSelect [data-char="gambler"]{--portrait-width:144.07%;--portrait-left:-23.72%;--portrait-y:-14.08%}
+.app-menu #fighterSelect .char-card .data,.app-menu #fighterSelect .char-choices .data{display:block;padding:12px 9px;min-height:76px;background:#101e2d;font-size:14px;font-weight:800;line-height:1.45;color:#dae8f1}
+.app-menu #fighterSelect .char-card strong{display:block;font-size:14px;font-weight:800;white-space:nowrap}
+.app-menu #fighterSelect .char-card small,.app-menu #fighterSelect .char-choices small{display:block;color:#8fa8bc;font-size:10px;font-weight:400;line-height:1.6;margin-top:4px;min-height:32px}
+.app-menu #fighterSelect .char-card::after{display:none}
+.app-menu #fighterSelect .char-card:hover:not(:disabled),.app-menu #fighterSelect .char-choices button:hover:not(:disabled){border-color:#67e1e9;transform:none;background:#142838}
+.app-menu #fighterSelect .char-card.selected,.app-menu #fighterSelect .char-choices button.on{border-color:#67e1e9;box-shadow:0 0 0 1px #67e1e9;background:#14323e}
+.app-menu #fighterSelect .char-card.selected .data,.app-menu #fighterSelect .char-choices button.on .data{background:#14323e}
+.app-menu #fighterSelect .char-number,.app-menu #fighterSelect .selection-badge{position:absolute;left:auto;right:6px;top:6px;z-index:2;margin:0;padding:3px 5px;border:0;border-radius:3px;background:#61e0e9;color:#061b25;font:750 9px/1.4 system-ui,sans-serif}
+.app-menu #fighterSelect .char-card:not(.selected) .char-number,.app-menu #fighterSelect .char-choices button:not(.on) .selection-badge{display:none}
+.app-menu #fighterSelect #charDescription,.app-menu #fighterSelect .character-descr{margin:18px 0 0;padding:12px 0 0;border-top:1px solid #263c50;font-size:12px;line-height:1.8;color:#9ab1c3;min-height:0}
+.app-home-fighters #fighterSelect > .note,.app-home-fighters #teamCharacterInfo{display:none}
+.app-home-fighters #fighterSelect .section-title{margin-bottom:48px}
+.app-menu #progressPanel{margin-top:24px}
 .app-setting-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:15px 0;border-bottom:1px solid #293c51}
 .app-setting-row > div{flex:1;min-width:170px}
 .app-setting-row strong{display:block;font-size:14px;color:#d8eaf5}
@@ -238,19 +257,6 @@ body.game-app{
 @keyframes app-menu-enter{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 @keyframes app-pane-enter{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
 
-@media(min-width:700px){
-  .app-home{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:center}
-  .app-home-title{margin:0}
-  .app-home-title h1{font-size:clamp(34px,3.3vw,46px)}
-  .app-home-title h1 em{display:block}
-  .app-home-title p{font-size:12px}
-  .app-home-art{margin:0;align-self:stretch}
-  .app-home-art img{height:100%;min-height:145px;max-height:185px}
-  .app-home > .app-home-actions,.app-home > .app-selection-summary,.app-home > #appResume,.app-home > .career{grid-column:1/-1;margin:0}
-  .app-home > .career{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border:1px solid #2a4358;border-radius:4px;text-align:left;background:#0d1a29}
-  .app-home > .career strong{font-size:20px;margin:0}
-  .app-home > .career span{font-size:9px}
-}
 @media(min-width:1600px){.game-app .app-battle > .hud,.game-app .app-battle > .score{padding-inline:max(32px,calc((100vw - 1600px)/2))}.game-app .app-battle > .skill-dock{padding-inline:max(32px,calc((100vw - 1400px)/2))}}
 @media(max-width:850px){
   .app-bar{gap:10px}
@@ -311,16 +317,7 @@ body.game-app{
   .app-tabs button{min-width:55px;padding-inline:5px;font-size:11px}
   .app-menu-body{padding:16px 13px}
   .app-menu-foot{gap:10px;padding:10px 13px}
-  .app-menu-foot .app-selection-summary{font-size:11px;line-height:1.5}
   .app-menu-foot .app-confirm-action{min-width:150px;min-height:48px;padding:9px 12px;font-size:12px}
-  .app-home-title{margin-bottom:18px}
-  .app-home-title h1{font-size:34px}
-  .app-home-title p{font-size:12px}
-  .app-home-art{gap:5px;margin-bottom:16px}
-  .app-home-art img{height:116px}
-  .app-home-actions{gap:8px}
-  .app-home-actions button,.app-home-actions a{font-size:13px;min-height:59px;padding:10px 6px}
-  .app-selection-summary{font-size:11px;padding:10px 12px}
   .app-pane .panel,.app-pane .side-section{padding:15px}
   .app-pane .sub-panel{grid-template-columns:1fr;gap:20px}
   .app-pane .training-content{grid-template-columns:1fr}
@@ -328,12 +325,6 @@ body.game-app{
   .app-pane .room-input,.app-pane .row{gap:7px}
   .app-pane .room-input .secondary,.app-pane .row .main-btn{padding-inline:10px;font-size:12px;white-space:nowrap}
   .app-pane .player-identity input{min-width:130px}
-  .game-app .app-menu #fighterSelect:not([hidden]),.game-app.fight-focus .app-menu #fighterSelect:not([hidden]){padding:12px}
-  .app-menu #fighterSelect .character-list,.app-menu #fighterSelect .char-choices{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-  .app-menu #fighterSelect .section-title{font-size:21px}
-  .app-menu #fighterSelect .char-card img,.app-menu #fighterSelect .char-choices img{height:140px}
-  .app-menu #fighterSelect .char-card .data,.app-menu #fighterSelect .char-choices span{padding:10px;min-height:79px;font-size:14px}
-  .app-menu #fighterSelect .char-card small,.app-menu #fighterSelect .char-choices small{font-size:10px}
   .app-setting-row{gap:9px}
   .app-setting-row > div{min-width:140px}
   .app-setting-row button{min-width:87px;padding-inline:9px}
@@ -341,7 +332,6 @@ body.game-app{
 @media(max-width:370px){
   .app-brand strong{display:none}
   .app-actions button{padding-inline:8px}
-  .app-menu #fighterSelect .char-card img,.app-menu #fighterSelect .char-choices img{height:115px}
 }
 @media(max-height:550px) and (orientation:landscape){
   body.game-app{--app-bar-height:46px;--app-edge:12px}
@@ -379,19 +369,6 @@ body.game-app{
   .app-tabs{padding-block:3px}
   .app-menu-body{padding:10px 15px}
   .app-menu-foot{padding-block:7px}
-  .app-home-title h1{font-size:34px}
-  .app-home-art img{height:95px}
-  .game-app .app-menu #fighterSelect:not([hidden]),.game-app.fight-focus .app-menu #fighterSelect:not([hidden]){padding:10px}
-  .app-menu #fighterSelect .section-kicker,.app-menu #fighterSelect .section-label,.app-menu #fighterSelect .selection-summary,.app-menu #fighterSelect .selection-hint{display:none}
-  .app-menu #fighterSelect .section-title{font-size:16px;margin:0 0 10px}
-  .app-menu #fighterSelect .character-list,.app-menu #fighterSelect .char-choices{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
-  .app-menu #fighterSelect .char-card,.app-menu #fighterSelect .char-choices button{display:grid;grid-template-columns:60px minmax(0,1fr);align-items:center;min-height:90px}
-  .app-menu #fighterSelect .char-card img,.app-menu #fighterSelect .char-choices img{width:60px;height:90px}
-  .app-menu #fighterSelect .char-card .data,.app-menu #fighterSelect .char-choices span{padding:7px;min-height:0;font-size:12px}
-  .app-menu #fighterSelect .char-card strong{font-size:12px}
-  .app-menu #fighterSelect .char-card small,.app-menu #fighterSelect .char-choices small{font-size:9px;line-height:1.5}
-  .app-menu #fighterSelect #charDescription,.app-menu #fighterSelect .character-descr{font-size:11px;margin-top:9px}
-  .app-menu #fighterSelect .roster-footer{padding-top:5px;margin-top:5px}
 }
 @media(max-height:550px) and (orientation:landscape) and (hover:none){
   .game-app .app-battle > .skill-dock{display:none}
@@ -400,4 +377,62 @@ body.game-app{
 }
 @media(prefers-reduced-motion:reduce){
   .game-app *,.game-app *::before,.game-app *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+
+@media(max-width:1000px) and (min-width:701px){
+ .app-home{grid-template-columns:minmax(235px,.8fr) minmax(0,1.4fr);gap:24px}
+ .app-menu #fighterSelect .character-list,.app-menu #fighterSelect .char-choices{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .app-menu #fighterSelect .char-card,.app-menu #fighterSelect .char-choices button{display:grid;grid-template-columns:64px minmax(0,1fr);align-items:center;min-height:100px}
+ .app-menu #fighterSelect .fighter-portrait{width:64px;aspect-ratio:1}
+ .app-menu #fighterSelect .char-card .data,.app-menu #fighterSelect .char-choices .data{padding:8px;min-height:59px}
+ .app-menu #fighterSelect .char-card small,.app-menu #fighterSelect .char-choices small{min-height:16px}
+ .app-home-fighters #fighterSelect .section-title{margin-bottom:22px}
+}
+@media(max-width:700px){
+ .app-home{grid-template-columns:1fr;gap:24px}
+ .app-home-title{margin-bottom:14px}
+ .app-home-title h1,.app-menu #fighterSelect .section-title{font-size:20px}
+ .app-home-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .app-home-actions button,.app-home-actions a{min-height:62px;padding:10px;gap:8px;font-size:12px}
+ .app-home-actions .mode-index{font-size:15px}
+ .app-home-actions small{font-size:8px}
+ .app-menu #fighterSelect .character-list,.app-menu #fighterSelect .char-choices{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .app-menu #fighterSelect .char-card,.app-menu #fighterSelect .char-choices button{display:grid;grid-template-columns:64px minmax(0,1fr);align-items:center;min-height:100px}
+ .app-menu #fighterSelect .fighter-portrait{width:64px;aspect-ratio:1}
+ .app-menu #fighterSelect .char-card .data,.app-menu #fighterSelect .char-choices .data{padding:9px;min-height:59px;font-size:13px}
+ .app-menu #fighterSelect .char-card strong{font-size:13px}
+ .app-menu #fighterSelect .char-card small,.app-menu #fighterSelect .char-choices small{font-size:10px;min-height:16px;margin-top:3px}
+ .app-home-fighters #fighterSelect .section-title{margin-bottom:15px}
+ .app-menu #fighterSelect #charDescription,.app-menu #fighterSelect .character-descr{font-size:11px;margin-top:12px;padding-top:10px}
+ .app-menu-foot .app-confirm-action{min-width:155px;min-height:50px;padding:10px 14px;font-size:13px}
+ .app-confirm-info > small{font-size:9px}
+ .app-menu-foot .app-selection-summary{font-size:11px}
+}
+@media(max-height:550px) and (orientation:landscape){
+ .app-home{grid-template-columns:minmax(230px,.9fr) minmax(0,1.5fr);gap:24px}
+ .app-home-title{margin-bottom:10px}
+ .app-home-title > small,.app-home-title p{display:none}
+ .app-home-title h1,.app-menu #fighterSelect .section-title{font-size:17px;margin-bottom:10px}
+ .app-home-actions{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+ .app-home-actions button,.app-home-actions a{min-height:55px;padding:7px 9px;font-size:11px;gap:7px}
+ .app-home-actions small{font-size:8px}
+ .app-home-actions .mode-index{font-size:14px}
+ .app-menu #fighterSelect .section-kicker,.app-menu #fighterSelect .section-label{display:none}
+ .app-home-fighters #fighterSelect .section-title{margin-bottom:10px}
+ .app-menu #fighterSelect .character-list,.app-menu #fighterSelect .char-choices{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+ .app-menu #fighterSelect .char-card,.app-menu #fighterSelect .char-choices button{display:flex;min-height:0}
+ .app-menu #fighterSelect .fighter-portrait{width:min(76px,100%);aspect-ratio:1;align-self:center}
+ .app-menu #fighterSelect .char-card .data,.app-menu #fighterSelect .char-choices .data{padding:7px 5px;min-height:63px;font-size:11px}
+ .app-menu #fighterSelect .char-card strong{font-size:11px}
+ .app-menu #fighterSelect .char-card small,.app-menu #fighterSelect .char-choices small{font-size:8px;min-height:26px;margin-top:2px}
+ .app-menu #fighterSelect #charDescription,.app-menu #fighterSelect .character-descr{display:none}
+ .app-menu #fighterSelect .char-number,.app-menu #fighterSelect .selection-badge{font-size:8px;right:3px;top:3px;padding:2px 3px}
+ .app-menu-foot .app-confirm-action{min-height:46px}
+}
+
+@media(max-width:370px){
+ .app-menu #fighterSelect .char-card,.app-menu #fighterSelect .char-choices button{grid-template-columns:52px minmax(0,1fr)}
+ .app-menu #fighterSelect .fighter-portrait{width:52px}
+ .app-menu #fighterSelect .char-card .data,.app-menu #fighterSelect .char-choices .data{padding:8px 5px}
+ .app-menu-foot .app-confirm-action{min-width:140px;font-size:12px}
 }

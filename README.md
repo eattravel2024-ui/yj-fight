@@ -1,6 +1,6 @@
 # 狠話擂台 — Big Talk / Real Fight
 
-> GitHub/Codex development baseline: **8.9.5**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.9.6**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,10 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.9.6 focused lobby
+
+The lobby now puts mode selection on the left, four consistent fighter cards on the right, and one primary action in a fixed footer with the selected mode/fighter. The headline is reduced to “選擇戰鬥模式”; Fight Fund and its duplicated balance display are removed. Mode selection stays on the same screen until confirmation, and cross-page mode navigation carries the selected fighter. Mobile uses compact cards while retaining the fixed action. See [lobby refinement notes](docs/LOBBY_8.9.6.md).
 
 ## 8.9.5 full-window game and in-game menus
 
