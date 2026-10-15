@@ -1,12 +1,41 @@
 # 8.10.0 手動發佈與回滾
 
-本次開發沒有連線或部署正式 VPS。以下指令由你確認更新內容後手動執行；快速迭代不要求每次先建立或合併 PR；目前本機開發分支為 `feat/arcade-phase1`。正式發佈請使用已審閱的完整 commit SHA，確保部署內容與測試內容一致。不要在正在執行遊戲的 `/opt/azhi71` 內做 `git pull` 或安裝依賴。
+本次開發沒有連線或部署正式 VPS。以下指令由你確認更新內容後手動執行；快速迭代不要求每次先建立或合併 PR；目前開發分支為 `feat/arcade-phase1`。正式發佈請使用已審閱的完整 commit SHA，確保部署內容與測試內容一致。不要在正在執行遊戲的 `/opt/azhi71` 內做 `git pull` 或安裝依賴。
 
-## 本階段來源狀態
+## Phase 1 GitHub 檢查點
 
-本次 Phase 1 位於本機分支 `feat/arcade-phase1`，尚未推送 GitHub；原更新資料夾執行 `git pull` 不會取得這版。請先審閱主選單及測試報告；若要自行部署本階段，使用下方完整來源包流程。Git 取用流程須等授權推送／合併後才適用。
+Phase 1 功能提交為 `4fc8806`，已完成 179 項 Node 與 25 項瀏覽器測試。後續發布文件提交不改遊戲程式。依使用者授權，發布分支為 `feat/arcade-phase1`，固定檢查點標籤為 `checkpoint-phase1-8.10.0`；沒有合併 main 或操作正式 VPS。
 
-8.10.0 更新漫畫街機主選單、共用導航及存檔入口驗證，保留原有戰鬥與所有模式。這是 Phase 1，不包含新任務選單／選圖／新版結算。健康版本應顯示 8.10.0，更新後強制重新整理。
+### 沿用主機上的來源資料夾
+
+自行登入原 VPS，在既有來源資料夾執行以下指令。`git switch` 不使用強制覆蓋；若有本機修改或衝突，請先保留並處理，不要使用 reset --hard。
+
+```bash
+set -e
+cd ~/azhi-update.lvccoe
+git fetch origin
+git switch feat/arcade-phase1
+git pull --ff-only
+npm ci --ignore-scripts --no-fund
+sudo bash deploy/upgrade-ubuntu.sh
+curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+```
+
+健康版本應顯示 `8.10.0`。更新腳本會保留完整舊版備份，並沿用原遊戲網址；不需要修改 Nginx。更新後強制重新整理瀏覽器。
+
+如要固定取用此階段，另建來源資料夾、只取檢查點即可（不必切換舊資料夾的分支）：
+
+```bash
+set -e
+RELEASE_DIR="$(mktemp -d "$HOME/azhi-phase1.XXXXXX")"
+git clone --branch checkpoint-phase1-8.10.0 --depth 1 https://github.com/eattravel2024-ui/yj-fight.git "$RELEASE_DIR"
+cd "$RELEASE_DIR"
+npm ci --ignore-scripts --no-fund
+sudo bash deploy/upgrade-ubuntu.sh
+curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+```
+
+8.10.0 更新漫畫街機主選單、共用導航及存檔入口驗證，保留原有戰鬥與所有模式。這是 Phase 1，不包含新任務選單／選圖／新版結算。Phase 2 尚未開始。
 
 ## 快速更新（目前 8.10.0）
 
