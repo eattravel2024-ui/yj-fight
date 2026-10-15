@@ -31,3 +31,15 @@ body.fight-focus .game-panel{max-width:none}
 body.fight-focus .arena canvas{max-height:none;object-fit:fill}
 @media(max-width:1000px){.side,.aside{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.side,.aside{grid-template-columns:minmax(0,1fr)}.char-card img,.char-choices img{height:105px}}
+/* 8.9 Ready lobby and actionable skill states. */
+.lobby-controls{margin:14px 0;padding:12px;border:1px solid #4b637e;border-radius:6px;background:#101d2c}
+.lobby-controls .action-row{display:flex;flex-wrap:wrap;gap:8px}
+.lobby-controls button{min-height:44px;padding:9px 14px;border:1px solid #689699;border-radius:4px;background:#193b43;color:#e1f7f4;font:inherit;cursor:pointer}
+.lobby-controls button[aria-pressed=true]{border-color:#81e5b4;background:#204d3b}
+.lobby-controls button:disabled{cursor:default;opacity:.45}
+.lobby-controls button[hidden]{display:none}
+.lobby-controls #readySummary{color:#d3efed;font-size:12px;margin:0 0 10px}
+.lobby-controls #readyRoster{line-height:1.9;overflow-wrap:anywhere;margin:10px 0 0}
+.skill-button[data-state=cancel]{border-color:#8df1ae;box-shadow:inset 0 0 18px #77e98c20}
+.skill-button[data-state=cancel] small{color:#a6f7b9}
+.skill-button[data-state=recovery]:not(:disabled),.skill-button[data-state=hitstop]:not(:disabled){border-color:#d0b582}

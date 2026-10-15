@@ -41,6 +41,8 @@ test('8.6 player names, room title, spectator identity and XSS protection', asyn
   const old=connect();old.incoming({type:'join',mode:'team',room:'NAMETEST',char:'sezi'});
   assert.equal(old.last('joined').name,'選手3','legacy clients without a name receive a safe fallback');
   const d=connect();d.incoming({type:'join',mode:'team',room:'NAMETEST',char:'winnie',name:'第四名選手'});
+  for(const player of [a,b,old,d])player.incoming({type:'set_ready',ready:true});
+  a.incoming({type:'start_match',revision:a.last('roster').revision});
   assert.equal(d.last('start').game.players.length,4,'names never change rollback player count');
   assert.equal(JSON.stringify(d.last('start').game).includes('第四名選手'),false,'identity not embedded in deterministic gameplay snapshots');
   const v=connect();v.incoming({type:'watch',room:'NAMETEST',name:'觀戰小王'});

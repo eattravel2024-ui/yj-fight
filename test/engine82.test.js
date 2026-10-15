@@ -59,7 +59,7 @@ test('browser includes I uppercut, O super and rematch controls',()=>{
  const server=fs.readFileSync(path.join(__dirname,'../server.js'),'utf8');
  assert.match(html,/data-key="upper"/);assert.match(html,/data-key="super"/);
  assert.match(html,/id="rematchButton"/);assert.match(browser,/KeyO:'super'/);
- assert.match(server,/msg\.type==='rematch'/);assert.match(server,/room\.rematchVotes\.size===room\.maxPlayers/);
+ assert.match(server,/msg\.type==='rematch'/);assert.match(server,/room\.players\.every\(p=>p\.ready\)/);
 });
 test('Gambler black-gold armor absorbs the first light hit without hitstun',()=>{
  const m=C.create('winnie','gambler');const attacker=m.players[0],foe=m.players[1];

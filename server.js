@@ -27,7 +27,7 @@ function cleanLabel(value,max=16){
  return size>=2&&size<=max&&LABEL.test(name)&&!RESERVED.test(name)?name:null;
 }
 function nameTaken(room,name,self){return [...room.players,...[...room.spectators].map(ws=>({name:ws.displayName,ws}))].some(p=>p.ws!==self&&p.name.toLocaleLowerCase()===name.toLocaleLowerCase())}
-function roomSummary(room){return {title:room.title,players:room.players.map(p=>({slot:p.slot,team:p.slot%2,char:p.char,name:p.name,host:p.ws===room.hostWs})),spectators:[...room.spectators].map(ws=>({name:ws.displayName}))}}
+function roomSummary(room){return {title:room.title,revision:room.revision||0,phase:room.session?'playing':room.completed?'finished':'waiting',players:room.players.map(p=>({slot:p.slot,team:p.slot%2,char:p.char,name:p.name,ready:!!p.ready,host:p.ws===room.hostWs})),spectators:[...room.spectators].map(ws=>({name:ws.displayName}))}}
 
 function send(ws,msg){if(ws.readyState!==WebSocket.OPEN)return; if(ws.bufferedAmount>1024*1024){ws.terminate();return}ws.send(JSON.stringify(msg))}
 function group(room,msg){for(const p of room.players)send(p.ws,msg)}
@@ -36,7 +36,10 @@ function all(room,msg){group(room,msg);audience(room,msg)}
 function compactGame(room){const engine=room.mode==='team'?Team:Combat;return engine.serialize(Rollback.clone(room.session.game))}
 function newCode(){let s;do{s=crypto.randomBytes(4).toString('hex').toUpperCase()}while(rooms.has(s));return s}
 function roomRoster(room){all(room,{type:'roster',mode:room.mode,needed:room.maxPlayers,...roomSummary(room)})}
+function resetReady(room){for(const p of room.players)p.ready=false;room.revision=(room.revision||0)+1;room.rematchVotes=new Set();}
+function canStart(room){return !room.session&&room.players.length===room.maxPlayers&&room.players.every(p=>p.ready);}
 function begin(room){
+ resetReady(room);
  const sorted=[...room.players].sort((a,b)=>a.slot-b.slot);room.rematchVotes=new Set();room.completed=false;
  room.matchId=crypto.randomBytes(8).toString('hex');room.finishingSince=null;room.playerEventBuffer=[];room.watchEventBuffer=[];
  const opts={introFrames:90,stage:['night','garage','harbor'][crypto.randomInt(3)],seed:crypto.randomInt(1,2**31)};
@@ -54,10 +57,10 @@ function leave(ws){
   room.spectators.delete(ws);roomRoster(room);all(room,{type:'spectator_count',count:room.spectators.size});
   if(!room.players.length&&!room.spectators.size)rooms.delete(room.id);return;
  }
- room.players=room.players.filter(p=>p.ws!==ws);
+ room.players=room.players.filter(p=>p.ws!==ws);resetReady(room);
  if(room.hostWs===ws)room.hostWs=room.players[0]?.ws||null;
  room.game=null;room.session=null;room.finishingSince=null;room.completed=false;room.rematchVotes=new Set();
- if(room.mode==='duel'&&room.players.length===1)room.players[0].slot=0;
+ if(room.mode==='duel'&&room.players.length===1){room.players[0].slot=0;send(room.players[0].ws,{type:'seat_updated',slot:0});}
  for(const player of room.players)send(player.ws,{type:'peer_left',message:'有玩家離線，本場比賽已取消；等待新玩家加入。'});
  audience(room,{type:'watch_end',message:'玩家已離線，正在等待房間重新開賽。'});
  roomRoster(room);
@@ -119,7 +122,7 @@ wss.on('connection',ws=>{
    if(!room){if(rooms.size>=ROOM_LIMIT){send(ws,{type:'error',message:'目前房間數已達上限，請稍後再試'});return}
     const title=msg.title?cleanLabel(msg.title,24):'海線格鬥房';
     if(!title){send(ws,{type:'error',message:'房間名稱需 2–24 字，不能含特殊控制字元'});return}
-    room={id,title,hostWs:null,mode:requestedMode,maxPlayers:requestedMode==='team'?4:2,players:[],spectators:new Set(),game:null,session:null,completed:false,rematchVotes:new Set(),lastActive:now};
+    room={id,title,hostWs:null,mode:requestedMode,maxPlayers:requestedMode==='team'?4:2,players:[],spectators:new Set(),game:null,session:null,completed:false,revision:0,rematchVotes:new Set(),lastActive:now};
    }
    if(room.mode!==requestedMode){send(ws,{type:'error',message:'房間模式不同，請確認是 1v1 還是 2v2'});return}
    if(room.players.filter(p=>p.ws!==ws).length>=room.maxPlayers){send(ws,{type:'error',message:'玩家席已滿，可以改用觀戰模式'});return}
@@ -130,11 +133,29 @@ wss.on('connection',ws=>{
    // All target validation completed before leaving or allocating any room.
    leave(ws);rooms.set(id,room);
    const used=new Set(room.players.map(p=>p.slot));let slot=Array.from({length:room.maxPlayers},(_,i)=>i).find(i=>!used.has(i));
-   room.players.push({ws,slot,char,name:displayName,keys:{},pulses:[]});ws.record={room:id,role:'player'};room.lastActive=now;
+   room.players.push({ws,slot,char,name:displayName,ready:false,keys:{},pulses:[]});resetReady(room);ws.record={room:id,role:'player'};room.lastActive=now;
    if(!room.hostWs)room.hostWs=ws;
    send(ws,{type:'joined',room:id,mode:room.mode,slot,team:slot%2,needed:room.maxPlayers,title:room.title,name:displayName,host:ws===room.hostWs});roomRoster(room);
-   if(room.players.length===room.maxPlayers)begin(room);
    return;
+  }
+  if(['set_ready','start_match','select_character'].includes(msg.type)){
+   const room=rooms.get(ws.record?.room),player=room?.players.find(p=>p.ws===ws);
+   if(!room||!player){send(ws,{type:'error',message:'只有房內選手可以操作準備與開賽'});return}
+   if(room.session){send(ws,{type:'error',message:'比賽進行中，請等本場結束'});return}
+   if(msg.type==='start_match'){
+    if(room.hostWs!==ws){send(ws,{type:'error',message:'只有房主可以開始比賽'});return}
+    if(!Number.isSafeInteger(msg.revision)||msg.revision!==room.revision){send(ws,{type:'error',message:'房間狀態已更新，請確認準備狀態後再開賽'});roomRoster(room);return}
+    if(!canStart(room)){send(ws,{type:'error',message:'需滿員且全員準備後才能開賽'});return}
+    begin(room);return;
+   }
+   if(msg.type==='set_ready'){
+    if(typeof msg.ready!=='boolean'){send(ws,{type:'error',message:'準備狀態必須為 true 或 false'});return}
+    if(player.ready!==msg.ready){player.ready=msg.ready;room.revision=(room.revision||0)+1;if(!msg.ready)room.rematchVotes.delete(ws);}
+   }else{
+    if(typeof msg.char!=='string'||!Object.hasOwn(Combat.CHAR,msg.char)){send(ws,{type:'error',message:'請選擇有效角色'});return}
+    if(player.char!==msg.char){player.char=msg.char;resetReady(room);}
+   }
+   room.lastActive=now;roomRoster(room);return;
   }
   if(msg.type==='set_name'&&ws.record){
    const room=rooms.get(ws.record.room);if(!room)return;
@@ -167,10 +188,10 @@ wss.on('connection',ws=>{
   }
   if(msg.type==='rematch'&&ws.record){
    const room=rooms.get(ws.record.room);
-   if(!room||room.players.length!==room.maxPlayers||!room.players.some(p=>p.ws===ws)||(!room.completed&&room.session?.game.status!=='finished'))return;
+   if(!room||room.players.length!==room.maxPlayers||!room.players.some(p=>p.ws===ws)||!room.completed)return;
    room.rematchVotes=room.rematchVotes||new Set();room.rematchVotes.add(ws);room.lastActive=now;
    all(room,{type:'rematch_status',votes:room.rematchVotes.size,needed:room.maxPlayers});
-   if(room.rematchVotes.size===room.maxPlayers&&room.completed)begin(room);
+   const voter=room.players.find(p=>p.ws===ws);voter.ready=true;room.revision=(room.revision||0)+1;roomRoster(room);
    return;
   }
   if(msg.type==='leave')leave(ws);
@@ -212,7 +233,7 @@ function simulateFrame(){
     group(room,{type:'match_complete',matchId:room.matchId,frame:session.frame,checkpoint:{frame:session.frame,state:Rollback.clone(session.game),hash:session.digest()}});
     audience(room,{type:'watch_complete',mode:room.mode,matchId:room.matchId,serverFrame:session.frame,game:compactGame(room)});
     room.session=null;room.game=null;
-    if(room.rematchVotes.size===room.maxPlayers)begin(room);
+    resetReady(room);roomRoster(room);
    }
   }else{
    room.finishingSince=null;

@@ -37,6 +37,11 @@ test('desktop practice: four fighters, easy skill and preserved legacy entry',as
  await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);await p.locator('#stage').focus();await p.keyboard.press('KeyU');
  await p.waitForFunction(()=>window.AzhiDebug.local?.players[0].meter<100);
  assert.equal(await p.evaluate(()=>window.AzhiDebug.local.players[0].char),'azhi');
+ await p.evaluate(()=>{window.AzhiDebug.local.players[0].meter=0;});
+ await p.waitForFunction(()=>document.querySelector('#specialStatus').textContent.includes('能量不足'));
+ assert.equal(await p.locator('#specialTrigger').isDisabled(),true);
+ await p.evaluate(()=>{window.AzhiDebug.local.players[0].meter=100;window.AzhiDebug.local.players[0].move=null;});
+ await p.waitForFunction(()=>document.querySelector('#specialStatus').textContent.includes('可施放'));
  assert.deepEqual(p.errors,[]);await p.screenshot({path:'coverage/desktop-arena.png',fullPage:true});
 });
 test('each fighter has a named entrance and a matching one-button skill in the browser',async()=>{
@@ -69,6 +74,10 @@ test('legacy adventure remains usable under real CSP',async()=>{
 test('two real browser clients play 1v1 and spectator stays read only',async()=>{
  const a=await page(),b=await page();
  for(const [p,n] of [[a,'Browser Alpha'],[b,'Browser Bravo']]){await p.goto(base+'/?room=E2EDUEL');await p.locator('#onlineNickname').fill(n);await p.locator('#joinRoom').click();}
+ assert.equal(await a.locator('#startMatchButton').isDisabled(),true);
+ for(const p of [a,b])await p.locator('#readyButton').click();
+ await a.locator('#onlinePanel').screenshot({path:'coverage/ready-lobby-8.9.png'});
+ await a.locator('#startMatchButton').click();
  await a.waitForFunction(()=>window.AzhiDebug.rollback?.frame>5);await b.waitForFunction(()=>window.AzhiDebug.rollback?.frame>5);
  await a.waitForFunction(()=>window.AzhiDebug.rollback.game.introFrames===0);await a.locator('#stage').focus();await a.keyboard.press('KeyU');
  await a.waitForFunction(()=>window.AzhiDebug.rollback.game.players[0].meter<25);
@@ -83,6 +92,9 @@ test('four real browser clients start 2v2 with four retained characters',async()
   const p=await page();players.push(p);await p.goto(base+'/team.html');await p.locator('#roomCode').fill('E2ETEAM');await p.locator('#playerNickname').fill('Team Player '+i);
   await p.locator('#teamCharacters button').nth(i).click();await p.locator('#joinButton').click();
  }
+ assert.equal(await players[0].locator('#startMatchButton').isDisabled(),true);
+ for(const p of players)await p.locator('#readyButton').click();
+ await players[0].locator('#startMatchButton').click();
  for(const p of players)await p.waitForFunction(()=>window.AzhiTeamDebug?.session?.frame>5);
  const roster=await players[0].evaluate(()=>window.AzhiTeamDebug.game.players.map(p=>p.char));assert.deepEqual(new Set(roster),new Set(['winnie','sezi','gambler','azhi']));
  const previous=await players[0].evaluate(()=>{const s=window.AzhiTeamDebug.session;s.game.status='finished';return s.frame;});

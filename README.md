@@ -1,6 +1,6 @@
 # 狠話擂台 — Big Talk / Real Fight
 
-> GitHub/Codex development baseline: **8.8.2**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.9.0**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -17,6 +17,10 @@ npm start
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
 
+## 8.9 Ready, skill status and combat fairness
+
+1v1 and 2v2 now wait for every player to press Ready, then the host starts the match. Changing a character or room membership resets readiness; rematches also require host confirmation. Skill buttons show energy shortage, stun, startup/active/recovery, valid cancels and the final 8-frame input buffer. Character skill poses follow simulation phases, airborne poses follow movement state, and hitstop holds animation. Same-frame melee/projectile contacts use frozen geometry; combo damage scales to a 45% floor (supers 60%). See [8.9 release notes](docs/UPGRADE_8.9.md).
+
 ## 8.8 character entrances and signature moves
 
 Four original fighters return with dedicated entrances, frame-driven skill choreography and easy one-button signatures: 維尼「不同意的請舉手」、塞子「高雄發大財」、金沙賭神「膽大撐死膽小餓死」、阿志「加油加300」. Press U (25 energy) or O (60 energy). Includes synchronized pre-fight countdown, original port arena, a wider arena with a fixed camera and double-tap dash. See [8.8 release notes](docs/UPGRADE_8.8.md) and [manual VPS commands](docs/MANUAL_RELEASE.md).
@@ -25,7 +29,7 @@ Four original fighters return with dedicated entrances, frame-driven skill chore
 
 Modern fighting-game HUD, four original fighters, one-button signatures (U / 25 energy) and supers (O / 60 energy), original per-character effects, improved combat parity and preserved game modes. Sam has been removed as requested; old selections safely fall back to Azhi. See [release notes](docs/UPGRADE_8.7.md), [manual VPS commands](docs/MANUAL_RELEASE.md), and `npm run test:e2e` for browser validation.
 
-Ready, reconnect recovery and private-room authorization remain planned; room links are not access controls.
+Ready and explicit host start are available in 1v1 and 2v2. Reconnect recovery and private-room authorization remain planned; room links are not access controls.
 
 ## Project layout
 

@@ -41,6 +41,7 @@ test('real WebSocket admission and spectator security boundaries',async t=>{
  async function join(client,room,char='azhi',mode='duel',name,title){
   const n=client.count('joined');client.send({type:'join',room,char,mode,name,title});return client.wait('joined',n);
  }
+ async function start(players,room){for(const p of players){p.send({type:'set_ready',ready:true});await p.fence();}players[0].send({type:'start_match',revision:rooms.get(room).revision});await players[0].fence();}
  async function rejected(client,message){
   const n=client.count('error');client.send(message);await client.wait('error',n);await client.fence();
  }
@@ -60,7 +61,7 @@ test('real WebSocket admission and spectator security boundaries',async t=>{
   const a=await connect(),b=await connect();
   for(const [index,char] of ['constructor','__proto__','toString','hasOwnProperty','sam'].entries()){
    const room=`SAFE${index}`;await join(a,room,char);await join(b,room,char);
-   const live=rooms.get(room);assert.ok(live.session);
+   await start([a,b],room);const live=rooms.get(room);assert.ok(live.session);
    assert.deepEqual(live.players.map(p=>p.char),['azhi','azhi']);
    assert.deepEqual(live.session.game.players.map(p=>p.char),['azhi','azhi']);
    a.send({type:'leave'});b.send({type:'leave'});await a.fence();await b.fence();
@@ -71,6 +72,7 @@ test('real WebSocket admission and spectator security boundaries',async t=>{
   const a=await connect(),b=await connect(),x=await connect(),y=await connect();
   await join(a,'ORIGINAL','azhi','duel','原房房主');await join(b,'ORIGINAL','sezi','duel','原房選手',null); // Existing main UI sends title:null when joining.
   await join(x,'FULLROOM','winnie','duel','目標房主');await join(y,'FULLROOM','gambler','duel','目標選手');
+  await start([a,b],'ORIGINAL');await start([x,y],'FULLROOM');
   const original=rooms.get('ORIGINAL'),session=original.session;
   for(const request of [
    {type:'join',room:'FULLROOM',char:'azhi'},
@@ -100,7 +102,7 @@ test('real WebSocket admission and spectator security boundaries',async t=>{
  await t.test('2v2 retains four players; spectators cannot submit inputs or change host state',async()=>{
   const players=await Promise.all(Array.from({length:4},()=>connect()));
   for(const [index,player] of players.entries())await join(player,'TEAMSAFE',['azhi','winnie','sezi','gambler'][index],'team');
-  await players[0].wait('start');
+  await start(players,'TEAMSAFE');await players[0].wait('start');
   const room=rooms.get('TEAMSAFE'),session=room.session,matchId=room.matchId;
   const watcher=await connect();watcher.send({type:'watch',room:'TEAMSAFE',name:'唯讀觀眾'});
   await watcher.wait('watch_start');await watcher.wait('watch_frame');

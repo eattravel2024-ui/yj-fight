@@ -31,6 +31,8 @@ test('four fighters + spectators + readonly late join + no side effects on spect
   const actors=[connect(),connect(),connect(),connect()];
   const roster=['azhi','winnie','sezi','gambler'];
   for(let i=0;i<4;i++)actors[i].incoming({type:'join',mode:'team',room:'HAIXIAN',char:roster[i]});
+  for(const player of actors)player.incoming({type:'set_ready',ready:true});
+  actors[0].incoming({type:'start_match',revision:actors[0].get('roster').at(-1).revision});
   assert.deepEqual(actors.map(ws=>ws.get('joined')[0].slot),[0,1,2,3]);
   assert.equal(actors[0].get('start').length,1);assert.equal(actors[3].get('start')[0].game.players.length,4);
   assert.equal(actors[0].get('start')[0].game.ruleset,'team');
@@ -66,7 +68,8 @@ test('four fighters + spectators + readonly late join + no side effects on spect
   watching.incoming({type:'rematch'});assert.equal(actors[0].get('rematch_status').at(-1).votes,1,'observer cannot vote');
   actors[1].incoming({type:'rematch'});actors[2].incoming({type:'rematch'});
   assert.equal(actors[0].get('start').length,1,'only three out of four votes cannot restart');
-  actors[3].incoming({type:'rematch'});assert.equal(actors[0].get('start').length,2,'all 4 votes start new match');
+  actors[3].incoming({type:'rematch'});assert.equal(actors[0].get('start').length,1,'all ready still needs host start');
+  actors[0].incoming({type:'start_match',revision:actors[0].get('roster').at(-1).revision});assert.equal(actors[0].get('start').length,2,'host starts ready rematch');
   assert.equal(watching.get('watch_start').length,1,'spectator is carried into the next match');
   actors[2].close();assert.ok(actors[0].get('peer_left').length);assert.equal(actors[0].get('start').length,2);
  }finally{await stop()}

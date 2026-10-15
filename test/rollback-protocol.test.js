@@ -36,6 +36,8 @@ test('room-to-room rollback protocol: join, frame IDs, late corrections, checkpo
  wss.emit('connection',a);wss.emit('connection',b);
  a.sendToServer({type:'join',room:'ROLL84',char:'azhi'});
  b.sendToServer({type:'join',room:'ROLL84',char:'winnie'});
+ for(const player of [a,b])player.sendToServer({type:'set_ready',ready:true});
+ a.sendToServer({type:'start_match',revision:a.find('roster').at(-1).revision});
  assert.equal(a.find('joined').length,1);assert.equal(b.find('joined')[0].slot,1);
  assert.equal(a.find('start').length,1);assert.equal(b.find('start').length,1);
  const matchId=a.find('start')[0].matchId;
