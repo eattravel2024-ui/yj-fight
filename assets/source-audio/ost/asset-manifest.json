@@ -1,0 +1,786 @@
+{
+  "sourceManifest": {
+    "path": "assets/source-audio/ost/manifest.json",
+    "bytes": 7488,
+    "sha256": "985a41fbe2d09f9efa867fb44950a0c232de895d6e89952085aa4028cf2b3afc"
+  },
+  "tracks": [
+    {
+      "id": "menu",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/01-main.ogg",
+        "bytes": 503100,
+        "sha256": "08fa27be7cd1dcc3ef499afa096b0c993fe97a588591e2038caaa1592ff2d3e0"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/01-main.mid",
+        "bytes": 7510,
+        "sha256": "caaa6f698e1aa3b88797edbb3053bf35c087cd89fc6c42e415cb388339fb7fdf"
+      },
+      "ogg": {
+        "path": "public/audio/ost/01-main.ogg",
+        "bytes": 503100,
+        "sha256": "08fa27be7cd1dcc3ef499afa096b0c993fe97a588591e2038caaa1592ff2d3e0"
+      },
+      "aac": {
+        "path": "public/audio/ost/01-main.m4a",
+        "bytes": 759286,
+        "sha256": "21f702a14b1eab7012f7720af1f94b7002c188e2a6d08fc0c44a933666980ed3"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "58.181833"
+        }
+      }
+    },
+    {
+      "id": "character_select",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/02-select.ogg",
+        "bytes": 359175,
+        "sha256": "6b7f8d6c84143f2863bd973e0af11db9090bac1dd00865a1dd17ca81a0ade4cb"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/02-select.mid",
+        "bytes": 5669,
+        "sha256": "b99019a94efde0893cb4ea466e3af06f1edc3af63bc008d4d9b7db700ea3443c"
+      },
+      "ogg": {
+        "path": "public/audio/ost/02-select.ogg",
+        "bytes": 359175,
+        "sha256": "6b7f8d6c84143f2863bd973e0af11db9090bac1dd00865a1dd17ca81a0ade4cb"
+      },
+      "aac": {
+        "path": "public/audio/ost/02-select.m4a",
+        "bytes": 542667,
+        "sha256": "aac85d33cfedd296fc38ab1d22c0c072424f0c44f2749adf7a98504153b8e493"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "41.739125"
+        }
+      }
+    },
+    {
+      "id": "mission_select",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/03-mission.ogg",
+        "bytes": 453652,
+        "sha256": "7af85eabbd2789a8161ddeae0462197d9306690d92b5caf54a6cd0ca12f12b2a"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/03-mission.mid",
+        "bytes": 4947,
+        "sha256": "1d8132ee2c994efa00089241ec70910b1dc55a986e1f268575933818f0675e91"
+      },
+      "ogg": {
+        "path": "public/audio/ost/03-mission.ogg",
+        "bytes": 453652,
+        "sha256": "7af85eabbd2789a8161ddeae0462197d9306690d92b5caf54a6cd0ca12f12b2a"
+      },
+      "aac": {
+        "path": "public/audio/ost/03-mission.m4a",
+        "bytes": 655874,
+        "sha256": "246806742b99b02db503bb10634156c71fa750dcd7faa3455ce9255d20806341"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "49.655167"
+        }
+      }
+    },
+    {
+      "id": "stage_select",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/04-stagemap.ogg",
+        "bytes": 413123,
+        "sha256": "751cc820e452cff075ce07f3c2b5decc5f164d0cc4b69e5df1e700989572090d"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/04-stagemap.mid",
+        "bytes": 4947,
+        "sha256": "8651579975cbe42df06012e4a19eebf36ed543c31c336c985a00fef6926f61f0"
+      },
+      "ogg": {
+        "path": "public/audio/ost/04-stagemap.ogg",
+        "bytes": 413123,
+        "sha256": "751cc820e452cff075ce07f3c2b5decc5f164d0cc4b69e5df1e700989572090d"
+      },
+      "aac": {
+        "path": "public/audio/ost/04-stagemap.m4a",
+        "bytes": 595816,
+        "sha256": "e7728c01261f9277dd63d772a3ef160ebc988c5999d813d6610f098934e35976"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "45.000000"
+        }
+      }
+    },
+    {
+      "id": "stage_night_market",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/05-nightmarket.ogg",
+        "bytes": 431155,
+        "sha256": "f8889db97290fddcde86a048513d7db0505a23a4224d6447a7201fb884cfc79e"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/05-nightmarket.mid",
+        "bytes": 7278,
+        "sha256": "a92d2b1e8a1ea2119c3c050db2f47f6169105a3ebba0193d3950ed1379d88e9d"
+      },
+      "ogg": {
+        "path": "public/audio/ost/05-nightmarket.ogg",
+        "bytes": 431155,
+        "sha256": "f8889db97290fddcde86a048513d7db0505a23a4224d6447a7201fb884cfc79e"
+      },
+      "aac": {
+        "path": "public/audio/ost/05-nightmarket.m4a",
+        "bytes": 666055,
+        "sha256": "4c79a06ff21beb9a6574a1c5831546c8f7cd439777a59e89887b74af79f460a5"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "50.526333"
+        }
+      }
+    },
+    {
+      "id": "stage_casino",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/06-casino.ogg",
+        "bytes": 451345,
+        "sha256": "a2a2b2adf15e2ef60288d805a36e41bb755358a2d73755395fed4bc7c44c790f"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/06-casino.mid",
+        "bytes": 7224,
+        "sha256": "b6c3dd140025d4929b9fccd517697ea3a49ecc0763326f1d73d21b3f7ef33738"
+      },
+      "ogg": {
+        "path": "public/audio/ost/06-casino.ogg",
+        "bytes": 451345,
+        "sha256": "a2a2b2adf15e2ef60288d805a36e41bb755358a2d73755395fed4bc7c44c790f"
+      },
+      "aac": {
+        "path": "public/audio/ost/06-casino.m4a",
+        "bytes": 671746,
+        "sha256": "b3879439763d64f48e6e2347c69044d522ca0580d6bc3d1f2ea59ca95ef42b03"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "51.891875"
+        }
+      }
+    },
+    {
+      "id": "stage_square",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/07-square.ogg",
+        "bytes": 431142,
+        "sha256": "4d19182995f6f5a245ec578e1b659a84aaf6a99094185a0df0d3e87f47d5b165"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/07-square.mid",
+        "bytes": 6522,
+        "sha256": "21e61152832ca467afd29b5d45cec4515215b89000605e892d161a319367c5e8"
+      },
+      "ogg": {
+        "path": "public/audio/ost/07-square.ogg",
+        "bytes": 431142,
+        "sha256": "4d19182995f6f5a245ec578e1b659a84aaf6a99094185a0df0d3e87f47d5b165"
+      },
+      "aac": {
+        "path": "public/audio/ost/07-square.m4a",
+        "bytes": 649443,
+        "sha256": "16aba17d4d2d4f5b3a64ae4821dbf7aac3dd7db1d0a7d4a0c633b3618f0638e9"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "49.548375"
+        }
+      }
+    },
+    {
+      "id": "stage_fur_lab",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/08-furlab.ogg",
+        "bytes": 456104,
+        "sha256": "11f4f0a46cf691499950b1b62b60e60278795f795819c6e8b75968dd1e47079c"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/08-furlab.mid",
+        "bytes": 7085,
+        "sha256": "1e5320e63f6e4359a5c177b4ff6a5e26cd629753b88a54a7eac13fa9809d6c5b"
+      },
+      "ogg": {
+        "path": "public/audio/ost/08-furlab.ogg",
+        "bytes": 456104,
+        "sha256": "11f4f0a46cf691499950b1b62b60e60278795f795819c6e8b75968dd1e47079c"
+      },
+      "aac": {
+        "path": "public/audio/ost/08-furlab.m4a",
+        "bytes": 703548,
+        "sha256": "6fcf9fcd5458510fad5fd3d9bf56c5c7ec2fc1848cbe2d0613b8340b2ce9f94d"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "54.084500"
+        }
+      }
+    },
+    {
+      "id": "training",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/09-training.ogg",
+        "bytes": 482078,
+        "sha256": "70a474a972d155dd14004bbfe6f11ba675bd13b0acc14e0c39382767f6e82a34"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/09-training.mid",
+        "bytes": 4900,
+        "sha256": "79427a30899743d387e8aa241a2a45886e9d5c747165f07d387057631695d048"
+      },
+      "ogg": {
+        "path": "public/audio/ost/09-training.ogg",
+        "bytes": 482078,
+        "sha256": "70a474a972d155dd14004bbfe6f11ba675bd13b0acc14e0c39382767f6e82a34"
+      },
+      "aac": {
+        "path": "public/audio/ost/09-training.m4a",
+        "bytes": 692566,
+        "sha256": "b28ec1c84f76e53c9e3adb45dfb86328ea576a568e7e891d977ff4f8c61366eb"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "52.363625"
+        }
+      }
+    },
+    {
+      "id": "final_boss",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/10-boss.ogg",
+        "bytes": 387624,
+        "sha256": "32fa30172dac6af98652eecdee6551db3b6f176a2cdd082fa322e490246fb62a"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/10-boss.mid",
+        "bytes": 6335,
+        "sha256": "3afef75433a8e8e9352c6441f5c65594be58201f822d5f8b88509e2dcc3cbdc3"
+      },
+      "ogg": {
+        "path": "public/audio/ost/10-boss.ogg",
+        "bytes": 387624,
+        "sha256": "32fa30172dac6af98652eecdee6551db3b6f176a2cdd082fa322e490246fb62a"
+      },
+      "aac": {
+        "path": "public/audio/ost/10-boss.m4a",
+        "bytes": 608228,
+        "sha256": "4dfbe8e8d13c2fbcfc1da9bf352e376efe4d2f48894d4d671c160aceb19ea7a9"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "46.265042"
+        }
+      }
+    },
+    {
+      "id": "results",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/11-result.ogg",
+        "bytes": 281420,
+        "sha256": "6b65023b98ad546500031d537e8638c9ec4f7ab3a95eb1f1f53fd09f2477969e"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/11-result.mid",
+        "bytes": 3835,
+        "sha256": "71b475e8c36cab92ac660ecf81191ac706addc5afeaef163422e8fb695bf8dfb"
+      },
+      "ogg": {
+        "path": "public/audio/ost/11-result.ogg",
+        "bytes": 281420,
+        "sha256": "6b65023b98ad546500031d537e8638c9ec4f7ab3a95eb1f1f53fd09f2477969e"
+      },
+      "aac": {
+        "path": "public/audio/ost/11-result.m4a",
+        "bytes": 417297,
+        "sha256": "b8edf970f5f5fe281d1af37b88fca95a5425279cc059073aa5a945aa9f64b3a3"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "31.475417"
+        }
+      }
+    },
+    {
+      "id": "credits",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/12-credits.ogg",
+        "bytes": 490855,
+        "sha256": "aa43c2a359d698debaebfe35e4782b215ca13f47603075d092890e9d1c9048f2"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/12-credits.mid",
+        "bytes": 4900,
+        "sha256": "47748b3fb2b60b0bf253322eda7537b3f0ea5bf68af36712bc4b63fd8838b841"
+      },
+      "ogg": {
+        "path": "public/audio/ost/12-credits.ogg",
+        "bytes": 490855,
+        "sha256": "aa43c2a359d698debaebfe35e4782b215ca13f47603075d092890e9d1c9048f2"
+      },
+      "aac": {
+        "path": "public/audio/ost/12-credits.m4a",
+        "bytes": 722429,
+        "sha256": "5d2404909734c3cab0a5cb2b0981eb2e3141ffeda27941202fd762a65d23865e"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "55.384625"
+        }
+      }
+    },
+    {
+      "id": "vs",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/13-vs.ogg",
+        "bytes": 25562,
+        "sha256": "117751142684f7669d1bc1a490a76a80d921b5e6254466b69da52783c4010c8a"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/13-vs.mid",
+        "bytes": 237,
+        "sha256": "5a3c16cb381fa3a136f4f8e801b53880d13565828f2eb33deff6842fbb6dcfdc"
+      },
+      "ogg": {
+        "path": "public/audio/ost/13-vs.ogg",
+        "bytes": 25562,
+        "sha256": "117751142684f7669d1bc1a490a76a80d921b5e6254466b69da52783c4010c8a"
+      },
+      "aac": {
+        "path": "public/audio/ost/13-vs.m4a",
+        "bytes": 41727,
+        "sha256": "58384a7cca9e36f7b091dc62bdfff8b21be9dc7aabcef42ed95557e50967d1db"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "3.243250"
+        }
+      }
+    },
+    {
+      "id": "round_start",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/14-round.ogg",
+        "bytes": 14412,
+        "sha256": "0ae3d92be80531b0f772743530563287872d4f5c6a9ac1f262f67943f169a2c3"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/14-round.mid",
+        "bytes": 177,
+        "sha256": "85aa445a3077b0e554ce196a6cc96ffe6eebc02490dc4a9286ee0c1b143a4830"
+      },
+      "ogg": {
+        "path": "public/audio/ost/14-round.ogg",
+        "bytes": 14412,
+        "sha256": "0ae3d92be80531b0f772743530563287872d4f5c6a9ac1f262f67943f169a2c3"
+      },
+      "aac": {
+        "path": "public/audio/ost/14-round.m4a",
+        "bytes": 20160,
+        "sha256": "6d20c1780dcc8041b351b865ef96ddca7bdc064bf5cb0577fd54125e10580379"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "1.600000"
+        }
+      }
+    },
+    {
+      "id": "ko",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/15-ko.ogg",
+        "bytes": 24736,
+        "sha256": "c72755cac6b7d7ddb816ded3c0c8213e729b3c513551757520e22f1b74fce574"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/15-ko.mid",
+        "bytes": 237,
+        "sha256": "8657ea7b67efb9cb9015847b05c424b953a83943b57317f4411df47da2f97119"
+      },
+      "ogg": {
+        "path": "public/audio/ost/15-ko.ogg",
+        "bytes": 24736,
+        "sha256": "c72755cac6b7d7ddb816ded3c0c8213e729b3c513551757520e22f1b74fce574"
+      },
+      "aac": {
+        "path": "public/audio/ost/15-ko.m4a",
+        "bytes": 39985,
+        "sha256": "a7fcc1fc64aee0a56e14d04b72e986ef9423563398f2706d7be9469afba1462f"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "3.200000"
+        }
+      }
+    },
+    {
+      "id": "victory",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/16-victory.ogg",
+        "bytes": 50043,
+        "sha256": "562da294baea178a3e4b3ec230775a0b4d8d511c8213dede9278252d1892937d"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/16-victory.mid",
+        "bytes": 358,
+        "sha256": "24095a6e4661d434fe01f7b2d7b9738b0c362e6c2a1425bc31783fe31fb7c4d5"
+      },
+      "ogg": {
+        "path": "public/audio/ost/16-victory.ogg",
+        "bytes": 50043,
+        "sha256": "562da294baea178a3e4b3ec230775a0b4d8d511c8213dede9278252d1892937d"
+      },
+      "aac": {
+        "path": "public/audio/ost/16-victory.m4a",
+        "bytes": 87614,
+        "sha256": "8ded70041b88345ca6beade0977a1c59bbcf1dbcb374bbcc1231a12bd940f1b6"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "6.956542"
+        }
+      }
+    },
+    {
+      "id": "defeat",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/17-defeat.ogg",
+        "bytes": 42975,
+        "sha256": "f4c1989151d12496dc30c2c030b23129b9665c076d9a84fc07e42fe3d926476a"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/17-defeat.mid",
+        "bytes": 287,
+        "sha256": "6cedd4bd9af333f7f39925272b2d47199aaab49f3a5dcb464a422a652f01f0a6"
+      },
+      "ogg": {
+        "path": "public/audio/ost/17-defeat.ogg",
+        "bytes": 42975,
+        "sha256": "f4c1989151d12496dc30c2c030b23129b9665c076d9a84fc07e42fe3d926476a"
+      },
+      "aac": {
+        "path": "public/audio/ost/17-defeat.m4a",
+        "bytes": 90855,
+        "sha256": "539b7a1fd6c04a34932ce211bdb617aa65387c4ea55bff3f66252f578790705c"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "7.200000"
+        }
+      }
+    },
+    {
+      "id": "intro_azhi",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/18-azhi.ogg",
+        "bytes": 34928,
+        "sha256": "5d8032bcff86f31fc093ef53b3935c5466d11220171c8c6f561a8a54421fae62"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/18-azhi.mid",
+        "bytes": 332,
+        "sha256": "1e8898c6356e7c48c033a50c7ed19b35db4af24330bf933da40984add241b33a"
+      },
+      "ogg": {
+        "path": "public/audio/ost/18-azhi.ogg",
+        "bytes": 34928,
+        "sha256": "5d8032bcff86f31fc093ef53b3935c5466d11220171c8c6f561a8a54421fae62"
+      },
+      "aac": {
+        "path": "public/audio/ost/18-azhi.m4a",
+        "bytes": 56297,
+        "sha256": "50adf1626fb79ec566c87dd03821de3f3fcea74f4898b7c8e003ae84001aa8ab"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "4.556958"
+        }
+      }
+    },
+    {
+      "id": "intro_saizi",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/19-saizi.ogg",
+        "bytes": 41308,
+        "sha256": "fa8083f7816c528e5df8ddee3854919813ff385fa518ac741f25a4ca67faf3f1"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/19-saizi.mid",
+        "bytes": 267,
+        "sha256": "2c8a9d5f9e881fd3ea07ac7ba1af1d624e3cef9055818f838fe01b27530364a8"
+      },
+      "ogg": {
+        "path": "public/audio/ost/19-saizi.ogg",
+        "bytes": 41308,
+        "sha256": "fa8083f7816c528e5df8ddee3854919813ff385fa518ac741f25a4ca67faf3f1"
+      },
+      "aac": {
+        "path": "public/audio/ost/19-saizi.m4a",
+        "bytes": 79626,
+        "sha256": "57581f7401534ea615f78776cf921cd09c0b253a80a84bd57b5fee2170a0f10f"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "6.428583"
+        }
+      }
+    },
+    {
+      "id": "intro_gambler",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/20-gambler.ogg",
+        "bytes": 36761,
+        "sha256": "bef75cc97e365b22004e9bc603bd96c53d6205baa3163ecf521831dde2dcf6b4"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/20-gambler.mid",
+        "bytes": 298,
+        "sha256": "7207b71fa64daf44f7be9cffbc84400ce435ee530bfb04cb76c35c4d697b16f1"
+      },
+      "ogg": {
+        "path": "public/audio/ost/20-gambler.ogg",
+        "bytes": 36761,
+        "sha256": "bef75cc97e365b22004e9bc603bd96c53d6205baa3163ecf521831dde2dcf6b4"
+      },
+      "aac": {
+        "path": "public/audio/ost/20-gambler.m4a",
+        "bytes": 62808,
+        "sha256": "d84ccae1046402b4cfc8d43b2bb9a8510a9f7270c90f0d02841148be5da5ff02"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "4.931500"
+        }
+      }
+    },
+    {
+      "id": "intro_winnie",
+      "originalAudio": {
+        "path": "assets/source-audio/ost/audio/21-winnie.ogg",
+        "bytes": 40396,
+        "sha256": "2f26a306d725fcde8796d193cda15672895dc668c0b8bcff3416b13d731420ad"
+      },
+      "midi": {
+        "path": "assets/source-audio/ost/midi/21-winnie.mid",
+        "bytes": 267,
+        "sha256": "0789d8deb10a4d415e915117a74a7120d04cd4792dd0145b7535ecb026db3d65"
+      },
+      "ogg": {
+        "path": "public/audio/ost/21-winnie.ogg",
+        "bytes": 40396,
+        "sha256": "2f26a306d725fcde8796d193cda15672895dc668c0b8bcff3416b13d731420ad"
+      },
+      "aac": {
+        "path": "public/audio/ost/21-winnie.m4a",
+        "bytes": 74860,
+        "sha256": "5a76bec28c44907a8cfb5a04f6bbc90fade813865aa6b8f661c1b1624d47cd57"
+      },
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "vorbis",
+            "sample_rate": "24000",
+            "channels": 2
+          }
+        ],
+        "format": {
+          "duration": "6.101708"
+        }
+      }
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 
 ## Goal
 Maintain and improve the existing browser-based 60 Hz fighting game, without removing existing modes.
-Current baseline: 8.11.0. Preserve the four playable characters (維尼, 塞子, 金沙賭神, 阿志), 1v1, 2v2, spectators, player/room names, arcade mode, and WebSocket networking. Sam was removed at the user’s request; do not restore that character or its assets.
+Current baseline: 8.11.1. Preserve the four playable characters (維尼, 塞子, 金沙賭神, 阿志), 1v1, 2v2, spectators, player/room names, arcade mode, and WebSocket networking. Sam was removed at the user’s request; do not restore that character or its assets.
 
 ## Source map
 - `server.js`: HTTP + authoritative WebSocket rooms, 1v1 and 2v2, validation and identities.
@@ -12,6 +12,7 @@ Current baseline: 8.11.0. Preserve the four playable characters (維尼, 塞子,
 - `public/game.js`, `public/team.js`: UI, visuals and client networking.
 - `public/combat-coach.js`: read-only cancel hints and hit receipts. Online receipts must use confirmed server events and deduplicate their IDs.
 - `public/character-art.js`, `public/character-art.css`: UI-only art registry, bounded same-character fallback and image fit; never substitute UI fullbodies for battle atlases. Original uploaded PNGs and their manifest live in `assets/source-art/phase1_5/`; rebuild with `tools/build_character_ui_art.py`.
+- `public/audio-manager.js`, `public/audio-director.js`, `public/audio.css`: shared gesture-unlocked audio, source caching, event deduplication and scene routing. Keep KO/results on confirmed online events; never emit from canvas redraw or rollback replay. Source OGG/MIDI/docs are under `assets/source-audio/ost/` as data, not development instructions. `tools/build_ost.py` prepares runtime OGG/AAC; VPS does not need FFmpeg.
 - `public/character-select.js`, `public/character-select.css`: Phase 2 three-region selection UI; preview drafts are canceled on exit, explicit confirmation calls the existing client adapter, and online acknowledgement/Ready remain server-owned.
 - `public/game-flow.js`: UI-only navigation and draft mode; never duplicate combat/Ready authority. Formal `window.AzhiGame` adapters expose existing client state/actions; preserve Debug APIs for existing tests.
 - `public/save-state.js`: validates the existing `azhi70_save` before lookup; preserve valid economy/progress/settings.
@@ -47,6 +48,8 @@ Current baseline: 8.11.0. Preserve the four playable characters (維尼, 塞子,
 
 ## Arcade 2.0 phased delivery
 Phase 1.5 supplied character UI art is integrated (8.10.1); three scene sources/optimized assets/metadata are prepared (8.10.2). In 8.10.3 the user explicitly requested live backgrounds, a fixed gambler/Azhi home pair and the new 陪公子練武 title. `stage-art.js` maps the original simulation IDs to the supplied scenes, with alpha underlay and old-SVG fallback. Phase 2 (8.11.0) now replaces the old selection layout with player/roster/rival regions and real frame-data; combat/stage geometry remains unchanged. The protected presentation hash changed only for the printed entrance title. Phase 1 main menu/common navigation is implemented on `feat/arcade-phase1`. Stop after each approved phase; do not implement Phase 3–5 or push GitHub without user authorization. Home retains six entries; local modes open the Phase 2 Character Select, with native character-grid/action IDs preserved. Escape returns subpanel → home → arena. Preserve busy-room guards on all cross-mode routes.
+
+The user separately authorized OST integration in 8.11.1. It does not complete Phase 3–5: only existing screens/battles plus future audio hooks are connected. Four stage tracks exist, but only three playable maps; do not silently invent a fur-lab stage. The protected server hash changed only for static audio MIME mappings.
 
 ## User preference: fast iteration
 Reuse the current development branch for small follow-up changes; do not create a new branch or require a new PR for every iteration. Run the relevant lightweight checks automatically. Use browser or extended suites only when justified by the change. Package one current source archive and give short manual VPS update instructions; never connect to production. Consolidate review/PRs at milestones rather than making the user manage branch stacks.

@@ -54,6 +54,7 @@
   const roomModes=document.createElement('p');roomModes.innerHTML='<a class="secondary" href="/team.html?panel=room">前往 2v2／觀戰大廳 ↗</a>';roomModes.querySelector('a').addEventListener('click',event=>{event.preventDefault();navigateMode('team')});panes.room.append(roomModes);
  }
  const characterSelect=window.AzhiCharacterSelect.create({pane:panes.fighters,action:foot.querySelector('.app-confirm-action'),game:gameAPI,openRoom:()=>open('room'),playSound:menuSound});
+ window.AzhiAudioDirector.mountSettings(panes.settings);
  const settingsTitle=document.createElement('h3');settingsTitle.textContent='聲音與畫面';panes.settings.append(settingsTitle);
  const setting=(title,description,element)=>{if(!element)return;const row=document.createElement('div');row.className='app-setting-row';const info=document.createElement('div'),heading=document.createElement('strong'),detail=document.createElement('p');heading.textContent=title;detail.textContent=description;info.append(heading,detail);row.append(info,element);panes.settings.append(row);};
  setting('遊戲音效','切換打擊與介面音效。',$('soundToggle'));
@@ -100,6 +101,7 @@
   const action=foot.querySelector('.app-confirm-action');if(action&&menu.open&&panel==='fighters')action.textContent=online?(gameAPI.mode==='spectator'?'加入觀戰 →':'前往對戰房間 →'):state?.status==='playing'?'重新開始戰鬥 →':'開始戰鬥 →';
   for(const button of bar.querySelectorAll('[data-panel]'))button.setAttribute('aria-expanded',String(menu.open&&button.dataset.panel===panel));
   characterSelect.refresh();
+  window.AzhiAudioDirector.route({panel,open:menu.open,game:gameAPI.game,mode:gameAPI.mode});
  }
  function open(name='home'){
   const next=Object.hasOwn(panes,name)?name:'home';if(next!==panel)body.scrollTop=0;panel=next;flow.open(next);

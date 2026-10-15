@@ -1,0 +1,279 @@
+{
+  "project": "陪公子練武",
+  "source": "User-provided BIG_TALK_OST_21_tracks.zip",
+  "tracks": [
+    {
+      "id": "menu",
+      "title": "BIG TALK MAIN THEME",
+      "title_zh": "主選單",
+      "kind": "bgm",
+      "loop": true,
+      "volume": 0.48,
+      "seconds": 58.18,
+      "sources": [
+        "audio/ost/01-main.ogg",
+        "audio/ost/01-main.m4a"
+      ]
+    },
+    {
+      "id": "character_select",
+      "title": "CHOOSE YOUR FIGHTER",
+      "title_zh": "角色選擇",
+      "kind": "bgm",
+      "loop": true,
+      "volume": 0.48,
+      "seconds": 41.74,
+      "sources": [
+        "audio/ost/02-select.ogg",
+        "audio/ost/02-select.m4a"
+      ]
+    },
+    {
+      "id": "mission_select",
+      "title": "MISSION BOARD",
+      "title_zh": "任務選擇",
+      "kind": "bgm",
+      "loop": true,
+      "volume": 0.48,
+      "seconds": 49.66,
+      "sources": [
+        "audio/ost/03-mission.ogg",
+        "audio/ost/03-mission.m4a"
+      ]
+    },
+    {
+      "id": "stage_select",
+      "title": "WHERE WE FIGHT",
+      "title_zh": "地圖選擇",
+      "kind": "bgm",
+      "loop": true,
+      "volume": 0.48,
+      "seconds": 45.0,
+      "sources": [
+        "audio/ost/04-stagemap.ogg",
+        "audio/ost/04-stagemap.m4a"
+      ]
+    },
+    {
+      "id": "stage_night_market",
+      "title": "NIGHT MARKET MAYHEM",
+      "title_zh": "嘴砲夜市",
+      "kind": "bgm",
+      "loop": true,
+      "volume": 0.48,
+      "seconds": 50.53,
+      "sources": [
+        "audio/ost/05-nightmarket.ogg",
+        "audio/ost/05-nightmarket.m4a"
+      ]
+    },
+    {
+      "id": "stage_casino",
+      "title": "GOLDEN HIGH ROLLER",
+      "title_zh": "金沙賭城",
+      "kind": "bgm",
+      "loop": true,
+      "volume": 0.48,
+      "seconds": 51.89,
+      "sources": [
+        "audio/ost/06-casino.ogg",
+        "audio/ost/06-casino.m4a"
+      ]
+    },
+    {
+      "id": "stage_square",
+      "title": "IRON PARADE",
+      "title_zh": "廣場坦克戰場",
+      "kind": "bgm",
+      "loop": true,
+      "volume": 0.48,
+      "seconds": 49.55,
+      "sources": [
+        "audio/ost/07-square.ogg",
+        "audio/ost/07-square.m4a"
+      ]
+    },
+    {
+      "id": "stage_fur_lab",
+      "title": "FUZZY COUNTERATTACK",
+      "title_zh": "絨毛禁區",
+      "kind": "bgm",
+      "loop": true,
+      "volume": 0.48,
+      "seconds": 54.08,
+      "sources": [
+        "audio/ost/08-furlab.ogg",
+        "audio/ost/08-furlab.m4a"
+      ]
+    },
+    {
+      "id": "training",
+      "title": "PRACTICE MODE",
+      "title_zh": "練習模式",
+      "kind": "bgm",
+      "loop": true,
+      "volume": 0.48,
+      "seconds": 52.36,
+      "sources": [
+        "audio/ost/09-training.ogg",
+        "audio/ost/09-training.m4a"
+      ]
+    },
+    {
+      "id": "final_boss",
+      "title": "THE LAST WORD",
+      "title_zh": "最終決戰",
+      "kind": "bgm",
+      "loop": true,
+      "volume": 0.48,
+      "seconds": 46.27,
+      "sources": [
+        "audio/ost/10-boss.ogg",
+        "audio/ost/10-boss.m4a"
+      ]
+    },
+    {
+      "id": "results",
+      "title": "SCOREBOARD SHUFFLE",
+      "title_zh": "結算畫面",
+      "kind": "bgm",
+      "loop": true,
+      "volume": 0.48,
+      "seconds": 31.48,
+      "sources": [
+        "audio/ost/11-result.ogg",
+        "audio/ost/11-result.m4a"
+      ]
+    },
+    {
+      "id": "credits",
+      "title": "AFTER THE FIGHT",
+      "title_zh": "製作名單",
+      "kind": "bgm",
+      "loop": true,
+      "volume": 0.48,
+      "seconds": 55.38,
+      "sources": [
+        "audio/ost/12-credits.ogg",
+        "audio/ost/12-credits.m4a"
+      ]
+    },
+    {
+      "id": "vs",
+      "title": "SHOWDOWN",
+      "title_zh": "VS 轉場",
+      "kind": "sting",
+      "loop": false,
+      "volume": 0.72,
+      "seconds": 3.24,
+      "sources": [
+        "audio/ost/13-vs.ogg",
+        "audio/ost/13-vs.m4a"
+      ]
+    },
+    {
+      "id": "round_start",
+      "title": "ROUND START",
+      "title_zh": "回合開始",
+      "kind": "sting",
+      "loop": false,
+      "volume": 0.72,
+      "seconds": 1.6,
+      "sources": [
+        "audio/ost/14-round.ogg",
+        "audio/ost/14-round.m4a"
+      ]
+    },
+    {
+      "id": "ko",
+      "title": "K.O.!",
+      "title_zh": "擊倒",
+      "kind": "sting",
+      "loop": false,
+      "volume": 0.72,
+      "seconds": 3.2,
+      "sources": [
+        "audio/ost/15-ko.ogg",
+        "audio/ost/15-ko.m4a"
+      ]
+    },
+    {
+      "id": "victory",
+      "title": "YOU WIN!",
+      "title_zh": "勝利",
+      "kind": "sting",
+      "loop": false,
+      "volume": 0.72,
+      "seconds": 6.96,
+      "sources": [
+        "audio/ost/16-victory.ogg",
+        "audio/ost/16-victory.m4a"
+      ]
+    },
+    {
+      "id": "defeat",
+      "title": "NOT THIS TIME",
+      "title_zh": "敗北",
+      "kind": "sting",
+      "loop": false,
+      "volume": 0.72,
+      "seconds": 7.2,
+      "sources": [
+        "audio/ost/17-defeat.ogg",
+        "audio/ost/17-defeat.m4a"
+      ]
+    },
+    {
+      "id": "intro_azhi",
+      "title": "AZHI DASH",
+      "title_zh": "阿志登場",
+      "kind": "sting",
+      "loop": false,
+      "volume": 0.72,
+      "seconds": 4.56,
+      "sources": [
+        "audio/ost/18-azhi.ogg",
+        "audio/ost/18-azhi.m4a"
+      ]
+    },
+    {
+      "id": "intro_saizi",
+      "title": "SAIZI GUARD",
+      "title_zh": "塞子登場",
+      "kind": "sting",
+      "loop": false,
+      "volume": 0.72,
+      "seconds": 6.43,
+      "sources": [
+        "audio/ost/19-saizi.ogg",
+        "audio/ost/19-saizi.m4a"
+      ]
+    },
+    {
+      "id": "intro_gambler",
+      "title": "ALL IN",
+      "title_zh": "金沙賭神登場",
+      "kind": "sting",
+      "loop": false,
+      "volume": 0.72,
+      "seconds": 4.93,
+      "sources": [
+        "audio/ost/20-gambler.ogg",
+        "audio/ost/20-gambler.m4a"
+      ]
+    },
+    {
+      "id": "intro_winnie",
+      "title": "GOLDEN TANK",
+      "title_zh": "維尼登場",
+      "kind": "sting",
+      "loop": false,
+      "volume": 0.72,
+      "seconds": 6.1,
+      "sources": [
+        "audio/ost/21-winnie.ogg",
+        "audio/ost/21-winnie.m4a"
+      ]
+    }
+  ]
+}

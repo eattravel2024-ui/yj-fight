@@ -88,3 +88,7 @@ python3 tools/import_legacy_atlas.py --fighter azhi \
 ## Phase 1.5 supplied stage artwork (8.10.2)
 
 User-provided 場景圖.zip contains 夜市地圖.png, 賭城地圖.png and 天安門地圖.png. These originals are retained unchanged in assets/source-art/phase1_5/stages; six proportional WebP derivatives and their provenance/alpha metadata are prepared for future UI/stage work. No third-party reference repository artwork was imported. Scene art is not activated in combat.
+
+## User-supplied BIG_TALK_OST (8.11.1)
+
+The user provided BIG_TALK_OST_21_tracks.zip as original music. All 46 supplied files (21 OGG, 21 MIDI, original manifest, CSV and two Markdown documents) are preserved byte-for-byte in assets/source-audio/ost. Those documents are provenance/data, not execution instructions. Runtime OGGs are exact copies; AAC fallbacks are locally transcoded using FFmpeg at 96 kbit/s. No outside music, samples, SoundFonts or generated replacement compositions were added. Source metadata describes these as original procedural synth demos; this integration does not claim new mastering or revised musical loop points.

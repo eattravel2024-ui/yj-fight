@@ -1,0 +1,22 @@
+﻿id,title,title_zh,file,midi,bpm,seconds,loop,kind,description,volume
+menu,BIG TALK MAIN THEME,主選單,audio/01-main.ogg,midi/01-main.mid,132,58.18,True,bgm,"Heroic electro rock, electric guitar, retro arcade synthesizer",0.48
+character_select,CHOOSE YOUR FIGHTER,角色選擇,audio/02-select.ogg,midi/02-select.mid,138,41.74,True,bgm,"Bouncy future funk, syncopated bass, arcade synth stabs",0.48
+mission_select,MISSION BOARD,任務選擇,audio/03-mission.ogg,midi/03-mission.mid,116,49.66,True,bgm,Mysterious adventurous synth pulses and measured beats,0.48
+stage_select,WHERE WE FIGHT,地圖選擇,audio/04-stagemap.ogg,midi/04-stagemap.mid,128,45.0,True,bgm,Energetic electronic breakbeats and synth leads,0.48
+stage_night_market,NIGHT MARKET MAYHEM,嘴砲夜市,audio/05-nightmarket.ogg,midi/05-nightmarket.mid,152,50.53,True,bgm,"Taiwanese festival rhythm inspired electronic rock, nasal suona-like synth",0.48
+stage_casino,GOLDEN HIGH ROLLER,金沙賭城,audio/06-casino.ogg,midi/06-casino.mid,148,51.89,True,bgm,"Electro swing, jazzy brass synth, syncopated casino rhythm",0.48
+stage_square,IRON PARADE,廣場坦克戰場,audio/07-square.ogg,midi/07-square.mid,155,49.55,True,bgm,"Heavy industrial orchestral rock, cinematic marching percussion",0.48
+stage_fur_lab,FUZZY COUNTERATTACK,絨毛禁區,audio/08-furlab.ogg,midi/08-furlab.mid,142,54.08,True,bgm,"Quirky weird science fiction synths, elastic bass, toy bells",0.48
+training,PRACTICE MODE,練習模式,audio/09-training.ogg,midi/09-training.mid,110,52.36,True,bgm,Restrained gentle training session electronic funk,0.48
+final_boss,THE LAST WORD,最終決戰,audio/10-boss.ogg,midi/10-boss.mid,166,46.27,True,bgm,Epic rapid orchestral synth metal boss music,0.48
+results,SCOREBOARD SHUFFLE,結算畫面,audio/11-result.ogg,midi/11-result.mid,122,31.48,True,bgm,Playful triumphant electric piano funk,0.48
+credits,AFTER THE FIGHT,製作名單,audio/12-credits.ogg,midi/12-credits.mid,104,55.38,True,bgm,Warm nostalgic ending synth piano and gentle bass,0.48
+vs,SHOWDOWN,VS 轉場,audio/13-vs.ogg,midi/13-vs.mid,148,3.24,False,sting,Dramatic rising versus transition,0.72
+round_start,ROUND START,回合開始,audio/14-round.ogg,midi/14-round.mid,150,1.6,False,sting,Short energetic fight start signal,0.72
+ko,K.O.!,擊倒,audio/15-ko.ogg,midi/15-ko.mid,150,3.2,False,sting,Explosive knockout stinger,0.72
+victory,YOU WIN!,勝利,audio/16-victory.ogg,midi/16-victory.mid,138,6.96,False,sting,Triumphant victory fanfare,0.72
+defeat,NOT THIS TIME,敗北,audio/17-defeat.ogg,midi/17-defeat.mid,100,7.2,False,sting,Comic melancholy losing jingle,0.72
+intro_azhi,AZHI DASH,阿志登場,audio/18-azhi.ogg,midi/18-azhi.mid,158,4.56,False,sting,Fast and sharp character entrance,0.72
+intro_saizi,SAIZI GUARD,塞子登場,audio/19-saizi.ogg,midi/19-saizi.mid,112,6.43,False,sting,Metallic defensive fighter entrance,0.72
+intro_gambler,ALL IN,金沙賭神登場,audio/20-gambler.ogg,midi/20-gambler.mid,146,4.93,False,sting,Jazzy gambler entrance flourish,0.72
+intro_winnie,GOLDEN TANK,維尼登場,audio/21-winnie.ogg,midi/21-winnie.mid,118,6.1,False,sting,Massive theatrical tank character entrance,0.72

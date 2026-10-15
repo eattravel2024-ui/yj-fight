@@ -1,0 +1,9 @@
+.audio-settings{border-top:2px solid #ff3558;margin-top:20px;padding-top:16px;max-width:760px}
+.audio-settings>p{font-size:12px;line-height:1.7;color:#c0aabb}
+.audio-settings>label{display:block;margin:14px 0 6px;font-size:13px;font-weight:800}
+.audio-settings output{float:right;color:#ffd43b;font:800 12px ui-monospace,monospace}
+.audio-settings input[type="range"]{display:block;width:100%;height:32px;padding:0;accent-color:#ffd43b;cursor:pointer}
+.audio-settings select{display:block;max-width:100%;width:100%;min-height:44px;padding:9px;background:#201826;color:#f5f1e8;border:1px solid #745263;font:inherit}
+.audio-actions{display:flex;gap:10px;flex-wrap:wrap}.audio-actions button{min-height:44px;padding:8px 14px;border:1px solid #745263;background:#271b29;color:#f5f1e8;cursor:pointer}
+.audio-actions button:disabled{opacity:.55;cursor:default}.audio-actions button:focus-visible,.audio-settings input:focus-visible,.audio-settings select:focus-visible{outline:2px solid #ffd43b;outline-offset:3px}
+.audio-settings .audio-note{font-size:11px;color:#9c8c9c}

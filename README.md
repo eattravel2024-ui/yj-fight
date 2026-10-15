@@ -1,6 +1,6 @@
 # 陪公子練武 — Spar With the Young Master
 
-> GitHub/Codex development baseline: **8.11.0**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.11.1**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,10 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.11.1 — original OST and shared Audio Manager
+
+All 21 supplied tracks and MIDI originals are preserved. Main menu, character selection, arcade mission waiting, practice, stage battles, final boss and results have music routing; VS, round start, KO, outcome and character entrances use deduplicated events. The settings screen has independent persistent BGM/SFX levels, master mute, retry and all-track audition. Audio uses one gesture-unlocked Web Audio graph, 300ms crossfades, bounded PCM caching and OGG/AAC fallback. The three current maps have their own music; the fourth fur-lab track and future stage-select/credits scenes are registered without inventing those maps/pages. See [OST mapping and verification](docs/AUDIO_8.11.1.md).
 
 ## 8.11.0 — Phase 2 Character Select
 

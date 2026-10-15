@@ -20,6 +20,7 @@
 - [x] Phase 1.5 scene art (8.10.2): three originals, optimized backgrounds/previews and metadata prepared; battle stages unchanged. Night-market source alpha preserved for Phase 3 review.
 - [x] 8.10.3 user-requested follow-up: 陪公子練武 branding, fixed Gambler/Azhi home art, and three supplied live backgrounds using existing simulation IDs; no stage selector or geometry changes.
 - [x] Phase 2 (8.11.0): independent player/roster/rival Character Select with real skills/stats, consistent art, cancelable drafts, explicit confirmation, server acknowledgement and keyboard/touch support.
+- [x] 8.11.1 user-requested audio: 21 original OST tracks, shared manager, independent levels, gesture unlock, real battle events and future scene hooks. Fourth stage music is ready; fourth map is not implemented.
 - [ ] Phase 3: mission registry/progress migration, true stage selection and server-owned online stage settings.
 - [ ] Phase 4: resource preparation, VS, pause/results and confirmed next/retry flow.
 - [ ] Phase 5: unified audio/input, gamepads, responsive/performance polish.

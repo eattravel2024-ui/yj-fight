@@ -12,7 +12,7 @@ const VERSION=require('./package.json').version;
 const PORT=Number(process.env.PORT||31071);
 const HOST=process.env.HOST||'127.0.0.1';
 const ROOT=path.resolve(__dirname,'public');
-const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml'};
+const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png','.webp':'image/webp','.svg':'image/svg+xml','.ogg':'audio/ogg','.m4a':'audio/mp4','.mid':'audio/midi'};
 const ROOM_LIMIT=200,CLIENT_LIMIT=500,SPECTATOR_LIMIT=24,SNAPSHOT_DIVISOR=process.env.AZHI_SNAPSHOT_HZ==='60'?1:2;
 const FRAME_NS=BigInt(Math.round(1e9/Combat.FPS));
 const rooms=new Map();
