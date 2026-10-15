@@ -1,12 +1,13 @@
-# 8.9 手動發佈與回滾
+# 8.9.5 手動發佈與回滾
 
 本次開發沒有連線或部署正式 VPS。以下指令由你確認更新內容後手動執行；快速迭代不要求每次先建立或合併 PR；目前開發分支為 `feat/signature-entrances`。正式發佈請使用已審閱的完整 commit SHA，確保部署內容與測試內容一致。不要在正在執行遊戲的 `/opt/azhi71` 內做 `git pull` 或安裝依賴。
 
-## 沿用 VPS 上已有的更新資料夾（8.9.4）
+## 沿用 VPS 上已有的更新資料夾（8.9.5）
 
 你上次成功更新使用的來源資料夾是 ~/azhi-update.lvccoe，已追蹤目前開發分支。自行登入原 VPS 後執行即可，不必下載檔案或另建分支：
 
 ```bash
+set -e
 cd ~/azhi-update.lvccoe
 git pull --ff-only
 npm ci --ignore-scripts --no-fund
@@ -14,29 +15,29 @@ sudo bash deploy/upgrade-ubuntu.sh
 curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
 ```
 
-健康版本應顯示 8.9.4。本次整合街機風格 UI、真實血條殘影及回合指示，更新後請重新載入頁面。更新腳本會自動檢查並備份；原遊戲網址不變，完成後強制重新整理。若不是使用該來源資料夾，先進入自己先前 clone 的來源目錄再執行同樣操作。
+健康版本應顯示 8.9.5。本次整合滿版擂台、遊戲內大廳／選角／房間／設定與面板動畫，更新後請重新載入頁面。更新腳本會自動檢查並備份；原遊戲網址不變，完成後強制重新整理。若不是使用該來源資料夾，先進入自己先前 clone 的來源目錄再執行同樣操作。
 
-## 快速更新（目前 8.9.4）
+## 快速更新（目前 8.9.5）
 
-小幅修改沿用同一開發分支，不必先管理多個分支或 PR。下載本次提供的 azhi-fighting-8.9.4.tar.gz，在電腦上傳：
+小幅修改沿用同一開發分支，不必先管理多個分支或 PR。下載本次提供的 azhi-fighting-8.9.5.tar.gz，在電腦上傳：
 
 ```bash
-scp ~/Downloads/azhi-fighting-8.9.4.tar.gz YOUR_USER@YOUR_VPS_IP:/tmp/
+scp ~/Downloads/azhi-fighting-8.9.5.tar.gz YOUR_USER@YOUR_VPS_IP:/tmp/
 ```
 
 自行登入 VPS 後執行（適用既有 /opt/azhi71 與 azhi71.service，需 Node 20+）：
 
 ```bash
 set -euo pipefail
-RELEASE_DIR="$(mktemp -d "$HOME/azhi-update-8.9.4.XXXXXX")"
-tar -xzf /tmp/azhi-fighting-8.9.4.tar.gz -C "$RELEASE_DIR" --strip-components=1
+RELEASE_DIR="$(mktemp -d "$HOME/azhi-update-8.9.5.XXXXXX")"
+tar -xzf /tmp/azhi-fighting-8.9.5.tar.gz -C "$RELEASE_DIR" --strip-components=1
 cd "$RELEASE_DIR"
 npm ci --ignore-scripts --no-fund
 sudo bash deploy/upgrade-ubuntu.sh
 curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
 ```
 
-更新腳本自行執行語法及 Node 檢查、安裝鎖定依賴、備份、更新與版本健康檢查，不需另外安裝瀏覽器或手跑長套測試。會短暫中斷對局；完成後瀏覽器強制重新整理，健康版本應為 8.9.4。若沒有現有 azhi71，使用本文件末尾「首次安裝」流程。
+更新腳本自行執行語法及 Node 檢查、安裝鎖定依賴、備份、更新與版本健康檢查，不需另外安裝瀏覽器或手跑長套測試。會短暫中斷對局；完成後瀏覽器強制重新整理，健康版本應為 8.9.5。若沒有現有 azhi71，使用本文件末尾「首次安裝」流程。
 
 以下保留完整 Git／回滾流程供需要時查閱，不是每次快速更新的必做清單。
 

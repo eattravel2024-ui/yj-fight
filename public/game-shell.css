@@ -1,0 +1,403 @@
+/* Full-window game shell. Presentation only; the 960 × 540 simulation is unchanged. */
+body.game-app{
+  --app-bar-height:52px;
+  --app-edge:clamp(12px,2.5vw,32px);
+  margin:0;
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  overflow:hidden;
+  overscroll-behavior:none;
+  background:#050911;
+}
+.game-app > .shell{display:none}
+.game-app [hidden]{display:none!important}
+.game-app .skip-link{z-index:130}
+.app-bar{
+  position:fixed;
+  z-index:30;
+  inset:0 0 auto;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  height:calc(var(--app-bar-height) + env(safe-area-inset-top,0px));
+  padding:env(safe-area-inset-top,0px) max(14px,env(safe-area-inset-right,0px)) 0 max(14px,env(safe-area-inset-left,0px));
+  border-bottom:1px solid #426477;
+  background:linear-gradient(100deg,#091b29f5,#0c111ef5 55%,#271025f5);
+  box-shadow:0 3px 20px #0008;
+}
+.app-brand{display:flex;align-items:center;gap:9px;min-width:0;min-height:44px;padding:0;border:0;background:transparent;color:#eafaff;white-space:nowrap;text-align:left}
+.app-brand:hover{text-decoration:none}
+.app-brand strong{font-size:16px;font-weight:900;letter-spacing:.04em}
+.app-brand small{font:700 9px ui-monospace,monospace;color:#82dbe6;letter-spacing:.08em}
+.app-brand .brand-icon{width:29px;height:31px;font-size:20px;flex-shrink:0;box-shadow:3px 3px 0 #b82e60}
+.app-status{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#9db9c9;font:11px/1.5 ui-monospace,monospace}
+.app-status::before{content:"";display:inline-block;width:5px;height:5px;margin-right:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px #00e5f466;vertical-align:middle}
+.app-actions{display:flex;align-items:center;gap:5px;margin-left:auto;flex-shrink:0}
+.app-actions button,.app-tabs button{
+  min-width:44px;
+  min-height:44px;
+  padding:7px 13px;
+  border:1px solid transparent;
+  border-radius:3px;
+  color:#b6ccdc;
+  background:transparent;
+  font-size:12px;
+  font-weight:750;
+  white-space:nowrap;
+}
+.app-actions button:hover,.app-tabs button:hover{border-color:#375974;background:#143043;color:#efffff}
+.app-actions button[aria-expanded=true],.app-tabs button[aria-selected=true],.app-tabs button.active{border-color:#4fa5b5;background:#124052;color:#d6ffff;box-shadow:inset 0 -2px var(--cyan)}
+.app-actions [data-fullscreen]{font-size:18px;min-width:44px;padding-inline:10px}
+.game-app .app-battle,.game-app.fight-focus .app-battle{
+  position:fixed;
+  inset:calc(var(--app-bar-height) + env(safe-area-inset-top,0px)) 0 0;
+  display:flex;
+  flex-direction:column;
+  width:100%;
+  max-width:none;
+  min-width:0;
+  min-height:0;
+  margin:0;
+  border:0;
+  border-radius:0;
+  overflow:hidden;
+  box-shadow:none;
+  background:#04070e;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.game-app .app-battle > .game-head,.game-app .app-battle > .footer-line,.game-app .app-battle > .board-bottom{display:none}
+.game-app .app-battle > .hud,.game-app .app-battle > .score{flex:0 0 auto;width:100%;margin:0;padding:9px var(--app-edge);border-bottom:1px solid #385467}
+.game-app .app-battle > .hud{grid-template-columns:minmax(0,1fr) 85px minmax(0,1fr);gap:18px}
+.game-app .app-battle .hud-portrait{width:40px;height:47px}
+.game-app .app-battle .fighter-name{font-size:12px;margin-bottom:4px}
+.game-app .app-battle .life{height:20px}
+.game-app .app-battle .energy{height:6px;margin-top:5px}
+.game-app .app-battle .meter-caption{font-size:7px;margin-top:3px}
+.game-app .app-battle .roundtime strong,.game-app .app-battle .timer strong{font-size:39px}
+.game-app .app-battle .roundtime small,.game-app .app-battle .timer small{font-size:8px;margin-top:3px}
+.game-app .app-battle .versus{font-size:7px;margin-top:3px}
+.game-app .app-battle > .arena{
+  flex:1 1 0;
+  display:grid;
+  place-items:center;
+  width:100%;
+  height:auto;
+  min-width:0;
+  min-height:0;
+  max-height:none;
+  margin:0;
+  border:0;
+  box-shadow:none;
+  background:radial-gradient(ellipse at center,#0e182a,#03060c 75%);
+}
+.game-app .app-battle > .arena canvas,.game-app.fight-focus .app-battle > .arena canvas{
+  display:block;
+  width:100%;
+  height:100%;
+  max-width:100%;
+  max-height:100%;
+  min-width:0;
+  min-height:0;
+  aspect-ratio:16/9;
+  object-fit:contain;
+  object-position:center;
+}
+.game-app .app-battle .scene-topline{top:9px;left:var(--app-edge);right:var(--app-edge)}
+.game-app .app-battle .corner{top:9px;left:var(--app-edge)}
+.game-app .app-battle .battle-overlay{padding:18px;gap:10px}
+.game-app .app-battle .battle-overlay h2{font-size:clamp(22px,3.7vw,38px)}
+.game-app .app-battle > .skill-dock{
+  flex:0 0 auto;
+  grid-template-columns:minmax(110px,.7fr) repeat(2,minmax(0,1fr));
+  width:100%;
+  padding:7px var(--app-edge);
+  gap:10px;
+  border-bottom:0;
+}
+.game-app .app-battle .skill-dock-label{display:block}
+.game-app .app-battle .skill-button{min-height:49px;padding:6px 12px}
+.game-app .app-battle .skill-button strong{font-size:12px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.game-app .app-battle .skill-button small{font-size:9px;line-height:1.4;margin-top:2px}
+.game-app .app-battle > .touch{flex:0 0 auto;padding:6px var(--app-edge);gap:5px;border-top:1px solid #283d52}
+.game-app .app-battle .touch button{min-height:44px;padding:4px 2px;font-size:11px}
+.game-app .app-battle > .score{grid-template-columns:minmax(0,1fr) 76px minmax(0,1fr);gap:18px}
+.game-app .app-battle .fighters{gap:5px}
+.game-app .app-battle .mini-fighter{gap:7px}
+.game-app .app-battle .mini-fighter img{width:28px;height:34px}
+.game-app .app-battle .mini-track{height:12px}
+.game-app .app-battle .mini-meter{height:4px;margin-top:3px}
+.game-app .app-battle .mini-top{font-size:9px;margin-bottom:3px}
+.game-app .app-battle .team-head{font-size:10px;margin-bottom:5px}
+.game-app .app-battle .center-notice{padding:16px}
+.game-app .toast{bottom:max(18px,env(safe-area-inset-bottom,0px));z-index:120}
+
+/* Native modal dialog supplies focus containment and Escape handling. */
+.app-menu{
+  color:var(--text);
+  width:min(1000px,calc(100vw - 40px));
+  max-width:none;
+  height:min(730px,calc(100dvh - 80px));
+  max-height:calc(100dvh - 80px);
+  margin:auto;
+  padding:0;
+  overflow:hidden;
+  border:1px solid #47778b;
+  border-radius:9px;
+  background:#0b1422;
+  box-shadow:0 35px 100px #000b,0 0 45px #00e5f40c;
+}
+.app-menu::backdrop{background:#02060ec4;backdrop-filter:blur(8px)}
+.app-menu[open]{animation:app-menu-enter .22s ease-out both}
+.app-menu-frame{height:100%;min-height:0;display:flex;flex-direction:column;background:linear-gradient(145deg,#0b263355,#0d1424 40%,#221329aa)}
+.app-menu-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 24px;border-bottom:1px solid #365063;flex:0 0 auto}
+.app-menu-head h2{margin:0;font-size:20px;font-weight:850;letter-spacing:.04em;color:#e9fbff}
+.app-menu-head small{font:700 9px/1.5 ui-monospace,monospace;letter-spacing:.15em;color:#78becb}
+.app-menu-head [data-close]{min-width:44px;min-height:44px;padding:8px 13px;border:1px solid #47677f;border-radius:4px;background:#122333;color:#c6e5ef;font-size:12px}
+.app-tabs{display:flex;flex:0 0 auto;gap:6px;padding:8px 24px;background:#060e19aa;border-bottom:1px solid #293d53;overflow-x:auto;scrollbar-width:thin}
+.app-tabs button{flex:1;min-width:76px;padding-inline:10px}
+.app-menu-body{flex:1 1 0;min-height:0;overflow:auto;overscroll-behavior:contain;padding:24px;scrollbar-width:thin;scrollbar-color:#376174 #101a29;scroll-padding:20px}
+.app-menu-foot{display:flex;align-items:center;flex:0 0 auto;gap:18px;padding:12px 24px;border-top:1px solid #3c647c;background:linear-gradient(105deg,#0b2838,#15182b);box-shadow:0 -8px 24px #0004}
+.app-menu-foot .app-selection-summary{flex:1;min-width:0;margin:0;padding:0;border:0;background:transparent;font-size:13px;line-height:1.6;color:#b9f3f8}
+.app-menu-foot .app-confirm-action{flex:0 0 auto;width:auto;min-width:230px;min-height:48px;margin:0;padding:10px 20px;font-size:14px}
+.app-pane:not([hidden]){animation:app-pane-enter .2s ease-out both}
+.app-pane > h3{font-size:21px;margin:0 0 12px}
+.app-pane > p{font-size:13px;line-height:1.8;color:#9fb6c9}
+.app-pane .panel{padding:20px;border-radius:6px;margin:0 0 16px;background:linear-gradient(125deg,#102333b3,#111829cc);box-shadow:none}
+.app-pane .side-section{padding:20px}
+.app-pane .section-title{font-size:20px;margin:5px 0 14px}
+.app-pane .section-kicker,.app-pane .section-label{font-size:10px}
+.app-pane .dialogue,.app-pane .note,.app-pane .status,.app-pane .net-message{font-size:12px}
+.app-pane .player-identity label,.app-pane .name-form label{font-size:13px}
+.app-pane .player-identity label small,.app-pane .name-form label small{font-size:11px}
+.app-pane input{font-size:14px;min-height:46px}
+.app-pane button,.app-pane a.primary,.app-pane a.secondary{min-height:44px}
+.app-pane .primary,.app-pane .secondary,.app-pane .main-btn{font-size:13px}
+.app-pane .ghost,.app-pane .small-btn{font-size:12px}
+.app-pane .player-identity{gap:9px}
+.app-pane #progressPanel .action-row:empty{display:none}
+.app-pane .tiny{font-size:11px}
+.app-pane .lobby-controls{padding:15px;margin-block:16px}
+.app-pane .lobby-controls #readySummary{font-size:14px}
+.app-pane .lobby-controls #readyRoster{font-size:12px}
+.app-pane .net-diagnostics,.app-pane .diag{font-size:11px}
+.app-pane .sub-panel{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:0}
+.app-pane .sub-panel h3{font-size:16px}
+.app-pane .sub-panel p,.app-pane .training-panel p{font-size:12px}
+.app-pane .training-panel{padding:0 20px}
+.app-pane .training-panel summary strong{font-size:15px}
+.app-pane .key-chip{font-size:12px;gap:7px}
+.app-pane .key-chip b{font-size:11px;min-width:28px;text-align:center}
+.app-pane .key-grid{gap:10px}
+.app-pane .frame-row b,.app-pane .frame-row span{font-size:12px}
+.app-pane .guide{gap:10px;padding:0;background:transparent}
+.app-pane .key{font-size:12px}
+.app-pane .subtitle{font-size:15px;margin-block:12px}
+.app-pane .career-panel .stat strong{font-size:27px}
+.app-pane .career-panel .stat small{font-size:11px}
+.app-pane .palette button{font-size:12px}
+.app-pane .fighter-select-link{display:none}
+
+.app-home{position:relative}
+.app-home-title{margin:0 0 22px}
+.app-home-title > small{display:block;color:#66dfed;font:800 10px ui-monospace,monospace;letter-spacing:.2em;margin-bottom:12px}
+.app-home-title h1{font-size:clamp(34px,5vw,54px);line-height:1.15;letter-spacing:.02em;font-weight:950;margin:0 0 12px;color:#e9faff;text-shadow:3px 3px #0a3a4e}
+.app-home-title h1 em{color:#79eeff;font-style:normal}
+.app-home-title p{font-size:13px;line-height:1.8;color:#a8bfce;max-width:620px;margin:0}
+.app-home-art{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:20px;isolation:isolate}
+.app-home-art img{display:block;object-fit:cover;object-position:50% 18%;width:100%;height:clamp(105px,19dvh,170px);border:1px solid #486478;border-radius:3px;filter:saturate(.85);background:#192939}
+.app-home-art img:nth-child(even){border-bottom-color:#ca4a80}
+.app-home-art img:nth-child(odd){border-bottom-color:#58d5e7}
+.app-home-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.app-home-actions button,.app-home-actions a{display:flex;align-items:center;justify-content:center;gap:9px;min-height:62px;padding:13px 17px;border:1px solid #416783;border-radius:5px;background:linear-gradient(120deg,#102d42,#101c31);color:#dbfaff;text-align:center;font-size:15px;font-weight:850;line-height:1.5;text-decoration:none}
+.app-home-actions button:first-child{border-color:#55c8d9;background:linear-gradient(110deg,#136071,#16314d);box-shadow:inset 3px 0 var(--cyan)}
+.app-home-actions button:hover,.app-home-actions a:hover{border-color:#7ee5f4;background:linear-gradient(120deg,#164255,#19253f);text-decoration:none}
+.app-home-actions small{display:block;font-size:10px;color:#8fbacb;font-weight:500}
+.app-selection-summary{padding:11px 14px;border:1px solid #315265;border-radius:4px;background:#0a202e;color:#9bdfeb;font-size:12px;line-height:1.7;margin:16px 0 0}
+.app-confirm-action{display:block;width:100%;margin-top:15px;min-height:48px;padding:10px 18px;font-size:14px}
+.game-app .app-menu #fighterSelect:not([hidden]),.game-app.fight-focus .app-menu #fighterSelect:not([hidden]){display:block;width:100%;max-width:none;margin:0;padding:18px;border-color:#375c74;background:linear-gradient(125deg,#10303d88,#182037 65%,#2d1831)}
+.app-menu #fighterSelect .section-title{font-size:24px;margin-bottom:8px}
+.app-menu #fighterSelect .selection-summary{font-size:16px!important}
+.app-menu #fighterSelect .selection-hint{font-size:12px!important;margin-bottom:20px!important}
+.app-menu #fighterSelect .character-list,.app-menu #fighterSelect .char-choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.app-menu #fighterSelect .char-card,.app-menu #fighterSelect .char-choices button{display:flex;flex-direction:column;align-items:stretch;min-height:0;text-align:left;overflow:hidden;border-radius:5px}
+.app-menu #fighterSelect .char-card img,.app-menu #fighterSelect .char-choices img{width:100%;height:clamp(130px,25dvh,210px);object-fit:cover;object-position:50% 18%;transition:filter .18s,transform .18s}
+.app-menu #fighterSelect .char-card .data,.app-menu #fighterSelect .char-choices span{padding:12px;min-height:91px;background:linear-gradient(130deg,#162d3d,#141e30)}
+.app-menu #fighterSelect .char-card strong,.app-menu #fighterSelect .char-choices span{font-size:15px}
+.app-menu #fighterSelect .char-card small,.app-menu #fighterSelect .char-choices small{font-size:11px;line-height:1.6}
+.app-menu #fighterSelect .char-card.selected img,.app-menu #fighterSelect .char-choices button.on img{filter:saturate(1.15);transform:scale(1.025)}
+.app-menu #fighterSelect #charDescription,.app-menu #fighterSelect .character-descr{margin:18px 0 0;font-size:13px;line-height:1.9;min-height:0}
+.app-setting-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;padding:15px 0;border-bottom:1px solid #293c51}
+.app-setting-row > div{flex:1;min-width:170px}
+.app-setting-row strong{display:block;font-size:14px;color:#d8eaf5}
+.app-setting-row p,.app-setting-row small{display:block;font-size:12px;line-height:1.7;color:#8faac0;margin:4px 0 0}
+.app-setting-row button{min-width:100px;min-height:44px;font-size:12px;padding:9px 14px}
+.app-setting-row button.on,.app-setting-row button[aria-pressed=true]{border-color:#59c5d0;background:#124454;color:#c7ffff}
+.app-menu a:focus-visible,.app-menu button:focus-visible,.app-menu input:focus-visible,.app-menu summary:focus-visible,.app-actions button:focus-visible{outline:2px solid #84efff;outline-offset:3px}
+
+@keyframes app-menu-enter{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes app-pane-enter{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+
+@media(min-width:700px){
+  .app-home{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;align-items:center}
+  .app-home-title{margin:0}
+  .app-home-title h1{font-size:clamp(34px,3.3vw,46px)}
+  .app-home-title h1 em{display:block}
+  .app-home-title p{font-size:12px}
+  .app-home-art{margin:0;align-self:stretch}
+  .app-home-art img{height:100%;min-height:145px;max-height:185px}
+  .app-home > .app-home-actions,.app-home > .app-selection-summary,.app-home > #appResume,.app-home > .career{grid-column:1/-1;margin:0}
+  .app-home > .career{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border:1px solid #2a4358;border-radius:4px;text-align:left;background:#0d1a29}
+  .app-home > .career strong{font-size:20px;margin:0}
+  .app-home > .career span{font-size:9px}
+}
+@media(min-width:1600px){.game-app .app-battle > .hud,.game-app .app-battle > .score{padding-inline:max(32px,calc((100vw - 1600px)/2))}.game-app .app-battle > .skill-dock{padding-inline:max(32px,calc((100vw - 1400px)/2))}}
+@media(max-width:850px){
+  .app-bar{gap:10px}
+  .app-brand strong{font-size:14px}
+  .app-brand small{display:none}
+  .app-actions{gap:2px}
+  .app-actions button{font-size:11px;padding-inline:9px}
+  .app-status{font-size:9px}
+  .game-app .app-battle > .skill-dock{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .game-app .app-battle .skill-dock-label{display:none}
+  .app-menu{width:calc(100vw - 24px)}
+}
+@media(max-width:600px){
+  body.game-app{--app-bar-height:52px;--app-edge:9px}
+  .app-bar{gap:5px;padding-inline:max(7px,env(safe-area-inset-left,0px)) max(7px,env(safe-area-inset-right,0px))}
+  .app-brand .brand-icon{width:25px;height:28px;font-size:18px;box-shadow:2px 2px 0 #b82e60}
+  .app-brand strong{font-size:13px;letter-spacing:0}
+  .app-status{display:none}
+  .app-actions button{font-size:11px;padding-inline:7px;min-width:44px}
+  .app-actions [data-fullscreen]{font-size:17px;min-width:44px;padding-inline:5px}
+  .game-app .app-battle > .hud{grid-template-columns:minmax(0,1fr) 49px minmax(0,1fr);gap:7px;padding-block:7px}
+  .game-app .app-battle .hud-person{gap:5px}
+  .game-app .app-battle .hud-portrait{width:27px;height:38px}
+  .game-app .app-battle .fighter-name{font-size:10px;gap:3px;margin-bottom:3px}
+  .game-app .app-battle .life{height:17px}
+  .game-app .app-battle .health-readout{font-size:8px}
+  .game-app .app-battle .energy{height:5px;margin-top:4px}
+  .game-app .app-battle .meter-caption{font-size:6px;line-height:1.4;margin-top:3px}
+  .game-app .app-battle .roundtime strong,.game-app .app-battle .timer strong{font-size:29px}
+  .game-app .app-battle .roundtime small,.game-app .app-battle .timer small{font-size:6px}
+  .game-app .app-battle > .skill-dock{padding:6px var(--app-edge);gap:6px}
+  .game-app .app-battle .skill-button{padding:5px 7px;gap:6px;min-height:49px}
+  .game-app .app-battle .skill-button strong{font-size:10px}
+  .game-app .app-battle .skill-button small{font-size:8px}
+  .game-app .app-battle .skill-button kbd{min-width:23px;height:25px;font-size:14px}
+  .game-app .app-battle .touch button{font-size:9px;min-height:44px}
+  .game-app .app-battle > .touch{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;padding-block:5px}
+  .game-app .app-battle .scene-topline{top:6px}
+  .game-app .app-battle .battle-logo{display:none}
+  .game-app .app-battle .battle-overlay{gap:8px;padding:14px}
+  .game-app .app-battle .battle-overlay h2{font-size:23px}
+  .game-app .app-battle .battle-overlay p{font-size:11px;max-width:280px;line-height:1.65}
+  .game-app .app-battle .battle-overlay small{font-size:9px}
+  .game-app .app-battle .battle-overlay .primary{min-height:44px}
+  .game-app .app-battle > .score{grid-template-columns:minmax(0,1fr) 42px minmax(0,1fr);gap:6px;padding-block:7px}
+  .game-app .app-battle .team-head{font-size:8px;gap:3px;margin-bottom:4px}
+  .game-app .app-battle .mini-fighter{gap:4px}
+  .game-app .app-battle .mini-fighter img{width:21px;height:28px}
+  .game-app .app-battle .mini-top{font-size:7px;margin-bottom:2px}
+  .game-app .app-battle .mini-track{height:11px}
+  .game-app .app-battle .mini-track .health-readout{font-size:7px}
+  .game-app .app-battle .mini-meter{height:3px;margin-top:3px}
+  .app-menu{width:calc(100vw - 14px);height:calc(100dvh - 28px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));max-height:calc(100dvh - 28px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));border-radius:7px}
+  .app-menu-head{padding:10px 14px;gap:8px}
+  .app-menu-head h2{font-size:17px}
+  .app-menu-head [data-close]{padding-inline:11px;font-size:11px}
+  .app-tabs{gap:3px;padding:5px 9px}
+  .app-tabs button{min-width:55px;padding-inline:5px;font-size:11px}
+  .app-menu-body{padding:16px 13px}
+  .app-menu-foot{gap:10px;padding:10px 13px}
+  .app-menu-foot .app-selection-summary{font-size:11px;line-height:1.5}
+  .app-menu-foot .app-confirm-action{min-width:150px;min-height:48px;padding:9px 12px;font-size:12px}
+  .app-home-title{margin-bottom:18px}
+  .app-home-title h1{font-size:34px}
+  .app-home-title p{font-size:12px}
+  .app-home-art{gap:5px;margin-bottom:16px}
+  .app-home-art img{height:116px}
+  .app-home-actions{gap:8px}
+  .app-home-actions button,.app-home-actions a{font-size:13px;min-height:59px;padding:10px 6px}
+  .app-selection-summary{font-size:11px;padding:10px 12px}
+  .app-pane .panel,.app-pane .side-section{padding:15px}
+  .app-pane .sub-panel{grid-template-columns:1fr;gap:20px}
+  .app-pane .training-content{grid-template-columns:1fr}
+  .app-pane .action-row{gap:8px}
+  .app-pane .room-input,.app-pane .row{gap:7px}
+  .app-pane .room-input .secondary,.app-pane .row .main-btn{padding-inline:10px;font-size:12px;white-space:nowrap}
+  .app-pane .player-identity input{min-width:130px}
+  .game-app .app-menu #fighterSelect:not([hidden]),.game-app.fight-focus .app-menu #fighterSelect:not([hidden]){padding:12px}
+  .app-menu #fighterSelect .character-list,.app-menu #fighterSelect .char-choices{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .app-menu #fighterSelect .section-title{font-size:21px}
+  .app-menu #fighterSelect .char-card img,.app-menu #fighterSelect .char-choices img{height:140px}
+  .app-menu #fighterSelect .char-card .data,.app-menu #fighterSelect .char-choices span{padding:10px;min-height:79px;font-size:14px}
+  .app-menu #fighterSelect .char-card small,.app-menu #fighterSelect .char-choices small{font-size:10px}
+  .app-setting-row{gap:9px}
+  .app-setting-row > div{min-width:140px}
+  .app-setting-row button{min-width:87px;padding-inline:9px}
+}
+@media(max-width:370px){
+  .app-brand strong{display:none}
+  .app-actions button{padding-inline:8px}
+  .app-menu #fighterSelect .char-card img,.app-menu #fighterSelect .char-choices img{height:115px}
+}
+@media(max-height:550px) and (orientation:landscape){
+  body.game-app{--app-bar-height:46px;--app-edge:12px}
+  .app-bar{gap:10px}
+  .app-brand strong{font-size:14px}
+  .app-brand small,.app-status{display:none}
+  .game-app .app-battle > .hud{padding-block:5px;grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr);gap:14px}
+  .game-app .app-battle .hud-portrait{width:28px;height:36px}
+  .game-app .app-battle .fighter-name{font-size:10px;margin-bottom:2px}
+  .game-app .app-battle .life{height:15px}
+  .game-app .app-battle .energy{height:4px;margin-top:3px}
+  .game-app .app-battle .meter-caption{font-size:6px;margin-top:2px}
+  .game-app .app-battle .roundtime strong,.game-app .app-battle .timer strong{font-size:29px}
+  .game-app .app-battle .roundtime small,.game-app .app-battle .timer small{font-size:6px;margin-top:2px}
+  .game-app .app-battle .versus{display:none}
+  .game-app .app-battle > .score{padding-block:4px;gap:12px;grid-template-columns:minmax(0,1fr) 60px minmax(0,1fr)}
+  .game-app .app-battle .fighters{gap:3px}
+  .game-app .app-battle .mini-fighter img{width:19px;height:23px}
+  .game-app .app-battle .mini-top{font-size:7px;line-height:1.1;margin-bottom:2px}
+  .game-app .app-battle .mini-track{height:8px}
+  .game-app .app-battle .mini-meter{height:3px;margin-top:2px}
+  .game-app .app-battle .team-head{margin-bottom:3px;font-size:8px;line-height:1.2}
+  .game-app .app-battle > .skill-dock{padding-block:4px}
+  .game-app .app-battle .skill-button{min-height:44px;padding-block:3px}
+  .game-app .app-battle .skill-button strong{font-size:10px}
+  .game-app .app-battle .skill-button small{font-size:8px}
+  .game-app .app-battle .battle-overlay{gap:5px;padding:10px}
+  .game-app .app-battle .battle-overlay .overlay-eyebrow,.game-app .app-battle .battle-overlay .icon,.game-app .app-battle .battle-overlay small{display:none}
+  .game-app .app-battle .battle-overlay h2{font-size:21px}
+  .game-app .app-battle .battle-overlay p{font-size:10px;max-width:520px;line-height:1.5}
+  .game-app .app-battle .battle-overlay .primary{min-height:44px;margin:0;padding-block:7px}
+  .app-menu{height:calc(100dvh - 18px);max-height:calc(100dvh - 18px)}
+  .app-menu-head{padding-block:5px}
+  .app-menu-head h2{font-size:16px}
+  .app-tabs{padding-block:3px}
+  .app-menu-body{padding:10px 15px}
+  .app-menu-foot{padding-block:7px}
+  .app-home-title h1{font-size:34px}
+  .app-home-art img{height:95px}
+  .game-app .app-menu #fighterSelect:not([hidden]),.game-app.fight-focus .app-menu #fighterSelect:not([hidden]){padding:10px}
+  .app-menu #fighterSelect .section-kicker,.app-menu #fighterSelect .section-label,.app-menu #fighterSelect .selection-summary,.app-menu #fighterSelect .selection-hint{display:none}
+  .app-menu #fighterSelect .section-title{font-size:16px;margin:0 0 10px}
+  .app-menu #fighterSelect .character-list,.app-menu #fighterSelect .char-choices{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+  .app-menu #fighterSelect .char-card,.app-menu #fighterSelect .char-choices button{display:grid;grid-template-columns:60px minmax(0,1fr);align-items:center;min-height:90px}
+  .app-menu #fighterSelect .char-card img,.app-menu #fighterSelect .char-choices img{width:60px;height:90px}
+  .app-menu #fighterSelect .char-card .data,.app-menu #fighterSelect .char-choices span{padding:7px;min-height:0;font-size:12px}
+  .app-menu #fighterSelect .char-card strong{font-size:12px}
+  .app-menu #fighterSelect .char-card small,.app-menu #fighterSelect .char-choices small{font-size:9px;line-height:1.5}
+  .app-menu #fighterSelect #charDescription,.app-menu #fighterSelect .character-descr{font-size:11px;margin-top:9px}
+  .app-menu #fighterSelect .roster-footer{padding-top:5px;margin-top:5px}
+}
+@media(max-height:550px) and (orientation:landscape) and (hover:none){
+  .game-app .app-battle > .skill-dock{display:none}
+  .game-app .app-battle > .touch{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px;padding-block:4px}
+  .game-app .app-battle .touch button{font-size:9px;min-height:44px;padding-inline:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .game-app *,.game-app *::before,.game-app *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}

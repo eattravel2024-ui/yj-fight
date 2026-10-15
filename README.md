@@ -1,6 +1,6 @@
 # 狠話擂台 — Big Talk / Real Fight
 
-> GitHub/Codex development baseline: **8.9.4**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.9.5**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,10 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.9.5 full-window game and in-game menus
+
+The arena now fills the browser viewport, with health bars, the full 16:9 stage and controls visible together. An in-game menu contains the lobby, character selection, room creation/joining, Ready, invitations, settings and move guide. Selection has a fixed confirmation button; Escape returns to the arena. Menus pause local play and release held inputs; online matches keep synchronizing with neutral input. Modal transitions respect reduced-motion preferences. All modes and existing combat/rollback rules remain available. See [full-window game notes](docs/FULL_WINDOW_8.9.5.md) and [manual VPS update](docs/MANUAL_RELEASE.md).
 
 ## 8.9.4 arcade UI integration
 
@@ -57,13 +61,14 @@ Ready and explicit host start are available in 1v1 and 2v2. Reconnect recovery a
 | `public/rollback.js` | Prediction, input history and rollback |
 | `public/engine/` | Frame-data, command parsing, collision and AI |
 | `public/game.js`, `public/team.js` | Browser gameplay and interface |
+| `public/game-shell.js`, `public/game-shell.css` | Full-window arena, in-game navigation, modal focus and responsive layout |
 | `public/art/`, `public/sprites/`, `public/vfx.js` | Character art, sprite sheets and effects |
 | `test/` | Node tests for gameplay and networking |
 | `deploy/` | Manual Ubuntu install, update and rollback |
 
 ## Working with Codex
 
-See [AGENTS.md](AGENTS.md), [Codex starter task](docs/CODEX_STARTER.md), and [development roadmap](docs/ROADMAP.md). Work on separate feature branches and PRs; GitHub Actions will run syntax checks and tests.
+See [AGENTS.md](AGENTS.md), [Codex starter task](docs/CODEX_STARTER.md), and [development roadmap](docs/ROADMAP.md). Small iterations reuse the current feature branch; consolidate review and PRs at milestones. GitHub Actions runs syntax checks and tests.
 
 ## Safety & license
 

@@ -2,7 +2,7 @@
 
 ## Goal
 Maintain and improve the existing browser-based 60 Hz fighting game, without removing existing modes.
-Current baseline: 8.9.4. Preserve the four playable characters (維尼, 塞子, 金沙賭神, 阿志), 1v1, 2v2, spectators, player/room names, arcade mode, and WebSocket networking. Sam was removed at the user’s request; do not restore that character or its assets.
+Current baseline: 8.9.5. Preserve the four playable characters (維尼, 塞子, 金沙賭神, 阿志), 1v1, 2v2, spectators, player/room names, arcade mode, and WebSocket networking. Sam was removed at the user’s request; do not restore that character or its assets.
 
 ## Source map
 - `server.js`: HTTP + authoritative WebSocket rooms, 1v1 and 2v2, validation and identities.
@@ -10,6 +10,7 @@ Current baseline: 8.9.4. Preserve the four playable characters (維尼, 塞子, 
 - `public/team-core.js`: four-fighter simulation, no friendly fire, team rules.
 - `public/rollback.js`: input histories, prediction, deterministic rollback and resync.
 - `public/game.js`, `public/team.js`: UI, visuals and client networking.
+- `public/game-shell.js`, `public/game-shell.css`: shared full-window layout and in-game menu; preserve original control IDs and native gameplay handlers. Local menus pause simulation; online menus must keep synchronization running with neutral input.
 - `public/vfx.js`, `public/sprites/`, `public/art/`: animation and visuals.
 - `public/engine/`: frame-data, commands, hitboxes and AI.
 - `test/`: regression tests. Add tests for any rule or protocol change.

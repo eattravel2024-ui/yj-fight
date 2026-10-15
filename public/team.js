@@ -9,7 +9,7 @@
  const playback=A.createPlayback(),motionQuery=matchMedia('(prefers-reduced-motion: reduce)');let reducedMotion=motionQuery.matches;
  const skillFX=window.AzhiSkillFX.create({quality:'high',reducedMotion});motionQuery.addEventListener('change',event=>{reducedMotion=event.matches;skillFX.setReducedMotion(reducedMotion)});
  const charIds=Object.keys(C.CHAR),stageAssets={night:'art/night.svg',garage:'art/garage.svg',harbor:'art/port-arena.svg'},stageNames={night:'逢甲霓虹夜市',garage:'海線改車廠',harbor:'港都狠話擂台'};
- const portraits={},sprites={},stages={};for(const id of charIds){let p=new Image(),s=new Image();p.src='art/portrait_'+id+'.webp?v=894';s.src='sprites/'+id+'.png?v=894';portraits[id]=p;sprites[id]=s;}
+ const portraits={},sprites={},stages={};for(const id of charIds){let p=new Image(),s=new Image();p.src='art/portrait_'+id+'.webp?v=895';s.src='sprites/'+id+'.png?v=895';portraits[id]=p;sprites[id]=s;}
  for(const [id,path] of Object.entries(stageAssets)){const image=new Image();image.src=path;stages[id]=image;}
  let playerNames=[],roomTitle='海線格鬥房',isHost=false,onlineName='';
  let ws=null,room='',role='player',selected='azhi',slot=-1,session=null,state=null,prevState=null,matchId='',serverFrame=0,serverMode='team',lastPacket=0,inputs={},pulses=[],delay=RB.INPUT_DELAY,rollbackCount=0,rtt=0,networkComplete=false,pending=null,watchers=0,waiting=true,watching=false,matchDone=false;
@@ -17,11 +17,12 @@
  const pressed={},attackKeys=new Set(C.ATTACKS),keyMap={KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',KeyW:'up',ArrowUp:'up',KeyS:'down',ArrowDown:'down',KeyJ:'light',Space:'light',KeyK:'heavy',KeyQ:'kick',KeyE:'low',KeyH:'throw',KeyI:'upper',KeyU:'special',KeyO:'super',KeyL:'guard',ShiftLeft:'dash',ShiftRight:'dash'};
  const overlay=(title,subtitle)=>{$('arenaWait').hidden=false;$('arenaMessage').textContent=title;$('arenaSub').textContent=subtitle||''};
  const hideOverlay=()=>{$('arenaWait').hidden=true};
+ function menuOpen(){return !!window.AzhiShell?.isOpen()}
  function status(s){$('roomStatus').textContent=s;$('quickMessage').textContent=s;}
  function toast(t){const c=$('battleCallout');c.classList.remove('show');void c.offsetWidth;c.textContent=t;c.classList.add('show')}
  function audioHit(kind){if(!audioOn||!soundEnabled)return;try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();audio.resume();const now=audio.currentTime,osc=audio.createOscillator(),gain=audio.createGain();osc.type=kind==='heavy'?'sawtooth':'triangle';osc.frequency.setValueAtTime(kind==='heavy'?115:260,now);osc.frequency.exponentialRampToValueAtTime(55,now+.13);gain.gain.setValueAtTime(kind==='heavy'?.08:.045,now);gain.gain.exponentialRampToValueAtTime(.001,now+.16);osc.connect(gain).connect(audio.destination);osc.start(now);osc.stop(now+.17);}catch{}}
  const lobby=window.AzhiLobby.create({getSocket:()=>ws,getSlot:()=>slot,getRole:()=>role,onCharacter:char=>{selected=char;renderChars();}});
- function renderChars(){$('selectionSummary').textContent=role==='spectator'?'觀戰模式 · 不需選擇角色':'目前選擇：'+C.CHAR[selected].name+' · '+C.CHAR[selected].special;$('teamCharacters').textContent='';for(const [id,c] of Object.entries(C.CHAR)){let b=document.createElement('button');b.type='button';b.className=id===selected?'on':'';b.setAttribute('aria-pressed',String(id===selected));b.disabled=role==='spectator'||lobby.busy;b.innerHTML='<img src="art/portrait_'+id+'.webp?v=894" alt=""><span></span>';b.querySelector('span').textContent=c.name;const skill=document.createElement('small');skill.textContent=c.special;b.querySelector('span').append(skill);const badge=document.createElement('b');badge.className='selection-badge';badge.textContent=id===selected?'✓ 已選擇':'';b.append(badge);b.title=c.skillDescription;b.onclick=()=>{if(slot>=0){lobby.select(id);return}selected=id;renderChars()};$('teamCharacters').append(b)}$('teamCharacterInfo').textContent=`${C.CHAR[selected].name}｜${C.CHAR[selected].title}：${C.CHAR[selected].desc}`;updateSkillUI()}
+ function renderChars(){$('selectionSummary').textContent=role==='spectator'?'觀戰模式 · 不需選擇角色':'目前選擇：'+C.CHAR[selected].name+' · '+C.CHAR[selected].special;$('teamCharacters').textContent='';for(const [id,c] of Object.entries(C.CHAR)){let b=document.createElement('button');b.type='button';b.className=id===selected?'on':'';b.setAttribute('aria-pressed',String(id===selected));b.disabled=role==='spectator'||lobby.busy;b.innerHTML='<img src="art/portrait_'+id+'.webp?v=895" alt=""><span></span>';b.querySelector('span').textContent=c.name;const skill=document.createElement('small');skill.textContent=c.special;b.querySelector('span').append(skill);const badge=document.createElement('b');badge.className='selection-badge';badge.textContent=id===selected?'✓ 已選擇':'';b.append(badge);b.title=c.skillDescription;b.onclick=()=>{if(slot>=0){lobby.select(id);return}selected=id;renderChars()};$('teamCharacters').append(b)}$('teamCharacterInfo').textContent=`${C.CHAR[selected].name}｜${C.CHAR[selected].title}：${C.CHAR[selected].desc}`;updateSkillUI()}
  function updateSkillUI(player){
   const fighter=C.CHAR[player?.char||selected]||C.CHAR.azhi;
   for(const [move,key,name] of [['special','U',fighter.special],['super','O',fighter.superName]]){
@@ -30,13 +31,13 @@
    for(const touch of document.querySelectorAll('[data-key="'+move+'"]')){touch.disabled=button.disabled;touch.classList.toggle('unavailable',!status.available);touch.setAttribute('aria-label',name+'，'+status.label);}
   }
  }
- for(const move of ['special','super'])$(move+'Trigger').onclick=()=>{if(role!=='player'||slot<0||!session||networkComplete)return;pulses.push(move);soundEnabled=true;canvas.focus({preventScroll:true})};
- function renderRoster(list=[]){playerNames=list;const el=$('teamRoster');el.textContent='';for(let i=0;i<(serverMode==='team'?4:2);i++){let p=list.find(x=>x.slot===i),seat=document.createElement('div');seat.className='seat '+(i%2?'blue-team':'red-team');let small=document.createElement('small');small.textContent=(i%2?'藍':'紅')+'隊 '+(Math.floor(i/2)+1)+' 號席';seat.append(small);if(p){const im=document.createElement('img');im.src='art/portrait_'+p.char+'.webp?v=894';im.alt='';seat.append(im)}const title=document.createElement('strong');title.textContent=p?(p.name||'玩家')+(p.host?' ★':''):'等待加入';if(p)title.classList.add('player-name','joined');seat.append(title);
+ for(const move of ['special','super'])$(move+'Trigger').onclick=()=>{if(menuOpen()||role!=='player'||slot<0||!session||networkComplete)return;pulses.push(move);soundEnabled=true;canvas.focus({preventScroll:true})};
+ function renderRoster(list=[]){playerNames=list;const el=$('teamRoster');el.textContent='';for(let i=0;i<(serverMode==='team'?4:2);i++){let p=list.find(x=>x.slot===i),seat=document.createElement('div');seat.className='seat '+(i%2?'blue-team':'red-team');let small=document.createElement('small');small.textContent=(i%2?'藍':'紅')+'隊 '+(Math.floor(i/2)+1)+' 號席';seat.append(small);if(p){const im=document.createElement('img');im.src='art/portrait_'+p.char+'.webp?v=895';im.alt='';seat.append(im)}const title=document.createElement('strong');title.textContent=p?(p.name||'玩家')+(p.host?' ★':''):'等待加入';if(p)title.classList.add('player-name','joined');seat.append(title);
  if(p){const sub=document.createElement('div');sub.className='character-caption';sub.textContent='使用：'+(C.CHAR[p.char]?.name||p.char);seat.append(sub)}el.append(seat)}}
  function updateHud(g){const players=g?.players||[],scores=g?.scores||[players[0]?.wins||0,players[1]?.wins||0];$('redScore').textContent=scores[0];$('blueScore').textContent=scores[1];hud.wins($('redRoundWins'),scores[0]);hud.wins($('blueRoundWins'),scores[1]);$('matchTime').textContent=Math.max(0,Math.ceil(g?.time??90));$('roundInfo').textContent=g?.introFrames>0?'登場倒數 '+Math.ceil(g.introFrames/30):'ROUND '+(g?.round||1);$('stageName').style.visibility=g?.introFrames>0?'hidden':'visible';$('stageName').textContent=(stageNames[g?.stage]||stageNames.night)+' / '+(g?.ruleset==='team'?'2V2':'1V1')+(role==='spectator'?' · LIVE':' · FIGHT');
   for(const team of [0,1]){const el=$(team?'blueFighters':'redFighters');el.textContent='';const teamPlayers=players.filter(p=>(p.team??(p.slot%2))===team).sort((a,b)=>a.slot-b.slot);
    for(let i=0;i<(g?.ruleset==='team'?2:serverMode==='team'?2:1);i++){
-    const p=teamPlayers[i],row=document.createElement('div');row.className='mini-fighter';let im=document.createElement('img');im.src='art/portrait_'+(p?.char||'azhi')+'.webp?v=894';im.alt='';row.append(im);
+    const p=teamPlayers[i],row=document.createElement('div');row.className='mini-fighter';let im=document.createElement('img');im.src='art/portrait_'+(p?.char||'azhi')+'.webp?v=895';im.alt='';row.append(im);
     const wrapper=document.createElement('div');wrapper.className='mini-wrap';const top=document.createElement('div');top.className='mini-top';const name=document.createElement('span');name.textContent=p?(playerNames.find(n=>n.slot===p.slot)?.name||('玩家 '+(p.slot+1)))+' · '+(C.CHAR[p.char]?.name||'角色'):'尚未加入';const hp=document.createElement('span');hp.textContent=p?Math.ceil(p.hp)+' HP':'--';top.append(name,hp);wrapper.append(top);
     const rail=document.createElement('div');rail.className='mini-track';const fill=document.createElement('div');fill.className='mini-fill';fill.style.width=Math.max(0,p?.hp||0)+'%';rail.append(fill);hud.health(rail,fill,p?.hp||0,p?.slot??('empty'+team+i),(g?.round||0)+':'+(p?.char||'empty'));if(!p)rail.querySelector('.health-readout').textContent='等待加入';wrapper.append(rail);
     const meter=document.createElement('div');meter.className='mini-meter';const meterBar=document.createElement('div');meterBar.style.width=(p?.meter||0)+'%';meter.append(meterBar);hud.meter(meter,p?.meter||0);wrapper.append(meter);row.append(wrapper);el.append(row);
@@ -50,14 +51,14 @@
  function copy(text){if(navigator.clipboard?.writeText)navigator.clipboard.writeText(text).then(()=>toast('邀請連結已複製')).catch(()=>fallback());else fallback();function fallback(){const t=document.createElement('textarea');t.value=text;document.body.append(t);t.select();document.execCommand('copy');t.remove();toast('邀請連結已複製')}}
  function link(watch){const u=new URL(location.href);u.pathname='/team.html';u.searchParams.set('room',room);if(watch)u.searchParams.set('watch','1');else u.searchParams.delete('watch');return u.href}
  function leave(){hud.clear();lobby.reset();skillFX.clear();playback.clear();seenEvents.clear();if(ws){const old=ws;ws=null;try{old.send(JSON.stringify({type:'leave'}));old.close(1000,'leave')}catch{}}room='';slot=-1;isHost=false;playerNames=[];roomTitle='海線格鬥房';$('applyNickname').disabled=true;$('applyRoomTitle').disabled=true;$('roomTitleInput').disabled=false;$('roomTitleDisplay').textContent='尚未進入房間';$('spectatorNames').textContent='觀眾：尚無';session=null;state=null;prevState=null;serverFrame=0;matchId='';waiting=true;watching=false;networkComplete=false;matchDone=false;pending=null;Object.keys(pressed).forEach(k=>delete pressed[k]);pulses=[];$('joinButton').disabled=false;$('disconnect').disabled=true;$('copyPlayerLink').disabled=true;$('copyWatchLink').disabled=true;$('rematch').disabled=true;renderChars();renderRoster();renderNetwork();overlay('等待玩家加入','建立四人房間，或輸入房號觀看正在進行的對戰。')}
- function startPlayer(msg){hud.clear();battleCamera.reset();if(role!=='player'||slot<0)return;skillFX.clear();playback.clear();seenEvents.clear();pending=null;clearHeld();matchId=msg.matchId;serverFrame=msg.frame||0;delay=Number(msg.inputDelay)||3;session=new RB.Session(msg.game);state=session.game;prevState=null;waiting=false;watching=false;matchDone=false;networkComplete=false;lastPacket=performance.now();$('rematch').disabled=true;hideOverlay();status('四人就位！現在由 60Hz 回滾引擎同步戰鬥。');document.querySelector('.score').scrollIntoView({block:'start',behavior:'instant'});}
- function startWatching(msg){hud.clear();battleCamera.reset();if(role!=='spectator')return;skillFX.clear();playback.clear();seenEvents.clear();matchId=msg.matchId;serverFrame=msg.frame||0;session=null;state=msg.game;prevState=null;waiting=false;watching=true;matchDone=false;lastPacket=performance.now();hideOverlay();status('正在觀戰第 '+(state.round||1)+' 回合（只讀模式）');toast('LIVE SPECTATE');}
+ function startPlayer(msg){hud.clear();battleCamera.reset();if(role!=='player'||slot<0)return;skillFX.clear();playback.clear();seenEvents.clear();pending=null;clearHeld();matchId=msg.matchId;serverFrame=msg.frame||0;delay=Number(msg.inputDelay)||3;session=new RB.Session(msg.game);state=session.game;prevState=null;waiting=false;watching=false;matchDone=false;networkComplete=false;lastPacket=performance.now();$('rematch').disabled=true;hideOverlay();status('四人就位！現在由 60Hz 回滾引擎同步戰鬥。');window.AzhiShell?.onBattleStart({mode:'team'});}
+ function startWatching(msg){hud.clear();battleCamera.reset();if(role!=='spectator')return;skillFX.clear();playback.clear();seenEvents.clear();matchId=msg.matchId;serverFrame=msg.frame||0;session=null;state=msg.game;prevState=null;waiting=false;watching=true;matchDone=false;lastPacket=performance.now();hideOverlay();status('正在觀戰第 '+(state.round||1)+' 回合（只讀模式）');toast('LIVE SPECTATE');window.AzhiShell?.onBattleStart({mode:'spectator'});}
  function syncCheckpoint(cp){if(!cp||!session)return;if(cp.frame>session.frame){if(cp.frame-session.frame>12){session.hardSync(cp.frame,cp.state);state=session.game;pending=null;return}pending=cp;return}if(session.digest(cp.frame)!==cp.hash)session.rebase(cp.frame,cp.state);state=session.game;pending=null;}
  const seenEvents=new Set();function eventVisual(e){if(e.kind==='skill'&&(role==='spectator'||e.slot===slot||e.id)){skillFX.emit({...e,direction:e.direction||state?.players?.[e.slot]?.face||1},performance.now());toast(e.name)}if(e.kind==='hit'){const attacker=state?.players?.[e.slot],x=e.x||500,y=448-(e.y||0)*.82-110;effects.push({x,y,at:performance.now(),color:e.block?'#6fd8ff':e.move==='super'?'#ffe585':e.counter?'#fb85e5':'#ff9a66',r:e.move==='super'?92:e.move==='heavy'?66:40,dmg:e.damage});if(!reducedMotion){shake=Math.max(shake,e.move==='super'?11:e.move==='heavy'?6:3);flash=Math.max(flash,e.move==='super'?.22:.08);}if(attacker){audioHit(e.move==='heavy'||e.move==='super'?'heavy':'light')}if(e.combo>1)toast(e.combo+' HIT COMBO!');}
  else if(e.kind==='super')toast((C.CHAR[e.char]?.name||'')+' SUPER!');else if(e.kind==='round')toast(e.winner>=0?(e.winnerTeam!==undefined?'TEAM '+(e.winnerTeam?'BLUE':'RED')+' WIN':'ROUND END'):'DRAW');else if(e.kind==='finish')toast('MATCH OVER');}
  function eventsFrom(events,sourceId='local'){for(const [index,e] of (events||[]).entries()){const k=matchId+':'+sourceId+':'+index+':'+(e.kind||'');if(seenEvents.has(k))continue;seenEvents.add(k);eventVisual(e)}if(seenEvents.size>320)seenEvents.clear();}
  function finish(game){if(!game||matchDone)return;matchDone=true;waiting=false;networkComplete=true;const team=game.winnerTeam??game.winner;const who=team===null||team===undefined?'平手':team===0?'紅隊勝利！':'藍隊勝利！';
- overlay('比賽結束 · '+who,role==='spectator'?'可留在房間觀看下一場。':'按再戰或準備，等待全員確認後由房主開賽。');$('rematch').disabled=role!=='player';status(who+' 等待是否再戰。')}
+ overlay('比賽結束 · '+who,role==='spectator'?'可留在房間觀看下一場。':'按再戰或準備，等待全員確認後由房主開賽。');$('rematch').disabled=role!=='player';status(who+' 等待是否再戰。');window.AzhiShell?.open('room')}
  function onMessage(m){switch(m.type){
   case 'seat_updated':slot=m.slot;break;
   case 'joined':role=m.role==='spectator'?'spectator':'player';setRole(role==='spectator');slot=m.slot;room=m.room;serverMode=m.mode||'duel';watching=m.role==='spectator';waiting=true;isHost=role==='player'&&!!m.host;roomTitle=m.title||roomTitle;onlineName=m.name||onlineName;
@@ -78,8 +79,8 @@
    if(m.checkpoint)syncCheckpoint(m.checkpoint);for(const [i,e] of (m.events||[]).entries())if(['finish','round'].includes(e.kind)||(e.kind==='skill'&&e.slot!==slot))eventsFrom([e],e.id||m.serverFrame+':'+i);break;
   case 'match_complete':if(role!=='player'||!session||m.matchId!==matchId)return;networkComplete=true;if(m.checkpoint){session.hardSync(m.checkpoint.frame,m.checkpoint.state);pending=null;state=session.game;}finish(state);updateSkillUI(state?.players?.[slot]);break;
   case 'watch_complete':if(role!=='spectator'||m.matchId!==matchId)return;prevState=state;state=m.game;serverFrame=m.serverFrame;finish(state);break;
-  case 'peer_left':session=null;waiting=true;networkComplete=true;matchDone=false;status(m.message||'有玩家離線');overlay('有選手離線',m.message||'等候玩家重新入場。');$('rematch').disabled=true;break;
-  case 'watch_end':waiting=true;watching=false;matchDone=false;networkComplete=true;status(m.message||'本場比賽結束');overlay('比賽已中止','有選手離線，請等待重新配對。');break;
+  case 'peer_left':session=null;waiting=true;networkComplete=true;matchDone=false;status(m.message||'有玩家離線');overlay('有選手離線',m.message||'等候玩家重新入場。');$('rematch').disabled=true;clearHeld();window.AzhiShell?.open('room');break;
+  case 'watch_end':waiting=true;watching=false;matchDone=false;networkComplete=true;status(m.message||'本場比賽結束');overlay('比賽已中止','有選手離線，請等待重新配對。');clearHeld();window.AzhiShell?.open('room');break;
   case 'rematch_status':status(`再戰確認：${m.votes}/${m.needed} 位選手同意，全員確認後由房主開賽`);break;
   case 'pong':if(Number.isFinite(m.sentAt)){const sample=Math.max(0,performance.now()-m.sentAt);rtt=rtt?rtt*.72+sample*.28:sample;delay=Math.max(3,Math.min(8,Math.ceil(rtt/33)+1))}break;
   case 'error':status(m.message||'房間發生錯誤');if(ws&&slot<0){const failed=ws;ws=null;failed.close();$('joinButton').disabled=false}break;
@@ -91,7 +92,7 @@
  function nameChange(){const n=checkNickname($('playerNickname').value);if(!n){status('暱稱需 2–16 字，不能包含特殊控制字元');return}onlineName=n;rememberNickname(n);$('playerNickname').value=n;
   if(ws?.readyState===WebSocket.OPEN&&room){ws.send(JSON.stringify({type:'set_name',name:n}));status('正在更新暱稱…')}else status('已儲存暱稱：'+n)}
  function titleChange(){if(!isHost||!ws||ws.readyState!==WebSocket.OPEN){status('只有房主能更改房名');return}const title=checkTitle($('roomTitleInput').value);if(!title){status('房名需 2–24 字，不可包含特殊字元');return}ws.send(JSON.stringify({type:'set_title',title}));status('正在更新房間名稱…')}
- function connect(){if(location.protocol==='file:'){status('線上模式需要從 VPS 網址開啟，不能用 file://');return}
+ function connect(){window.AzhiShell?.open('room');if(location.protocol==='file:'){status('線上模式需要從 VPS 網址開啟，不能用 file://');return}
   if(ws){status('已連線，如需重新加入請先離開房間。');return}
   const requested=$('roomCode').value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
   if(role==='spectator'&&!requested){status('觀戰需要輸入既有房號。');return}
@@ -105,14 +106,14 @@
   socket.onopen=()=>{if(socket!==ws)return;socket.send(JSON.stringify(role==='spectator'?{type:'watch',room:requested,name:onlineName}:{type:'join',mode:'team',room:requested,char:selected,name:onlineName,title}));status('已連線，等待房間回應。')};
   socket.onmessage=e=>{if(socket!==ws)return;let m;try{m=JSON.parse(e.data)}catch{return}onMessage(m)};
   socket.onerror=()=>{if(socket!==ws)return;status('連線錯誤：請檢查 VPS /ws 反向代理。')};
-  socket.onclose=()=>{if(socket!==ws)return;ws=null;lobby.reset();session=null;networkComplete=true;$('joinButton').disabled=false;$('applyNickname').disabled=true;$('applyRoomTitle').disabled=true;$('roomTitleInput').disabled=false;slot=-1;waiting=true;status('連線已中斷。可使用原房號重新加入。');overlay('連線已中斷','檢查網路連線後重新連接。')};
+  socket.onclose=()=>{if(socket!==ws)return;ws=null;leave();clearHeld();networkComplete=true;status('連線已中斷。可使用原房號重新加入。');overlay('連線已中斷','檢查網路連線後重新連接。');window.AzhiShell?.open('room')};
  }
  function tick(){if(!session||!ws||ws.readyState!==WebSocket.OPEN||slot<0||networkComplete)return;
  if(performance.now()-lastPacket>6000){status('超過 6 秒沒有收到更新，請檢查連線。');return}
  // Predicted endings must keep logical frames moving until authoritative confirmation.
  const frame=Math.max(session.frame,serverFrame)+delay+1;
- const keys={};for(const [k,v] of Object.entries(pressed))if(v)keys[k]=true;
- const input={keys,pulses:pulses.splice(0,4)};
+ const blocked=menuOpen(),keys={};if(!blocked)for(const [k,v] of Object.entries(pressed))if(v)keys[k]=true;
+ const input={keys,pulses:blocked?[]:pulses.splice(0,4)};if(blocked)pulses=[];
  session.submit(slot,frame,input);
  ws.send(JSON.stringify({type:'input',matchId,frame,...input}));
  prevState=state?{...state,players:state.players?.map(p=>({...p}))}:null;
@@ -120,15 +121,15 @@
  let catchup=0;while(session.frame<serverFrame+delay&&catchup<3){session.advance();catchup++}
  if(pending&&pending.frame<=session.frame)syncCheckpoint(pending);state=session.game;
  }
- function keyPressed(e,on){const k=keyMap[e.code];if(!k||role==='spectator'||slot<0||!session)return;if(e.metaKey||e.ctrlKey||e.altKey||(document.activeElement?.tagName==='BUTTON'&&e.code==='Space'))return;
- if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;e.preventDefault();const old=!!pressed[k];pressed[k]=on;
+ function keyPressed(e,on){const k=keyMap[e.code];if(!k)return;if(!on){pressed[k]=false;return}if(menuOpen()||role==='spectator'||slot<0||!session||networkComplete)return;if(e.metaKey||e.ctrlKey||e.altKey||(document.activeElement?.tagName==='BUTTON'&&e.code==='Space'))return;
+ if(document.activeElement?.isContentEditable||['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;e.preventDefault();const old=!!pressed[k];pressed[k]=on;
  if(on&&!old&&attackKeys.has(k))pulses.push(k);if(on){soundEnabled=true;try{audio?.resume()}catch{}}
  }
  addEventListener('keydown',e=>keyPressed(e,true),{capture:true});addEventListener('keyup',e=>keyPressed(e,false),{capture:true});
  function clearHeld(){Object.keys(pressed).forEach(k=>pressed[k]=false);pulses=[];for(const button of document.querySelectorAll('[data-key]'))button.classList.remove('held')}
- addEventListener('blur',clearHeld);document.addEventListener('visibilitychange',()=>{if(document.hidden)clearHeld()});
+ addEventListener('azhi:menu',clearHeld);addEventListener('blur',clearHeld);document.addEventListener('visibilitychange',()=>{if(document.hidden)clearHeld()});
  for(const b of document.querySelectorAll('[data-key]')){const k=b.dataset.key;
-  b.addEventListener('pointerdown',e=>{if(role==='spectator'||slot<0||!session||networkComplete)return;e.preventDefault();b.setPointerCapture(e.pointerId);const was=!!pressed[k];pressed[k]=true;if(!was&&attackKeys.has(k))pulses.push(k);soundEnabled=true;b.classList.add('held')});
+  b.addEventListener('pointerdown',e=>{if(menuOpen()||role==='spectator'||slot<0||!session||networkComplete)return;e.preventDefault();b.setPointerCapture(e.pointerId);const was=!!pressed[k];pressed[k]=true;if(!was&&attackKeys.has(k))pulses.push(k);soundEnabled=true;b.classList.add('held')});
   for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>{pressed[k]=false;b.classList.remove('held')});
  }
  function drawStage(now){const id=state?.stage||'night',img=stages[id];if(img?.complete&&img.naturalWidth)ctx.drawImage(img,0,0,960,540);else{const grad=ctx.createLinearGradient(0,0,0,540);grad.addColorStop(0,'#111a3a');grad.addColorStop(1,'#432846');ctx.fillStyle=grad;ctx.fillRect(0,0,960,540)}
@@ -170,7 +171,7 @@
  $('copyPlayerLink').onclick=()=>room&&copy(link(false));$('copyWatchLink').onclick=()=>room&&copy(link(true));
  $('rematch').onclick=()=>{if(role!=='player'||!ws||ws.readyState!==WebSocket.OPEN||slot<0)return;ws.send(JSON.stringify({type:'rematch'}));$('rematch').disabled=true;status('已提出再戰，等待全部四名選手同意。');};
  $('effectToggle').onclick=()=>{visualEffects=!visualEffects;$('effectToggle').textContent='特效：'+(visualEffects?'開':'關')};$('soundToggle').onclick=()=>{audioOn=!audioOn;if(audioOn)soundEnabled=true;$('soundToggle').textContent='音效：'+(audioOn?'開':'關')};$('boxToggle').onclick=()=>{showBoxes=!showBoxes;$('boxToggle').classList.toggle('on',showBoxes);$('boxToggle').setAttribute('aria-pressed',String(showBoxes));};
- canvas.addEventListener('pointerdown',()=>{canvas.focus({preventScroll:true});soundEnabled=true});
+ canvas.addEventListener('pointerdown',()=>{if(menuOpen())return;canvas.focus({preventScroll:true});soundEnabled=true});
  setInterval(()=>{if(ws?.readyState===WebSocket.OPEN){const ts=performance.now();ws.send(JSON.stringify({type:'ping',sentAt:ts}))}},2000);
  setInterval(renderNetwork,550);
  try{onlineName=localStorage.getItem(NAME_KEY)||''}catch{}if(!checkNickname(onlineName))onlineName='旅人'+String(Math.floor(Math.random()*9000)+1000);
