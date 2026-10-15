@@ -1,6 +1,6 @@
 {
   "name": "azhi-haixian-fighting",
-  "version": "8.9.1",
+  "version": "8.9.2",
   "private": true,
   "description": "狠話擂台 8.9：Ready 開賽、技能狀態、逐幀動作與公平對戰",
   "scripts": {

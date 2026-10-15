@@ -38,3 +38,13 @@ python3 tools/import_legacy_atlas.py --fighter azhi \
 ## 8.8 原創出場與狠話招式
 
 新增 public/presentation.js、手繪 SVG 港都舞台 public/art/port-arena.svg；技能掌印、金幣港景、300 加油機與骰子拳弧為原創 Canvas 幾何圖形。參考 vincent-li/kof13 的動作資料設計，以及 Cubicheng/StreetFighter README／展示截圖的自適應鏡頭概念，未引入其 Blueprint、程式碼、人物、場景或聲音資產。
+
+## 8.9.2 阿志影片參考動作
+
+使用者提供 `gemini_generated_video_6dc43df0.mp4` 並明確選擇製作阿志透明戰鬥動作。影片 SHA-256 為 `9d1c5288c4ada8fc46fbb5c45974a7b7c9a21d812b7c3fa12f7b16ec565948dc`。原始影片留在本次工作區附件，未作為遊戲影片、音軌或背景散布。
+
+`assets/azhi/video-poses.png` 是依影片人物與姿勢參考，使用影像生成工具製作的 21 個透明關鍵姿勢；並非從原影片逐格去背後直接拷貝。跳躍、受擊、倒地等原片不完整的姿勢為補製。沒有帶入影片中的對手、血條、文字、場景與音軌。
+
+`assets/azhi/video-poses.json` 記錄姿勢裁切、角色根節點及 17 動作／10 時序影格的對應；`tools/build_azhi_video_atlas.py` 僅作 alpha 元件隔離、錨點正規化及圖集打包。遊戲中的阿志改為每格 384×300，其餘角色維持 240×300；共用相同 300px 高度、292px 腳底錨點與原世界比例。`make_sprites.py` 會沿用此來源重建，避免覆寫回舊角色素材。
+
+影片目前只有部分出招，這版使用 21 個關鍵姿勢安排播放，未宣稱具備 170 張不同的流暢手繪中間張。後續可針對跨姿勢的過渡補張，維持既有招式前搖／有效／收招與判定。

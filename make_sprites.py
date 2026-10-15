@@ -176,6 +176,11 @@ def svg(cid,act,n):
 
 manifest={'frameWidth':W,'frameHeight':H,'columns':FR,'framesPerAction':FR,'actions':ACTS,'characters':{}}
 for cid,c in PAL.items():
+ if cid=='azhi' and (Path(__file__).parent/'assets/azhi/video-poses.json').exists():
+  from tools.build_azhi_video_atlas import build
+  build()
+  manifest['characters'][cid]={'name':c['name'],'file':'sprites/'+cid+'.png','frameWidth':384,'frameHeight':300,'source':'User-provided video reference; 21 generated transparent key poses','profile':'assets/azhi/video-poses.json'}
+  continue
  atlas=Image.new('RGBA',(W*FR,H*len(ACTS)))
  face=Image.open(Path(__file__).parent/'public'/'art'/('face_'+cid+'.png')).convert('RGBA')
  face=face.resize((53,66),Image.Resampling.LANCZOS)

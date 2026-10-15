@@ -27,6 +27,7 @@ test('Gambler one-button signature grants its single-hit counter armor during st
  assert.ok(m.events.some(e=>e.kind==='armor'),'armor event not emitted');
  assert.equal(m.players[0].armorCharges,0,'the signature armor is consumed by the jab');
 });
-test('sprites retain canonical 240x300, 17-row, 10-column atlas (PNG header)',()=>{
- for(const id of expected){const d=fs.readFileSync(path.join(__dirname,'../public/sprites/'+id+'.png'));assert.equal(d.subarray(1,4).toString(),'PNG');assert.equal(d.readUInt32BE(16),2400);assert.equal(d.readUInt32BE(20),5100)}
+test('sprites retain 17-row, 10-column atlas with metadata matching renderer frame sizes',()=>{
+ const A=require('../public/engine/animation.js'),manifest=JSON.parse(fs.readFileSync(path.join(__dirname,'../public/sprites/manifest.json')));
+ for(const id of expected){const d=fs.readFileSync(path.join(__dirname,'../public/sprites/'+id+'.png'));const size=A.frameSize(id);assert.equal(size.width,manifest.characters[id].frameWidth||manifest.frameWidth);assert.equal(size.height,manifest.characters[id].frameHeight||manifest.frameHeight);assert.equal(d.subarray(1,4).toString(),'PNG');assert.equal(d.readUInt32BE(16),size.width*10);assert.equal(d.readUInt32BE(20),size.height*17)}
 });

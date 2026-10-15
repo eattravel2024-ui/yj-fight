@@ -28,3 +28,7 @@ id_rsa*
 *.pid
 .vscode/
 .idea/
+
+# Python asset authoring cache
+__pycache__/
+*.pyc

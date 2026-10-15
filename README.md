@@ -1,6 +1,6 @@
 # 狠話擂台 — Big Talk / Real Fight
 
-> GitHub/Codex development baseline: **8.9.1**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.9.2**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,10 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.9.2 Azhi video-based animation
+
+Azhi now uses 21 transparent key poses generated from the user's supplied video references, packed into 17 actions × 10 timeline frames. His green shirt, black trousers and pink towel follow the video; missing poses are supplementary generated art. The wider 384×300 cells keep extended limbs intact while preserving height, ground anchors, move timing and collision rules. Rebuild with `python tools/build_azhi_video_atlas.py` (Pillow required for authoring only).
 
 ## 8.9.1 viewport and character selection
 
