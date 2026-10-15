@@ -1,6 +1,6 @@
 # 狠話擂台 — Big Talk / Real Fight
 
-> GitHub/Codex development baseline: **8.9.9**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.10.0**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,12 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.10.0 Arcade 2.0 — Phase 1
+
+The full-window main menu now uses a manga arcade identity: dedicated original character key art, slanted numbered panels, halftone/speed-line backgrounds, local licensed display typography and a clear selected state. Six entries lead to existing arcade/practice character controls, online/team rooms, settings and move guides. Enter/Space confirms; arrows/WASD select; Escape returns through the menu. Menu selection never starts combat or disconnects an occupied room.
+
+A small `game-flow.js` coordinates UI navigation, while formal `AzhiGame` adapters keep combat and room authority in the existing clients. `save-state.js` validates the existing save before chapter/character lookup without removing valid progress, currency or purchases. Fight Fund remains absent from the main menu. Phase 2–5 features are not implemented in this release. See [Phase 1 delivery and verification](docs/ARCADE_2_PHASE1.md).
 
 ## 8.9.9 Sezi reference-based animation
 
@@ -77,7 +83,8 @@ Ready and explicit host start are available in 1v1 and 2v2. Reconnect recovery a
 | `public/rollback.js` | Prediction, input history and rollback |
 | `public/engine/` | Frame-data, command parsing, collision and AI |
 | `public/game.js`, `public/team.js` | Browser gameplay and interface |
-| `public/game-shell.js`, `public/game-shell.css` | Full-window arena, in-game navigation, modal focus and responsive layout |
+| `public/game-shell.js`, `public/game-shell.css`, `public/arcade-menu.css` | Full-window arena, arcade main menu, shared UI tokens, focus and responsive layout |
+| `public/game-flow.js`, `public/save-state.js` | UI-only navigation and strict existing-save normalization |
 | `public/art/`, `public/sprites/`, `public/vfx.js` | Character art, sprite sheets and effects |
 | `test/` | Node tests for gameplay and networking |
 | `deploy/` | Manual Ubuntu install, update and rollback |

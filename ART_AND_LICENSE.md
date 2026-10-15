@@ -70,3 +70,9 @@ python3 tools/import_legacy_atlas.py --fighter azhi \
 使用者在對話提供白色毛球八格動作圖及人物照片，授權作為此角色動畫與頭部替換參考。`assets/sezi/reference-poses.png` 是用影像生成工具依兩張參考製作的 21 個透明關鍵姿勢：毛球與金屬接頭保留圖一造型，頭部依圖二重新製作寫實五官、多角度及表情，並非原照片的逐格直接剪貼。未帶入參考圖的背景、標籤、衣服或真人身體；缺少的防禦、受擊、倒地及近身動作為補製。公開發行前仍需依專案既有規範確認素材及肖像權利。
 
 `assets/sezi/reference-poses.json` 記錄裁切、根節點與動作對應，`tools/build_azhi_video_atlas.py --fighter sezi` 僅隔離 alpha 元件、統一比例並打包。塞子改用 384×300，至此四位角色皆使用此尺寸，維持 292px 地面錨點與 0.76 顯示比例。170 格時序含停留／重複，並非 170 張獨立中間張；`public/art/moves/sezi.webp` 同步展示關鍵姿勢。藍色風帶以 Canvas 幾何繪製，保留「高雄發大財」金幣特效及原有招式數值。
+
+## 8.10.0 Arcade 2.0 Phase 1 主選單
+
+`assets/menu/arcade-heroes-source.png` 是用影像生成工具，以既有 `assets/azhi/video-poses.png` 與 `assets/winnie/reference-poses.png` 為角色造型／五官參考，另外製作的透明漫畫主視覺。只用於主選單，不覆蓋角色戰鬥、肖像或其他來源素材；`public/art/menu/arcade-heroes.webp` 為同圖的 WebP 格式版本。所有斜切面板、網點與速度線均以 CSS 原創繪製，未拷貝 KOF／Street Fighter 的角色、標誌或背景。
+
+英文字標與編號使用 Barlow Condensed Black Italic：Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)，SIL Open Font License 1.1。原始檔取自 Google Fonts 的 `ofl/barlowcondensed/BarlowCondensed-BlackItalic.ttf`，隨附 `public/fonts/OFL-BarlowCondensed.txt`；以本機檔案載入，無 CDN。繁體中文使用裝置的 Noto Sans CJK TC／PingFang TC／Microsoft JhengHei 等系統字體，沒有宣稱這個英文字型包含中文字形。

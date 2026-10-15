@@ -2,7 +2,7 @@
 
 ## Goal
 Maintain and improve the existing browser-based 60 Hz fighting game, without removing existing modes.
-Current baseline: 8.9.9. Preserve the four playable characters (維尼, 塞子, 金沙賭神, 阿志), 1v1, 2v2, spectators, player/room names, arcade mode, and WebSocket networking. Sam was removed at the user’s request; do not restore that character or its assets.
+Current baseline: 8.10.0. Preserve the four playable characters (維尼, 塞子, 金沙賭神, 阿志), 1v1, 2v2, spectators, player/room names, arcade mode, and WebSocket networking. Sam was removed at the user’s request; do not restore that character or its assets.
 
 ## Source map
 - `server.js`: HTTP + authoritative WebSocket rooms, 1v1 and 2v2, validation and identities.
@@ -11,7 +11,9 @@ Current baseline: 8.9.9. Preserve the four playable characters (維尼, 塞子, 
 - `public/rollback.js`: input histories, prediction, deterministic rollback and resync.
 - `public/game.js`, `public/team.js`: UI, visuals and client networking.
 - `public/combat-coach.js`: read-only cancel hints and hit receipts. Online receipts must use confirmed server events and deduplicate their IDs.
-- `public/game-shell.js`, `public/game-shell.css`: shared full-window layout and in-game menu; preserve original control IDs and native gameplay handlers. Local menus pause simulation; online menus must keep synchronization running with neutral input.
+- `public/game-flow.js`: UI-only navigation and draft mode; never duplicate combat/Ready authority. Formal `window.AzhiGame` adapters expose existing client state/actions; preserve Debug APIs for existing tests.
+- `public/save-state.js`: validates the existing `azhi70_save` before lookup; preserve valid economy/progress/settings.
+- `public/game-shell.js`, `public/game-shell.css`, `public/arcade-menu.css`: shared full-window layout and in-game menu; preserve original control IDs and native gameplay handlers. Local menus pause simulation; online menus must keep synchronization running with neutral input.
 - `public/vfx.js`, `public/sprites/`, `public/art/`: animation and visuals.
 - `public/engine/`: frame-data, commands, hitboxes and AI.
 - `test/`: regression tests. Add tests for any rule or protocol change.
@@ -40,6 +42,9 @@ Current baseline: 8.9.9. Preserve the four playable characters (維尼, 塞子, 
 3. Privacy and auth boundaries: room password/invite, spectator permissions, abuse/rate limits.
 4. Gameplay tuning, training/tutorial flow, touch ergonomics.
 5. 2v2 load, latency and rollback testing; state checksum/desync diagnostics.
+
+## Arcade 2.0 phased delivery
+Phase 1 main menu/common navigation is implemented on `feat/arcade-phase1`. Stop after each approved phase; do not implement Phase 2–5 or push GitHub without user authorization. Home has six entries; confirming local modes opens the existing fighter panel, not a new Character Select. Escape returns subpanel → home → arena. Preserve busy-room guards on all cross-mode routes.
 
 ## User preference: fast iteration
 Reuse the current development branch for small follow-up changes; do not create a new branch or require a new PR for every iteration. Run the relevant lightweight checks automatically. Use browser or extended suites only when justified by the change. Package one current source archive and give short manual VPS update instructions; never connect to production. Consolidate review/PRs at milestones rather than making the user manage branch stacks.

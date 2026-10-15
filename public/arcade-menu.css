@@ -1,0 +1,459 @@
+/* Arcade 2.0 / Phase 1. Shared UI tokens and the main menu only.
+   Battle sizing, simulation and HUD styles deliberately remain in game-shell.css. */
+@font-face{font-family:"Arcade Display";src:url("fonts/BarlowCondensed-BlackItalic.ttf") format("truetype");font-style:normal;font-weight:900;font-display:swap}
+.app-menu{
+  --arcade-black:#09090f;
+  --arcade-panel:#17161f;
+  --arcade-red:#ff3558;
+  --arcade-yellow:#ffd43b;
+  --arcade-white:#f5f1e8;
+  --arcade-cyan:#00d9f5;
+  --arcade-muted:#b6b0bd;
+  --arcade-line:#554754;
+  --arcade-shadow:5px 5px 0 #000;
+  --arcade-heading:"Arcade Display",Impact,"Arial Narrow","Arial Black",sans-serif;
+  color:var(--arcade-white);
+  border:2px solid #4a3746;
+  border-radius:2px;
+  background:var(--arcade-black);
+  font-family:"Noto Sans CJK TC","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+}
+.app-menu .app-menu-frame{background:linear-gradient(115deg,#20151d,#100f17 65%)}
+.app-menu .app-menu-head{border-bottom:2px solid var(--arcade-red);background:#121017}
+.app-menu .app-menu-head small{color:var(--arcade-yellow);letter-spacing:.18em}
+.app-menu .app-menu-head h2{color:var(--arcade-white);font-weight:950}
+.app-menu-back{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.app-menu .app-menu-head [data-home]{min-height:44px;padding:8px 13px;border:1px solid #76606f;border-radius:0;background:#24202b;color:var(--arcade-white);box-shadow:3px 3px 0 #000;font-size:12px}
+.app-menu .app-menu-head [data-home]:hover{background:var(--arcade-white);color:var(--arcade-black)}
+.app-menu .app-menu-head [data-close]{border-color:#76606f;border-radius:0;background:#24202b;color:var(--arcade-white);box-shadow:3px 3px 0 #000}
+.app-menu .app-menu-head [data-close]:hover{background:var(--arcade-white);color:var(--arcade-black)}
+.app-menu .app-tabs{background:#09090f;border-bottom-color:#493c49}
+.app-menu .app-tabs button{border-radius:0;color:#c4b8c7}
+.app-menu .app-tabs button:hover{background:#2d1e2a;border-color:var(--arcade-red);color:var(--arcade-white)}
+.app-menu .app-tabs button[aria-selected=true]{color:var(--arcade-yellow);background:#34232a;border-color:#7c4d4f;box-shadow:inset 0 -3px var(--arcade-yellow)}
+.app-menu .app-menu-body{scrollbar-color:#925469 #17121b}
+.app-menu .app-menu-foot{background:#15111b;border-top:2px solid var(--arcade-red);box-shadow:none}
+.app-menu .app-confirm-info > small{color:#c5a5b5}
+.app-menu .app-selection-summary{color:var(--arcade-white)}
+.app-menu .app-menu-foot .app-confirm-action{border:2px solid #09090f;border-radius:0;color:#09090f;background:var(--arcade-yellow);box-shadow:4px 4px 0 #a42b42}
+.app-menu .app-menu-foot .app-confirm-action:hover{background:#ffe678;box-shadow:6px 5px 0 #c1334e}
+.app-menu .app-pane > h3{color:var(--arcade-white);font-weight:950;letter-spacing:.03em}
+.app-menu .app-setting-row{border-bottom-color:#493747}
+.app-menu .app-setting-row strong{color:var(--arcade-white)}
+.app-menu .app-setting-row p,.app-menu .app-setting-row small{color:#bdacbf}
+.app-menu .app-setting-row button{border-radius:0;border-color:#685363;background:#241b2b;color:var(--arcade-white)}
+.app-menu .app-setting-row button.on,.app-menu .app-setting-row button[aria-pressed=true]{border-color:#f4d756;background:#39301c;color:#ffeb94}
+.app-menu .app-pane .panel:not(#fighterSelect){border-color:#53404e;border-radius:0;background:#19141e}
+.app-menu input{border-color:#6b5261;border-radius:0;background:#0e0b12;color:var(--arcade-white)}
+.app-menu .secondary,.app-menu .ghost,.app-menu .small-btn{border-radius:0;border-color:#745263;background:#271b29;color:var(--arcade-white);box-shadow:2px 2px 0 #000}
+.app-menu .primary,.app-menu .main-btn{border-radius:0;border-color:#ff9caf;background:var(--arcade-red);color:white;box-shadow:3px 3px 0 #000}
+.app-menu a:focus-visible,.app-menu button:focus-visible,.app-menu input:focus-visible,.app-menu summary:focus-visible{outline:3px solid var(--arcade-yellow);outline-offset:4px}
+
+/* Home is a whole scene rather than another tab in the previous dashboard. */
+.app-menu[data-panel="home"]{
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  height:100dvh;
+  max-height:100dvh;
+  max-width:none;
+  margin:0;
+  padding:0;
+  border:0;
+  border-radius:0;
+  overflow:hidden;
+  background:var(--arcade-black);
+  box-shadow:none;
+}
+.app-menu[data-panel="home"]::backdrop{background:var(--arcade-black);backdrop-filter:none}
+.app-menu[data-panel="home"][open]{animation:arcade-scene-in .28s ease-out both}
+.app-menu[data-panel="home"] .app-menu-frame{background:var(--arcade-black)}
+.app-menu[data-panel="home"] .app-menu-head,
+.app-menu[data-panel="home"] .app-tabs,
+.app-menu[data-panel="home"] .app-menu-foot{display:none}
+.app-menu[data-panel="home"] .app-menu-body{padding:0;overflow:hidden;scroll-padding:0}
+.app-menu[data-panel="home"] .app-pane[data-pane="home"]{height:100%;min-height:0;animation:none}
+.arcade-home{
+  position:relative;
+  isolation:isolate;
+  display:grid;
+  grid-template-columns:minmax(0,1.16fr) minmax(0,1fr);
+  grid-template-rows:minmax(0,1fr);
+  align-items:stretch;
+  gap:0;
+  min-height:100%;
+  height:100%;
+  overflow:hidden;
+  background:var(--arcade-black);
+}
+.arcade-home::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:0;
+  background:var(--arcade-white);
+  clip-path:polygon(0 0,59% 0,49% 100%,0 100%);
+}
+.arcade-home::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:0;
+  background:repeating-linear-gradient(117deg,transparent 0 13px,#ffffff05 13px 14px,transparent 14px 32px);
+  pointer-events:none;
+}
+.arcade-keyart{
+  position:relative;
+  min-width:0;
+  min-height:0;
+  padding:clamp(27px,4.5vh,58px) 0 0 clamp(28px,4.7vw,90px);
+  isolation:isolate;
+}
+.arcade-keyart::before{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:29% -8% 4% -4%;
+  background:var(--arcade-red);
+  clip-path:polygon(0 24%,100% 0,90% 79%,0 100%);
+}
+.arcade-keyart::after{
+  content:"";
+  position:absolute;
+  z-index:0;
+  inset:0 -4% 3% 0;
+  background-image:radial-gradient(#09090f24 1.5px,transparent 1.5px),repeating-conic-gradient(from 247deg at 100% 55%,transparent 0deg 4deg,#09090f14 4deg 4.3deg,transparent 4.3deg 11deg);
+  background-size:8px 8px,100% 100%;
+  mask-image:linear-gradient(180deg,transparent 0%,#000 25%,#000 95%,transparent);
+  pointer-events:none;
+}
+.arcade-edition{
+  position:relative;
+  z-index:3;
+  display:inline-block;
+  margin:0 0 clamp(12px,2vh,25px);
+  padding:6px 12px;
+  color:var(--arcade-white);
+  background:var(--arcade-black);
+  font:800 clamp(9px,.8vw,13px)/1.3 ui-monospace,monospace;
+  letter-spacing:.18em;
+  box-shadow:4px 4px 0 var(--arcade-yellow);
+  transform:rotate(-2deg);
+}
+.arcade-wordmark{
+  position:relative;
+  z-index:3;
+  width:max-content;
+  max-width:100%;
+  margin:0;
+  font:900 clamp(62px,7.1vw,145px)/.83 var(--arcade-heading);
+  letter-spacing:-.055em;
+  transform:rotate(-4deg);
+  transform-origin:left center;
+  text-transform:uppercase;
+}
+.arcade-wordmark span{display:block}
+.arcade-wordmark .wordmark-big{color:var(--arcade-black);text-shadow:3px 3px 0 #fff}
+.arcade-wordmark .wordmark-real{
+  margin-top:6px;
+  color:var(--arcade-red);
+  -webkit-text-stroke:1px var(--arcade-black);
+  paint-order:stroke fill;
+  text-shadow:4px 5px 0 var(--arcade-black);
+}
+.arcade-subtitle{
+  position:relative;
+  z-index:3;
+  display:inline-block;
+  margin:clamp(14px,2vh,24px) 0 0;
+  padding:2px 11px 4px;
+  color:var(--arcade-black);
+  background:var(--arcade-yellow);
+  font-size:clamp(19px,2.1vw,38px);
+  font-weight:1000;
+  line-height:1.25;
+  letter-spacing:.16em;
+  box-shadow:4px 4px 0 var(--arcade-black);
+  transform:rotate(-4deg);
+}
+.arcade-hero{
+  position:absolute;
+  z-index:2;
+  inset:33% -4% 6% -2%;
+  display:block;
+  width:106%;
+  height:61%;
+  max-width:none;
+  object-fit:contain;
+  object-position:center bottom;
+  filter:drop-shadow(5px 7px 0 #09090f);
+  transform-origin:50% 90%;
+  animation:arcade-heroes-in .48s cubic-bezier(.18,.8,.24,1) both;
+  pointer-events:none;
+}
+.arcade-hero-caption{
+  position:absolute;
+  z-index:4;
+  left:clamp(22px,3.8vw,72px);
+  bottom:clamp(57px,8vh,100px);
+  max-width:62%;
+  padding:10px 16px 12px;
+  color:var(--arcade-white);
+  background:var(--arcade-black);
+  border:2px solid var(--arcade-white);
+  box-shadow:5px 5px 0 var(--arcade-black);
+  transform:rotate(-5deg);
+}
+.arcade-hero-caption small{display:block;color:var(--arcade-yellow);font:800 clamp(8px,.75vw,12px)/1.4 ui-monospace,monospace;letter-spacing:.14em}
+.arcade-hero-caption strong{display:block;margin-top:2px;font-size:clamp(13px,1.45vw,25px);font-weight:950;letter-spacing:.04em;line-height:1.4}
+.arcade-stamp{
+  position:absolute;
+  z-index:5;
+  right:0;
+  bottom:clamp(61px,7vh,90px);
+  display:grid;
+  place-content:center;
+  width:clamp(80px,8.6vw,150px);
+  aspect-ratio:1;
+  padding:10px;
+  border:3px solid var(--arcade-black);
+  background:var(--arcade-yellow);
+  color:var(--arcade-black);
+  box-shadow:5px 5px 0 var(--arcade-black);
+  text-align:center;
+  font:900 clamp(10px,1vw,17px)/1.3 var(--arcade-heading);
+  letter-spacing:.04em;
+  transform:rotate(9deg);
+}
+.arcade-stamp strong{display:block;font-size:clamp(25px,2.6vw,47px);line-height:1}
+.arcade-stamp span,.arcade-stamp small{display:block}
+.arcade-ticker{
+  position:absolute;
+  z-index:5;
+  inset:auto -6% 0 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:20px;
+  min-height:40px;
+  padding:8px 20px;
+  border-top:3px solid var(--arcade-black);
+  color:var(--arcade-black);
+  background:var(--arcade-yellow);
+  font:900 clamp(9px,.88vw,14px)/1.2 ui-monospace,monospace;
+  letter-spacing:.1em;
+  white-space:nowrap;
+}
+.arcade-ticker::before,.arcade-ticker::after{content:"+";font:900 25px/1 var(--arcade-heading);color:var(--arcade-red)}
+.arcade-navigation{
+  position:relative;
+  z-index:6;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height:0;
+  min-width:0;
+  padding:clamp(24px,4.6vh,58px) clamp(24px,4.2vw,80px) clamp(24px,4.2vh,50px) clamp(31px,4vw,76px);
+  gap:clamp(12px,1.7vh,20px);
+}
+.arcade-nav-heading{position:relative;flex:0 0 auto;padding-left:17px;border-left:5px solid var(--arcade-red)}
+.arcade-nav-heading > small{display:block;margin-bottom:5px;color:var(--arcade-red);font:800 clamp(10px,.8vw,14px)/1.3 ui-monospace,monospace;letter-spacing:.23em}
+.arcade-nav-heading h2{margin:0;color:var(--arcade-white);font-size:clamp(24px,2.15vw,40px);font-weight:1000;letter-spacing:.035em;line-height:1.4}
+.arcade-options{display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(6,minmax(0,1fr));flex:1 1 0;min-height:0;max-height:650px;gap:clamp(7px,1.1vh,13px);padding:3px 10px 6px 0}
+.app-menu .arcade-option{
+  position:relative;
+  isolation:isolate;
+  display:flex;
+  align-items:center;
+  gap:clamp(13px,1.5vw,28px);
+  width:100%;
+  min-width:0;
+  min-height:55px;
+  padding:8px clamp(17px,1.9vw,35px);
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  color:var(--arcade-white);
+  cursor:pointer;
+  text-align:left;
+  text-decoration:none;
+  transform:translateX(0);
+  transition:transform .17s ease,color .17s ease;
+  -webkit-tap-highlight-color:transparent;
+}
+.arcade-option::before,.arcade-option::after{content:"";position:absolute;z-index:-1;inset:0;clip-path:polygon(3% 0,100% 0,97% 100%,0 100%);pointer-events:none}
+.arcade-option::before{background:#211c29;box-shadow:inset 0 1px #6e586b,inset 0 -1px #493b49;transition:background .17s ease}
+.arcade-option::after{z-index:-2;background:#000;transform:translate(4px,4px)}
+.arcade-option-number{flex:0 0 auto;min-width:1.28em;color:#62505f;font:900 italic clamp(27px,3vw,51px)/1 var(--arcade-heading);letter-spacing:-.06em;transition:color .17s ease,transform .17s ease}
+.arcade-option-copy{display:block;flex:1;min-width:0}
+.arcade-option-copy strong{display:block;font-size:clamp(16px,1.65vw,30px);font-weight:950;line-height:1.3;letter-spacing:.035em}
+.arcade-option-copy small{display:block;margin-top:3px;color:#b7a4b5;font:700 clamp(8px,.68vw,12px)/1.25 ui-monospace,monospace;letter-spacing:.17em}
+.arcade-option-arrow{flex:0 0 auto;color:#b38a9f;font-size:clamp(21px,2.1vw,36px);font-weight:750;line-height:1;transition:transform .17s ease,color .17s ease}
+.app-menu .arcade-option:hover{color:var(--arcade-white);transform:translateX(5px);text-decoration:none}
+.arcade-option:hover::before{background:#392234;box-shadow:inset 0 1px var(--arcade-red),inset 0 -1px var(--arcade-red)}
+.app-menu .arcade-option.is-selected,.app-menu .arcade-option[aria-current="true"]{color:var(--arcade-black);transform:translateX(9px)}
+.arcade-option.is-selected::before,.arcade-option[aria-current="true"]::before{background:var(--arcade-yellow);box-shadow:none}
+.arcade-option.is-selected::after,.arcade-option[aria-current="true"]::after{background:#b62642;transform:translate(5px,6px)}
+.arcade-option.is-selected .arcade-option-number,.arcade-option[aria-current="true"] .arcade-option-number{color:var(--arcade-black);transform:scale(1.06)}
+.arcade-option.is-selected .arcade-option-copy small,.arcade-option[aria-current="true"] .arcade-option-copy small{color:#5d4316}
+.arcade-option.is-selected .arcade-option-arrow,.arcade-option[aria-current="true"] .arcade-option-arrow{color:var(--arcade-black);transform:translateX(4px)}
+.app-menu .arcade-option:focus-visible{outline:3px solid var(--arcade-white);outline-offset:4px}
+.arcade-option.is-locked{cursor:not-allowed;opacity:.55}
+.arcade-nav-note{flex:0 0 auto;min-height:37px;margin:0;padding-left:4px;color:#baa9bd;font-size:clamp(10px,.82vw,14px);line-height:1.65}
+.arcade-nav-note strong{color:var(--arcade-white);font-weight:800}
+.arcade-controls{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border-top:1px solid #59404e;padding-top:clamp(12px,1.8vh,21px)}
+.arcade-control-hints,.arcade-key-hints{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;color:#c7b8c9;font-size:clamp(9px,.75vw,12px);line-height:1.5}
+.arcade-controls kbd{display:inline-block;min-width:23px;margin-right:4px;padding:3px 5px;border:1px solid #7f697d;border-bottom-width:3px;border-radius:0;background:#2c2330;color:var(--arcade-white);font:800 10px/1.2 ui-monospace,monospace;text-align:center}
+.app-menu .arcade-enter{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  min-height:44px;
+  min-width:120px;
+  padding:10px 18px;
+  border:2px solid var(--arcade-white);
+  border-radius:0;
+  color:var(--arcade-white);
+  background:var(--arcade-red);
+  box-shadow:4px 4px 0 #000;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:900;
+  line-height:1.3;
+  letter-spacing:.08em;
+  transition:transform .16s ease,background .16s ease;
+}
+.app-menu .arcade-enter:hover{background:#ff5e78;transform:translate(-1px,-2px)}
+.app-menu .arcade-enter:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
+.arcade-controls #appResume{min-height:44px;margin:0;border-radius:0;border-color:#8b6579;background:#251927;color:var(--arcade-white);font-size:11px;box-shadow:3px 3px 0 #000}
+
+@keyframes arcade-scene-in{from{opacity:0}to{opacity:1}}
+@keyframes arcade-heroes-in{from{opacity:0;transform:translate(-15px,10px) scale(.98)}to{opacity:1;transform:translate(0,0) scale(1)}}
+
+@media(min-width:1600px){
+  .arcade-navigation{padding-left:4.9vw;padding-right:5.2vw}
+  .arcade-nav-heading{margin-bottom:4px}
+}
+@media(max-width:1150px) and (min-width:701px){
+  .arcade-home{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .arcade-home::before{clip-path:polygon(0 0,58% 0,45% 100%,0 100%)}
+  .arcade-keyart{padding-left:30px}
+  .arcade-wordmark{font-size:7vw}
+  .arcade-navigation{padding-left:25px;padding-right:27px}
+  .arcade-hero{inset:35% -10% 7% -8%;width:118%;height:58%}
+  .arcade-stamp{right:-15px}
+  .arcade-controls{gap:8px}
+  .arcade-control-hints,.arcade-key-hints{gap:6px}
+}
+@media(max-height:720px) and (min-width:701px){
+  .arcade-navigation{padding-block:23px;gap:10px}
+  .arcade-nav-heading h2{font-size:27px}
+  .arcade-nav-heading > small{font-size:10px;margin-bottom:2px}
+  .arcade-options{gap:7px}
+  .app-menu .arcade-option{min-height:50px;padding-block:7px}
+  .arcade-option-copy strong{font-size:20px}
+  .arcade-option-copy small{font-size:8px;margin-top:2px}
+  .arcade-option-number{font-size:33px}
+  .arcade-nav-note{font-size:10px;min-height:30px}
+  .arcade-controls{padding-top:10px}
+  .arcade-keyart{padding-top:29px}
+  .arcade-wordmark{font-size:clamp(60px,7vw,98px)}
+  .arcade-edition{margin-bottom:12px}
+  .arcade-subtitle{font-size:24px;margin-top:15px}
+  .arcade-hero{inset:34% -6% 7% -5%;width:111%;height:59%}
+  .arcade-hero-caption{bottom:58px;padding:7px 11px}
+  .arcade-hero-caption strong{font-size:17px}
+  .arcade-stamp{width:88px;bottom:56px}
+}
+@media(max-width:700px){
+  .app-menu[data-panel="home"]{overflow:auto;overscroll-behavior:contain}
+  .app-menu[data-panel="home"] .app-menu-body{overflow:auto}
+  .app-menu[data-panel="home"] .app-pane[data-pane="home"]{height:auto;min-height:100%}
+  .arcade-home{grid-template-columns:minmax(0,1fr);grid-template-rows:280px auto;height:auto;min-height:100dvh;overflow:hidden}
+  .arcade-home::before{clip-path:polygon(0 0,100% 0,100% 245px,0 306px)}
+  .arcade-keyart{min-height:280px;padding:22px 18px 0}
+  .arcade-keyart::before{inset:65px -20px -5px 4px;clip-path:polygon(0 34%,100% 0,100% 86%,0 100%)}
+  .arcade-keyart::after{inset:0}
+  .arcade-edition{margin-bottom:12px;padding:4px 7px;font-size:7px;letter-spacing:.08em;box-shadow:3px 3px 0 var(--arcade-yellow)}
+  .arcade-wordmark{font-size:clamp(39px,11vw,68px);line-height:.83}
+  .arcade-wordmark .wordmark-real{margin-top:4px;text-shadow:3px 3px 0 var(--arcade-black)}
+  .arcade-subtitle{font-size:16px;margin-top:10px;padding:2px 6px;letter-spacing:.09em;box-shadow:3px 3px 0 var(--arcade-black)}
+  .arcade-hero{inset:18px -32px 12px auto;object-position:center bottom;width:78%;height:260px;filter:drop-shadow(3px 4px 0 #09090f)}
+  .arcade-hero-caption{left:17px;bottom:29px;max-width:69%;padding:5px 9px;box-shadow:3px 3px 0 var(--arcade-black);border-width:1px}
+  .arcade-hero-caption small{font-size:6px;letter-spacing:.1em}
+  .arcade-hero-caption strong{font-size:11px;line-height:1.3}
+  .arcade-stamp{right:20px;bottom:20px;width:57px;padding:5px;border-width:2px;box-shadow:3px 3px 0 var(--arcade-black);font-size:7px}
+  .arcade-stamp strong{font-size:21px}
+  .arcade-ticker{display:none}
+  .arcade-navigation{padding:19px 24px 25px;gap:12px;justify-content:flex-start}
+  .arcade-nav-heading{padding-left:10px;border-left-width:4px}
+  .arcade-nav-heading > small{font-size:8px;letter-spacing:.2em;margin-bottom:2px}
+  .arcade-nav-heading h2{font-size:21px}
+  .arcade-options{flex:none;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));max-height:none;gap:8px 9px;padding-right:8px}
+  .app-menu .arcade-option{min-height:64px;padding:8px 11px;gap:8px}
+  .arcade-option-number{font-size:26px}
+  .arcade-option-copy strong{font-size:15px;letter-spacing:0}
+  .arcade-option-copy small{font-size:6px;margin-top:3px;letter-spacing:.05em}
+  .arcade-option-arrow{display:none}
+  .app-menu .arcade-option.is-selected,.app-menu .arcade-option[aria-current="true"]{transform:translateX(4px)}
+  .arcade-nav-note{font-size:10px;min-height:0;line-height:1.7}
+  .arcade-controls{padding-top:12px;gap:10px}
+  .arcade-control-hints,.arcade-key-hints{font-size:9px;gap:7px}
+  .arcade-controls kbd{font-size:9px;min-width:20px;padding:2px 4px}
+  .app-menu .arcade-enter{min-width:106px;padding:8px 14px;font-size:12px}
+}
+@media(max-width:370px){
+  .arcade-home{grid-template-rows:250px auto}
+  .arcade-keyart{min-height:250px}
+  .arcade-home::before{clip-path:polygon(0 0,100% 0,100% 216px,0 270px)}
+  .arcade-hero{height:235px;width:78%;right:-30px}
+  .arcade-wordmark{font-size:39px}
+  .arcade-hero-caption{bottom:25px}
+  .arcade-hero-caption small{display:none}
+  .arcade-stamp{right:12px;width:53px}
+  .arcade-navigation{padding-inline:18px}
+  .arcade-option-copy strong{font-size:16px}
+}
+@media(max-height:550px) and (orientation:landscape){
+  .app-menu[data-panel="home"] .app-menu-body{overflow:auto}
+  .app-menu[data-panel="home"] .app-pane[data-pane="home"]{height:100%;min-height:340px}
+  .arcade-home{grid-template-columns:minmax(0,.94fr) minmax(0,1fr);grid-template-rows:minmax(0,1fr);min-height:340px;height:100%}
+  .arcade-home::before{clip-path:polygon(0 0,58% 0,45% 100%,0 100%)}
+  .arcade-keyart{min-height:0;padding:17px 0 0 24px}
+  .arcade-keyart::before{inset:26% -8% 3% -4%;clip-path:polygon(0 24%,100% 0,90% 79%,0 100%)}
+  .arcade-edition{margin-bottom:10px;padding:3px 7px;font-size:6px;letter-spacing:.13em}
+  .arcade-wordmark{font-size:clamp(42px,6.9vw,68px);line-height:.82}
+  .arcade-subtitle{font-size:15px;margin-top:10px;padding:2px 6px}
+  .arcade-hero{inset:30% -9% 7% -7%;height:63%;width:116%}
+  .arcade-hero-caption{left:21px;bottom:34px;max-width:66%;padding:5px 8px;border-width:1px;box-shadow:3px 3px 0 var(--arcade-black)}
+  .arcade-hero-caption small{font-size:6px}
+  .arcade-hero-caption strong{font-size:10px;line-height:1.3}
+  .arcade-stamp{right:-4px;bottom:31px;width:58px;padding:4px;border-width:2px;box-shadow:3px 3px 0 var(--arcade-black);font-size:6px}
+  .arcade-stamp strong{font-size:22px}
+  .arcade-ticker{display:flex;min-height:23px;padding:4px 10px;gap:10px;font-size:6px;border-top-width:2px}
+  .arcade-ticker::before,.arcade-ticker::after{font-size:16px}
+  .arcade-navigation{padding:14px 25px 13px 21px;gap:7px}
+  .arcade-nav-heading{padding-left:9px;border-left-width:3px;background:var(--arcade-black)}
+  .arcade-nav-heading > small{font-size:7px;line-height:1;margin-bottom:3px}
+  .arcade-nav-heading h2{font-size:17px;line-height:1.3}
+  .arcade-options{flex:1 1 0;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:7px 8px;padding:1px 7px 4px 0;max-height:none}
+  .app-menu .arcade-option{min-height:47px;padding:6px 10px;gap:8px}
+  .arcade-option-number{font-size:24px}
+  .arcade-option-copy strong{font-size:12px;letter-spacing:0;line-height:1.3}
+  .arcade-option-copy small{font-size:6px;letter-spacing:.02em;line-height:1.2;margin-top:3px}
+  .arcade-option-arrow{display:none}
+  .app-menu .arcade-option.is-selected,.app-menu .arcade-option[aria-current="true"]{transform:translateX(4px)}
+  .arcade-option.is-selected::after,.arcade-option[aria-current="true"]::after{transform:translate(3px,3px)}
+  .arcade-nav-note{min-height:0;font-size:8px;line-height:1.45}
+  .arcade-controls{padding-top:7px;gap:7px;flex-wrap:nowrap}
+  .arcade-control-hints,.arcade-key-hints{gap:4px;font-size:7px}
+  .arcade-controls kbd{font-size:7px;min-width:17px;padding:2px 3px;margin-right:1px;border-bottom-width:2px}
+  .app-menu .arcade-enter{min-height:44px;min-width:86px;padding:7px 9px;gap:5px;font-size:10px;border-width:1px;box-shadow:3px 3px 0 #000}
+  .arcade-controls #appResume{font-size:8px;min-height:44px;padding:6px}
+}
+@media(prefers-reduced-motion:reduce){
+  .arcade-home *,.arcade-home *::before,.arcade-home *::after{animation:none!important;transition:none!important}
+}

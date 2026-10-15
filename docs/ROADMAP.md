@@ -13,6 +13,15 @@
 - [x] 8.9.7: live cancel/energy hints and actual skill hit receipts; supers verified in both rulesets. Continue tutorials for anti-air and team mechanics.
 - 8.9: same-frame contact trades and combo damage scaling implemented in both rulesets with rollback replay tests. Next: balance the four characters with matchup simulations, real matches and aggregate telemetry (opt-in where appropriate).
 
+## Arcade 2.0 — staged upgrade
+- Phase 0 inventory: completed against 8.9.9; see local audit report.
+- [x] Phase 1 (8.10.0): manga main menu, shared visual tokens, formal client adapters, UI navigation and strict save validation. Preserve all existing modes and Fight Fund removal.
+- [ ] Phase 2: independent Character Select with actual character/skill data and consistent art.
+- [ ] Phase 3: mission registry/progress migration, true stage selection and server-owned online stage settings.
+- [ ] Phase 4: resource preparation, VS, pause/results and confirmed next/retry flow.
+- [ ] Phase 5: unified audio/input, gamepads, responsive/performance polish.
+- Stop after each phase for user review; do not silently start the next phase.
+
 ## P2 — polish and growth
 - 8.9: phase-based skill keyframes, state-based jump/dash/hurt and hitstop holds implemented with existing atlases. Next: hand-drawn in-between/contact frames and animation review; licensed art audit and UI performance budgets.
 - 8.9.2: Azhi has 21 transparent video-referenced key poses and reproducible atlas packing. Next: add transition drawings between key poses and review animation in real matches.
