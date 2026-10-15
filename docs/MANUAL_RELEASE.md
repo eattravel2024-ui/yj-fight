@@ -2,9 +2,27 @@
 
 目前版本 **8.11.2**：場景內街機 HUD、背景降噪、能量／技能提示與真實回合演出；依要求移除獨立的經典冒險 6.8。街機、練習、1v1、2v2、觀戰及存檔保留。本次未連線或部署正式 VPS。
 
-## 8.11.2：下載來源包部署（本次尚未推送 GitHub）
+## 8.11.2：從 GitHub 固定檢查點更新
 
-本機檢查點為 `checkpoint-combat-hud-8.11.2`。附件要求不要推送遠端，因此 GitHub 目前仍是 8.11.1；直接 git pull 不會取得本次改版。請先下載 `azhi-fighting-8.11.2.tar.gz`，在自己的電腦上傳：
+使用者已授權發布 8.11.2。功能提交 `1fd8aeb`，固定標籤 `checkpoint-combat-hud-8.11.2`，開發分支 `feat/arcade-phase1`；未合併 main，也不自動部署。
+
+自行登入原 VPS，在既有來源資料夾執行（需 Node.js 20+ 與既有 azhi71 安裝）：
+
+```bash
+set -euo pipefail
+cd ~/azhi-update.lvccoe
+git fetch origin tag checkpoint-combat-hud-8.11.2
+git switch --detach checkpoint-combat-hud-8.11.2
+npm ci --ignore-scripts --no-fund
+sudo bash deploy/upgrade-ubuntu.sh
+curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+```
+
+明確抓取標籤可避開舊資料夾只追蹤單一分支的限制；detached HEAD 是固定版本的正常狀態。若有本機修改造成切換失敗，先保存修改，不使用強制覆蓋或 reset --hard。健康版本應為 **8.11.2**，完成後強制重新整理。
+
+## 來源包替代流程
+
+如不使用 Git，可先下載 `azhi-fighting-8.11.2.tar.gz`，在自己的電腦上傳：
 
 ```bash
 scp ~/Downloads/azhi-fighting-8.11.2.tar.gz YOUR_USER@YOUR_VPS_IP:/tmp/
