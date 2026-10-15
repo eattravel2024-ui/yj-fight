@@ -8,6 +8,7 @@ const os=require('node:os');
 const path=require('node:path');
 const {spawnSync}=require('node:child_process');
 const rollbackSource=fs.readFileSync(path.join(__dirname,'../deploy/rollback-ubuntu.sh'),'utf8');
+const releaseVersion=require('../package.json').version;
 const upgradeSource=fs.readFileSync(path.join(__dirname,'../deploy/upgrade-ubuntu.sh'),'utf8');
 const quote=value=>"'"+value.replaceAll("'","'\\''")+"'";
 
@@ -24,7 +25,7 @@ function fixture(t,scenario='success'){
  fs.writeFileSync(path.join(root,'azhi71.service'),'fixture service');
  const required=['public/index.html','public/team.html','public/team-core.js','public/team.js','public/engine/frame-data.js','public/rollback.js','public/engine/commands.js','public/engine/boxes.js','public/sprites/manifest.json','public/skill-vfx.js','public/legacy.js','test/fixture.test.js','README.md','server.js'];
  for(const file of required){const filename=path.join(src,file);fs.mkdirSync(path.dirname(filename),{recursive:true});fs.writeFileSync(filename,'new fixture content');}
- fs.writeFileSync(path.join(src,'package.json'),JSON.stringify({version:'8.7.0'}));
+ fs.writeFileSync(path.join(src,'package.json'),JSON.stringify({version:releaseVersion}));
  fs.writeFileSync(path.join(src,'package-lock.json'),'fixture reviewed lockfile');
  function stub(name,body){fs.writeFileSync(path.join(bin,name),'#!/usr/bin/env bash\nset -euo pipefail\n'+body+'\n',{mode:0o755});}
  stub('id','exit 0');stub('chown','exit 0');stub('sleep','exit 0');
@@ -38,7 +39,7 @@ fi`);
 if [[ "$1" == start && "$TEST_SCENARIO" == start-failure && ! -e "$TEST_ROOT/failed-start" ]];then
  touch "$TEST_ROOT/failed-start";exit 1
 fi`);
- stub('curl','if [[ "$TEST_SCENARIO" == health-failure ]];then printf \'%s\\n\' \'{"ok":true,"version":"wrong"}\';else printf \'%s\\n\' \'{"ok":true,"version":"8.7.0"}\';fi');
+ stub('curl',`if [[ "$TEST_SCENARIO" == health-failure ]];then printf \'%s\\n\' \'{"ok":true,"version":"wrong"}\';else printf \'%s\\n\' \'{"ok":true,"version":"${releaseVersion}"}\';fi`);
  stub('mv',`if [[ "$TEST_SCENARIO" == rename-failure && "$1" == "$TEST_ROOT"/live.next.* ]];then exit 73;fi
 exec /bin/mv "$@"`);
  let source=upgradeSource
@@ -70,7 +71,7 @@ deployTest('deployment --check leaves live app, service, log and lock untouched'
 
 deployTest('deployment stages complete public assets and frozen runtime dependencies before replacing live app',t=>{
  const f=fixture(t);assert.equal(f.result.status,0,f.result.stderr);
- assert.equal(JSON.parse(fs.readFileSync(path.join(f.app,'package.json'))).version,'8.7.0');
+ assert.equal(JSON.parse(fs.readFileSync(path.join(f.app,'package.json'))).version,releaseVersion);
  for(const file of ['public/skill-vfx.js','public/legacy.js','package-lock.json','node_modules/ws'])assert.equal(fs.existsSync(path.join(f.app,file)),true,file);
  const backups=f.files().filter(name=>name.startsWith('live.backup.'));assert.equal(backups.length,1);
  assert.equal(fs.readFileSync(path.join(f.root,backups[0],'server.js'),'utf8'),'old-server');
@@ -116,5 +117,5 @@ deployTest('manual rollback refuses the shared lock while another update holds i
  const result=spawnSync('flock',[path.join(f.root,'upgrade.lock'),'bash',script],{env:f.env,input:'YES\n',encoding:'utf8',timeout:5000});
  assert.notEqual(result.status,0);assert.match(result.stdout,/另一個更新或回滾/);
  assert.equal(f.calls('service.calls'),before);
- assert.equal(JSON.parse(fs.readFileSync(path.join(f.app,'package.json'))).version,'8.7.0');
+ assert.equal(JSON.parse(fs.readFileSync(path.join(f.app,'package.json'))).version,releaseVersion);
 });

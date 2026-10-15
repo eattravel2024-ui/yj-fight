@@ -10,3 +10,12 @@
 @media(hover:none){.touch{display:grid}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}.notice.show{opacity:1}.char-card:hover:not(:disabled){transform:none}}
 /* Keep the keyboard skip link outside both the visual layout and full-page captures. */
 .skip-link:not(:focus){clip-path:inset(50%);width:1px;height:1px;overflow:hidden;padding:0;white-space:nowrap}
+/* 8.8: original fight-poster finish, keeping every existing mode and control. */
+:root{--gold:#ffb877;--cyan:#8de2e4}
+.intro h1 em,.hero h1 em{color:#ffb877;text-shadow:3px 3px 0 #4b2636}
+.brand-icon{background:#ffb877;box-shadow:5px 5px 0 #c46a65}
+.intro,.hero{background:linear-gradient(108deg,#20192b88,transparent 68%);padding-left:18px;border-left:3px solid #cf766a;margin-top:18px}
+.arena,.board{border-color:#735763;box-shadow:0 18px 60px #03050c77}
+.skill-button strong{white-space:normal;line-height:1.45}.skill-button{min-height:70px}
+.section-kicker{color:#dba58f}.mode.active{border-color:#df987d;background:linear-gradient(120deg,#3c2932,#24232b)}
+@media(max-width:600px){.intro,.hero{padding-left:12px}.skill-button{min-height:70px}.skill-button strong{font-size:10px}.skill-button small{font-size:8px}}

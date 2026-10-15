@@ -39,7 +39,7 @@ function roomRoster(room){all(room,{type:'roster',mode:room.mode,needed:room.max
 function begin(room){
  const sorted=[...room.players].sort((a,b)=>a.slot-b.slot);room.rematchVotes=new Set();room.completed=false;
  room.matchId=crypto.randomBytes(8).toString('hex');room.finishingSince=null;room.playerEventBuffer=[];room.watchEventBuffer=[];
- const opts={stage:['night','garage','harbor'][crypto.randomInt(3)],seed:crypto.randomInt(1,2**31)};
+ const opts={introFrames:90,stage:['night','garage','harbor'][crypto.randomInt(3)],seed:crypto.randomInt(1,2**31)};
  room.session=new Rollback.Session(room.mode==='team'?Team.create(sorted.map(p=>p.char),opts):Combat.create(sorted[0].char,sorted[1].char,opts));
  room.game=room.session.game;
  roomRoster(room);

@@ -11,7 +11,7 @@
 - Unified lobby: select 1v1/2v2, name room, join, role selection, spectators, ready and rematch.
 - Mac keyboard focus and mobile virtual controls customization; accessible touch areas.
 - Practice/tutorial: input buffering, cancel windows, hitstop, combos, anti-air and team mechanics.
-- Balance the five characters with reproducible combat simulations and match telemetry (aggregate, opt-in where appropriate).
+- Balance the four characters with reproducible combat simulations and match telemetry (aggregate, opt-in where appropriate).
 
 ## P2 — polish and growth
 - Character animation review, licensed art audit, UI performance budgets.

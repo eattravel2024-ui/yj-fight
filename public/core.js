@@ -9,14 +9,16 @@ const AI=typeof require==='function'&&typeof module==='object'?require('./engine
 function moveFor(p,name){const base=Object.hasOwn(MOVE,name)?MOVE[name]:null;if(!base)return null;const cid=typeof p==='string'?p:p?.char;const mod=Object.hasOwn(CHAR,cid)?CHAR[cid].moves?.[name]:null;if(!mod)return base;const m={...base,...mod};m.start=m.startup;m.cancelStart=m.startup+Math.max(1,Math.floor(m.active*.45));m.cancelEnd=m.startup+m.active+Math.max(2,Math.floor(m.recovery*.36));m.cancelable=true;m.cancelWindow=[m.cancelStart,m.cancelEnd];return m;}
 const ATTACKS=['light','heavy','kick','low','upper','throw','special','super'];
 const bound=(v,a,b)=>Math.max(a,Math.min(b,v));
-function fighter(char,slot){char=Object.hasOwn(CHAR,char)?char:'azhi';return {slot,char,x:slot?686:274,y:0,vy:0,face:slot?-1:1,hp:100,meter:30,wins:0,stun:0,guard:false,crouch:false,move:null,combo:0,lastHit:-999,flash:0,dash:0,dashCd:0,inputs:{},prev:{},buffer:[],ko:false,chain:0,airHits:0,cpuWait:0,motion:[],lastCommand:-100,guardFrames:0,armorTimer:0,armorCharges:0}}
-function create(a='azhi',b='winnie',opts={}){const m={players:[fighter(a,0),fighter(b,1)],tick:0,round:1,time:75,status:'playing',pause:0,events:[],difficulty:opts.difficulty??1,stage:opts.stage||'night',seed:opts.seed||137,hitstop:0,projectiles:[],practice:!!opts.practice};if(opts.practice){m.players[0].meter=100;m.players[1].meter=100;}return m;}
+function fighter(char,slot){char=Object.hasOwn(CHAR,char)?char:'azhi';return {slot,char,x:slot?686:274,y:0,vy:0,face:slot?-1:1,hp:100,meter:30,wins:0,stun:0,guard:false,crouch:false,move:null,combo:0,lastHit:-999,flash:0,dash:0,dashCd:0,inputs:{},prev:{},buffer:[],ko:false,chain:0,airHits:0,cpuWait:0,motion:[],lastCommand:-100,guardFrames:0,lastDashCommand:-100,armorTimer:0,armorCharges:0}}
+function create(a='azhi',b='winnie',opts={}){const m={players:[fighter(a,0),fighter(b,1)],tick:0,round:1,time:75,status:'playing',pause:0,events:[],difficulty:opts.difficulty??1,stage:opts.stage||'night',seed:opts.seed||137,hitstop:0,projectiles:[],practice:!!opts.practice,introDuration:introLength(opts.introFrames),introFrames:introLength(opts.introFrames)};if(opts.practice){m.players[0].meter=100;m.players[1].meter=100;}return m;}
+function introLength(value){return Number.isSafeInteger(value)?bound(value,0,180):0}
+function entranceStep(m){if(!(m.introFrames>0))return false;m.introFrames--;for(const p of m.players){p.inputs={};p.prev={};p.buffer=[];p.motion=[];}return true}
 function rng(m){m.seed=(m.seed*1664525+1013904223)>>>0;return m.seed/4294967296}
-function reset(m){m.tick=0;m.time=75;m.status='playing';m.pause=0;m.hitstop=0;m.events=[];m.projectiles=[];m.players=m.players.map(p=>{const f=fighter(p.char,p.slot);f.wins=p.wins;return f});m.events.push({kind:'text',text:'ROUND '+m.round})}
+function reset(m){m.introFrames=m.introDuration||0;m.tick=0;m.time=75;m.status='playing';m.pause=0;m.hitstop=0;m.events=[];m.projectiles=[];m.players=m.players.map(p=>{const f=fighter(p.char,p.slot);f.wins=p.wins;return f});m.events.push({kind:'text',text:'ROUND '+m.round})}
 function input(m,slot,keys){
- const p=m.players[slot];if(!p)return;
+ const p=m.players[slot];if(!p||m.introFrames>0)return;
  const k={};for(const key of ['left','right','up','down','guard','dash',...ATTACKS])k[key]=keys?.[key]===true;
- Commands.record(p,k,m.tick);
+ Commands.record(p,k,m.tick);if(Commands.doubleTap(p,m.tick))k.dash=true;
  const pulses=Array.isArray(keys?.pulses)?keys.pulses.filter(x=>ATTACKS.includes(x)).slice(0,6):[];
  for(const key of ATTACKS){if(k[key]&&!p.inputs[key]&&!pulses.includes(key))pulses.push(key)}
  for(const original of pulses){let key=original;
@@ -47,6 +49,7 @@ function prepareFighter(p,tick){
 }
 function overlap(p,foe,d){return Boxes.hits(p,foe,d)}
 function hit(m,p,foe){const a=p.move;if(!a||a.hit)return;const d=moveFor(p,a.name);if(!overlap(p,foe,d))return;
+ if(d.level==='throw'&&(p.y>0||foe.y>8))return;
  if(foe.dash>0&&foe.dash<=6)return;
  const blocking=foe.guard&&d.level!=='throw'&&(d.level==='mid'||(d.level==='low'&&foe.crouch)||(d.level==='high'&&!foe.crouch));
  const counter=!blocking&&!!foe.move&&foe.move.frame<moveFor(foe,foe.move.name).start;
@@ -128,6 +131,7 @@ function canChain(from,next){
 }
 
 function step(m){if(m.status==='between'){if(--m.pause<=0){m.round++;reset(m)}return}if(m.status!=='playing')return;
+ if(entranceStep(m))return;
  // Hitstop freezes the scene, but input() still buffers new key edges. This allows responsive hit confirms.
  if(m.hitstop>0){m.hitstop--;return;}
  m.tick++;m.time-=1/FPS;const [a,b]=m.players;a.face=a.x<=b.x?1:-1;b.face=-a.face;
@@ -161,7 +165,7 @@ function step(m){if(m.status==='between'){if(--m.pause<=0){m.round++;reset(m)}re
  resolvePushboxes(a,b);
  if(m.time<=0||m.players.some(p=>p.hp<=0))endRound(m);
 }
-function serialize(m){return {type:'state',status:m.status,round:m.round,time:Math.max(0,Math.ceil(m.time)),tick:m.tick,serverHz:FPS,stage:m.stage,difficulty:m.difficulty,winner:m.winner??null,hitstop:m.hitstop,projectiles:m.projectiles.map(p=>({...p})),players:m.players.map(p=>({slot:p.slot,char:p.char,x:p.x,y:p.y,hp:p.hp,meter:p.meter,face:p.face,guard:p.guard,crouch:p.crouch,stun:p.stun,move:p.move?{name:p.move.name,frame:p.move.frame,hit:p.move.hit}:null,flash:p.flash,combo:p.combo,dash:p.dash,wins:p.wins,vy:p.vy,armorTimer:p.armorTimer,armorCharges:p.armorCharges})),events:m.events.splice(0,40)}}
+function serialize(m){return {type:'state',status:m.status,round:m.round,time:Math.max(0,Math.ceil(m.time)),tick:m.tick,introDuration:m.introDuration||0,introFrames:m.introFrames||0,serverHz:FPS,stage:m.stage,difficulty:m.difficulty,winner:m.winner??null,hitstop:m.hitstop,projectiles:m.projectiles.map(p=>({...p})),players:m.players.map(p=>({slot:p.slot,char:p.char,x:p.x,y:p.y,hp:p.hp,meter:p.meter,face:p.face,guard:p.guard,crouch:p.crouch,stun:p.stun,move:p.move?{name:p.move.name,frame:p.move.frame,hit:p.move.hit}:null,flash:p.flash,combo:p.combo,dash:p.dash,wins:p.wins,vy:p.vy,armorTimer:p.armorTimer,armorCharges:p.armorCharges})),events:m.events.splice(0,40)}}
 function cpu(m,slot,skill=1,passive=false){
  const p=m.players[slot],foe=m.players[1-slot];if(passive){input(m,slot,{});return}
  if(p.cpuWait>0){p.cpuWait--;input(m,slot,p.cpuKeys||{});return}
@@ -170,5 +174,5 @@ function cpu(m,slot,skill=1,passive=false){
  p.cpuKeys=AI.decide(p,foe,()=>rng(m),skill);
  input(m,slot,p.cpuKeys);
 }
-return {FPS,INPUT_BUFFER,CHAR,MOVE,moveFor,ATTACKS,applyPushback,resolvePushboxes,create,reset,input,step,serialize,cpu,overlap,canChain,canCancel,startMove,bufferedMove,prepareFighter,spawnSpecialProjectile,Boxes,Commands,AI};
+return {FPS,INPUT_BUFFER,CHAR,MOVE,moveFor,ATTACKS,applyPushback,resolvePushboxes,create,reset,input,step,serialize,cpu,overlap,canChain,canCancel,startMove,bufferedMove,prepareFighter,spawnSpecialProjectile,introLength,entranceStep,Boxes,Commands,AI};
 });

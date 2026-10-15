@@ -4,8 +4,8 @@
 const TAU=Math.PI*2;
 const STYLES=Object.freeze({
  winnie:Object.freeze({style:'shockwave',color:'#ffc44e',light:'#fff1b0',count:18}),
- sezi:Object.freeze({style:'spin',color:'#78e7f2',light:'#f4fcff',count:16}),
- gambler:Object.freeze({style:'cards',color:'#b795ff',light:'#f9e5ff',count:13}),
+ sezi:Object.freeze({style:'spin',color:'#ffd15b',light:'#fff3b2',count:16}),
+ gambler:Object.freeze({style:'cards',color:'#69dce9',light:'#fff0c7',count:13}),
  azhi:Object.freeze({style:'counter',color:'#eabb63',light:'#fff3c6',count:12})
 });
 const cap=(n,min,max)=>Math.max(min,Math.min(max,n));
@@ -25,53 +25,46 @@ function card(ctx,x,y,rotation,size,index,palette){
  polygon(ctx,4,7,0);ctx.fill();
  ctx.fillRect(-8,-13,3,4);ctx.fillRect(5,9,3,4);ctx.restore();
 }
+function palm(ctx,size){
+ ctx.save();ctx.scale(size,size);ctx.fillRect(-14,-5,28,29);
+ for(let i=0;i<4;i++)ctx.fillRect(-14+i*8,-32-(i===1||i===2?5:0),6,34);
+ ctx.save();ctx.rotate(-.75);ctx.fillRect(-25,-1,7,24);ctx.restore();
+ ctx.strokeRect(-12,-3,24,25);ctx.restore();
+}
 function honey(ctx,b,t){
- const p=b.palette,r=24+114*t,m=b.super?1.35:1;
- ctx.strokeStyle=p.color;ctx.lineWidth=3;ctx.fillStyle=p.light;
- // An open honeycomb front grows forward from the caster, with honey droplets.
- for(let i=0;i<b.count;i++){
-  const a=(i/b.count-.5)*Math.PI*1.7,x=24+Math.cos(a)*r*m,y=Math.sin(a)*r*.67;
-  ctx.save();ctx.translate(x,y);polygon(ctx,6,(7+(i%3)*3)*(1-t*.35),Math.PI/6);ctx.globalAlpha*=i%3===0?.9:.5;ctx.stroke();if(i%5===0){ctx.globalAlpha*=.25;ctx.fill();}ctx.restore();
+ const p=b.palette,r=32+t*102;ctx.fillStyle=p.light;ctx.strokeStyle=p.color;ctx.lineWidth=2;
+ for(let i=0;i<Math.min(6,b.count);i++){
+  const angle=(i/5-.5)*1.6,x=30+Math.cos(angle)*r,y=Math.sin(angle)*r;
+  ctx.save();ctx.translate(x,y);ctx.rotate(angle*.3);ctx.globalAlpha*=.35+(i%2)*.3;palm(ctx,.45+(i%3)*.12);ctx.restore();
  }
- ctx.save();ctx.translate(18+r*.5,63);ctx.scale(1,.22);arc(ctx,0,0,r*.88,Math.PI*.7,Math.PI*2.3,5*(1-t)+1,p.light);ctx.restore();
- arc(ctx,10,0,r*.76,-1.25,1.25,3,p.light);
+ ctx.save();ctx.translate(40+t*75,-8);palm(ctx,1.2);ctx.restore();
+ arc(ctx,20,8,r,-1.5,1.5,4,p.color);
+ ctx.font='900 15px system-ui';ctx.fillStyle=p.color;ctx.fillText('舉手！',10,73);
 }
 function spin(ctx,b,t){
- const p=b.palette,r=43+t*64,turn=t*TAU*1.6;
- ctx.fillStyle=p.color;ctx.strokeStyle=p.color;
- for(let i=0;i<Math.min(b.count,6);i++){
-  const a=turn-i*.65;ctx.save();ctx.globalAlpha*=.12+(i/6)*.28;
-  ghost(ctx,Math.cos(a)*r,Math.sin(a)*r*.4,.7+i*.055);ctx.restore();
- }
+ const p=b.palette,r=45+t*80,turn=t*TAU;ctx.fillStyle=p.color;ctx.strokeStyle=p.light;ctx.lineWidth=2;
  for(let i=0;i<b.count;i++){
-  const a=turn+i*TAU/b.count,rad=r*(.45+(i%3)*.3);
-  arc(ctx,0,0,rad,a,a+.55,1+(i%3),i%3?p.color:p.light);
+  const angle=turn+i*TAU/b.count;ctx.save();ctx.translate(Math.cos(angle)*r,Math.sin(angle)*r*.65);ctx.rotate(angle);
+  ctx.fillStyle=i%2?'#ffd26e':p.color;ctx.beginPath();ctx.ellipse(0,0,7,11,0,0,TAU);ctx.fill();ctx.stroke();ctx.restore();
  }
+ for(let i=0;i<5;i++){ctx.fillStyle=i%2?'#edc577aa':'#f8e5b2aa';ctx.fillRect(-40+i*18,-20-i%3*17,12,50+i%3*17);}
+ arc(ctx,0,0,r,-turn,Math.PI*1.4-turn,4,p.light);ctx.font='900 17px system-ui';ctx.fillStyle=p.light;ctx.fillText('發大財',-27,65);
 }
 function cards(ctx,b,t){
- const p=b.palette,n=b.count,spread=.4+t*1.15;
- for(let i=0;i<n;i++){
-  const fraction=n===1?.5:i/(n-1),angle=(fraction-.5)*spread*Math.PI;
-  const x=35+Math.cos(angle)*(28+95*t),y=Math.sin(angle)*(25+90*t);
-  card(ctx,x,y,angle+t*TAU*(i%2?1:-1)*.22,.55+(i%3)*.13,i,p);
- }
- arc(ctx,32,0,25+94*t,-spread*1.5,spread*1.5,2,p.color);
- // Casino chip ring is a visual marker only; it has no random gameplay result.
- ctx.save();ctx.rotate(t*2);polygon(ctx,8,20);ctx.strokeStyle=p.light;ctx.lineWidth=2;ctx.stroke();polygon(ctx,4,9,Math.PI/4);ctx.fillStyle=p.color;ctx.fill();ctx.restore();
+ const p=b.palette;ctx.strokeStyle=p.light;ctx.fillStyle=p.color;ctx.lineWidth=3;
+ for(let i=0;i<Math.min(b.count,9);i++){const angle=(i/8-.5)*1.6,dist=35+t*120;card(ctx,25+Math.cos(angle)*dist,Math.sin(angle)*dist*.6,angle,.65,i,p);}
+ ctx.save();ctx.translate(28,-10);ctx.fillStyle='#132638';ctx.fillRect(-24,-38,49,70);ctx.strokeRect(-24,-38,49,70);
+ ctx.fillStyle=p.light;ctx.fillRect(-16,-29,31,16);ctx.fillStyle='#15202b';ctx.font='900 12px system-ui';ctx.fillText('300',-13,-17);
+ ctx.strokeStyle=p.color;ctx.beginPath();ctx.moveTo(25,-24);ctx.lineTo(39,-10);ctx.lineTo(39,25);ctx.quadraticCurveTo(39,39,28,29);ctx.stroke();ctx.restore();
+ for(let i=0;i<6;i++){ctx.strokeStyle=i%2?'#ffc078':p.light;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-55-i*8,25-i*9);ctx.lineTo(5+t*30,16-i*7);ctx.stroke();}
 }
 function counter(ctx,b,t){
- const p=b.palette,r=44+90*t;
- // Heavy black ink sweeps edged in gold, followed by an original geometric fist.
- for(let i=0;i<Math.min(b.count,6);i++){
-  const radius=r+i*7,start=-1.25+i*.07,end=.85+t*.6;
-  arc(ctx,3,8,radius,start,end,10-i,'#111721');
-  arc(ctx,3,8,radius+5,start,end,2,p.color);
- }
- ctx.save();ctx.translate(43+t*56,-8);ctx.rotate(-.22+t*.2);
- ctx.fillStyle='#141b28';ctx.strokeStyle=p.light;ctx.lineWidth=2;
- ctx.beginPath();ctx.moveTo(-22,-11);ctx.lineTo(-8,-23);ctx.lineTo(23,-17);ctx.lineTo(29,2);ctx.lineTo(13,20);ctx.lineTo(-17,15);ctx.closePath();ctx.fill();ctx.stroke();
- for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(-2+i*8,-17);ctx.lineTo(1+i*8,-3);ctx.stroke();}ctx.restore();
- for(let i=6;i<b.count;i++){const a=(i-6)*.24-1.1;ctx.save();ctx.translate(Math.cos(a)*r,Math.sin(a)*r);polygon(ctx,4,3+i%3,.25);ctx.fillStyle=p.color;ctx.fill();ctx.restore();}
+ const p=b.palette,r=45+90*t;
+ for(let i=0;i<6;i++){arc(ctx,2,8,r+i*7,-1.2+i*.09,.9+t*.6,9-i,'#10151f');arc(ctx,2,8,r+i*7+5,-1.2+i*.09,.9+t*.6,2,p.color);}
+ ctx.save();ctx.translate(38+t*55,-8);ctx.rotate(-.15+t*.2);ctx.fillStyle='#111927';ctx.strokeStyle=p.light;ctx.lineWidth=2;
+ ctx.beginPath();ctx.moveTo(-24,-9);ctx.lineTo(-9,-24);ctx.lineTo(23,-18);ctx.lineTo(30,2);ctx.lineTo(14,20);ctx.lineTo(-16,15);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();
+ for(let i=0;i<4;i++){ctx.save();ctx.translate(-28+i*25,35-Math.sin(t*Math.PI+i)*20);ctx.rotate(t+i);ctx.fillStyle=p.color;ctx.fillRect(-9,-9,18,18);ctx.fillStyle='#13202a';ctx.fillRect(-5,-5,3,3);ctx.fillRect(2,2,3,3);ctx.restore();}
+ ctx.fillStyle=p.light;ctx.font='900 16px system-ui';ctx.fillText('膽量全押',-15,75);
 }
 const DRAWERS={shockwave:honey,spin,cards,counter};
 function create(options={}){
@@ -107,5 +100,9 @@ function create(options={}){
  function stats(now=clock()){prune(now);return {bursts:bursts.length,particles:bursts.reduce((n,b)=>n+b.count,0),budget:limits(),quality,reducedMotion};}
  return {emit,draw,snapshot,stats,clear:()=>{bursts=[];},setQuality:value=>{quality=value==='low'?'low':'high';trim();return quality;},setReducedMotion:value=>{reducedMotion=!!value;}};
 }
-return {create,STYLES};
+function drawEmblem(ctx,char,progress,superMove=false){
+ if(!Object.hasOwn(STYLES,char))return false;
+ const palette=STYLES[char];DRAWERS[palette.style](ctx,{palette,count:palette.count,super:superMove},cap(progress,0,1));return true;
+}
+return {create,STYLES,drawEmblem};
 });

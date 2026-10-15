@@ -13,7 +13,7 @@ function fighter(id,slot){
 }
 function create(chars=['azhi','winnie','sezi','gambler'],opts={}){
  const players=Array.from({length:4},(_,slot)=>fighter(chars[slot]||'azhi',slot));
- return {ruleset:'team',players,tick:0,round:1,time:90,status:'playing',pause:0,events:[],difficulty:1,stage:opts.stage||'night',seed:opts.seed||1729,hitstop:0,projectiles:[],scores:[0,0],winnerTeam:null};
+ return {ruleset:'team',players,tick:0,round:1,time:90,status:'playing',pause:0,events:[],difficulty:1,stage:opts.stage||'night',seed:opts.seed||1729,hitstop:0,projectiles:[],scores:[0,0],winnerTeam:null,introDuration:C.introLength(opts.introFrames),introFrames:C.introLength(opts.introFrames)};
 }
 function rng(m){m.seed=(Math.imul(m.seed,1664525)+1013904223)>>>0;return m.seed/4294967296;}
 function input(m,slot,keys){C.input(m,slot,keys)}
@@ -31,6 +31,7 @@ function hit(m,attacker,target,data){
  const move=attacker.move;if(!target||move.hitSlots.includes(target.slot)||!B.hits(attacker,target,data))return;
  const spin=attacker.char==='sezi'&&['special','super'].includes(move.name);
  if(spin&&(move.hitCounts?.[target.slot]||0)>=3)return;
+ if(data.level==='throw'&&(attacker.y>0||target.y>8))return;
  if(target.dash>0&&target.dash<=6)return;
  const block=target.guard&&data.level!=='throw'&&(data.level==='mid'||(data.level==='low'&&target.crouch)||(data.level==='high'&&!target.crouch));
  const counter=!block&&!!target.move&&target.move.frame<C.moveFor(target,target.move.name).start;
@@ -81,12 +82,13 @@ function finishRound(m){if(m.status!=='playing')return;
  if(m.scores.some(n=>n>=2)){m.status='finished';m.winnerTeam=m.scores[0]>m.scores[1]?0:1;m.events.push({kind:'finish',winnerTeam:m.winnerTeam});return}
  m.status='between';m.pause=120;
 }
-function resetRound(m){m.round++;m.tick=0;m.time=90;m.status='playing';m.pause=0;m.hitstop=0;m.projectiles=[];
+function resetRound(m){m.introFrames=m.introDuration||0;m.round++;m.tick=0;m.time=90;m.status='playing';m.pause=0;m.hitstop=0;m.projectiles=[];
  m.players=m.players.map(p=>fighter(p.char,p.slot));m.events.push({kind:'text',text:'ROUND '+m.round});
 }
 function step(m){
  if(m.status==='between'){if(--m.pause<=0)resetRound(m);return}
  if(m.status!=='playing')return;
+ if(C.entranceStep(m))return;
  if(m.hitstop>0){m.hitstop--;return}
  m.tick++;m.time-=1/FPS;
  for(const p of m.players){
@@ -120,6 +122,6 @@ function step(m){
  }
  updateProjectiles(m);resolveAll(m);finishRound(m);
 }
-function serialize(m){return {ruleset:'team',type:'state',status:m.status,round:m.round,time:Math.max(0,Math.ceil(m.time)),tick:m.tick,serverHz:FPS,stage:m.stage,scores:m.scores.slice(),winnerTeam:m.winnerTeam,hitstop:m.hitstop,projectiles:m.projectiles.map(p=>({...p})),players:m.players.map(p=>({slot:p.slot,team:p.team,char:p.char,x:p.x,y:p.y,hp:p.hp,meter:p.meter,face:p.face,guard:p.guard,crouch:p.crouch,stun:p.stun,move:p.move?{name:p.move.name,frame:p.move.frame,hit:p.move.hit}:null,flash:p.flash,combo:p.combo,dash:p.dash,vy:p.vy,armorTimer:p.armorTimer,armorCharges:p.armorCharges})),events:m.events.splice(0,50)};}
+function serialize(m){return {ruleset:'team',type:'state',status:m.status,round:m.round,time:Math.max(0,Math.ceil(m.time)),tick:m.tick,introDuration:m.introDuration||0,introFrames:m.introFrames||0,serverHz:FPS,stage:m.stage,scores:m.scores.slice(),winnerTeam:m.winnerTeam,hitstop:m.hitstop,projectiles:m.projectiles.map(p=>({...p})),players:m.players.map(p=>({slot:p.slot,team:p.team,char:p.char,x:p.x,y:p.y,hp:p.hp,meter:p.meter,face:p.face,guard:p.guard,crouch:p.crouch,stun:p.stun,move:p.move?{name:p.move.name,frame:p.move.frame,hit:p.move.hit}:null,flash:p.flash,combo:p.combo,dash:p.dash,vy:p.vy,armorTimer:p.armorTimer,armorCharges:p.armorCharges})),events:m.events.splice(0,50)};}
 return {FPS,CHAR,teams,ATTACKS,create,input,step,serialize,nearest,living};
 });

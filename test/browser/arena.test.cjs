@@ -34,15 +34,28 @@ test('desktop practice: four fighters, easy skill and preserved legacy entry',as
  assert.ok(await p.locator('a[href*="adventure-legacy"]').count());
  await p.locator('[data-mode="practice"]').focus();await p.keyboard.press('Space');assert.equal(await p.evaluate(()=>window.AzhiDebug.mode),'practice');await p.locator('#mainAction').click();
  await p.waitForFunction(()=>window.AzhiDebug.local?.practice===true);
- await p.locator('#stage').focus();await p.keyboard.press('KeyU');
+ await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);await p.locator('#stage').focus();await p.keyboard.press('KeyU');
  await p.waitForFunction(()=>window.AzhiDebug.local?.players[0].meter<100);
  assert.equal(await p.evaluate(()=>window.AzhiDebug.local.players[0].char),'azhi');
  assert.deepEqual(p.errors,[]);await p.screenshot({path:'coverage/desktop-arena.png',fullPage:true});
 });
+test('each fighter has a named entrance and a matching one-button skill in the browser',async()=>{
+ const p=await page({viewport:{width:1280,height:900}});await p.goto(base);await p.waitForFunction(()=>window.AzhiDebug);
+ for(const [i,name] of ['不同意的請舉手','高雄發大財','加油加300','膽大撐死膽小餓死'].entries()){
+  await p.locator('[data-mode="practice"]').click();await p.locator('#characterList button').nth(i).click();await p.locator('#mainAction').click();
+  await p.waitForFunction(()=>window.AzhiDebug.local.introFrames>0);
+  assert.equal(await p.locator('#specialName').textContent(),name);
+  if(i===0)await p.screenshot({path:'coverage/entrance-8.8.png',fullPage:true});
+  await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);await p.locator('#specialTrigger').click();
+  await p.waitForFunction(()=>window.AzhiDebug.skillFX.stats().bursts>0);
+  const effect=await p.evaluate(()=>window.AzhiDebug.skillFX.snapshot()[0]);assert.equal(effect.char,['winnie','sezi','gambler','azhi'][i]);
+ }
+ assert.deepEqual(p.errors,[]);
+});
 test('mobile touch skill, no horizontal page overflow and reduced motion',async()=>{
  const p=await page({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'});await p.goto(base);await p.waitForFunction(()=>window.AzhiDebug);
  await p.locator('[data-mode="practice"]').click();await p.locator('#mainAction').click();
- await p.locator('[data-key="special"]').first().tap();await p.waitForFunction(()=>window.AzhiDebug.local.players[0].meter<100);
+ await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);await p.locator('[data-key="special"]').first().tap();await p.waitForFunction(()=>window.AzhiDebug.local.players[0].meter<100);
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  assert.deepEqual(p.errors,[]);await p.screenshot({path:'coverage/mobile-arena.png',fullPage:true});
 });
@@ -57,7 +70,7 @@ test('two real browser clients play 1v1 and spectator stays read only',async()=>
  const a=await page(),b=await page();
  for(const [p,n] of [[a,'Browser Alpha'],[b,'Browser Bravo']]){await p.goto(base+'/?room=E2EDUEL');await p.locator('#onlineNickname').fill(n);await p.locator('#joinRoom').click();}
  await a.waitForFunction(()=>window.AzhiDebug.rollback?.frame>5);await b.waitForFunction(()=>window.AzhiDebug.rollback?.frame>5);
- await a.locator('#stage').focus();await a.keyboard.press('KeyU');
+ await a.waitForFunction(()=>window.AzhiDebug.rollback.game.introFrames===0);await a.locator('#stage').focus();await a.keyboard.press('KeyU');
  await a.waitForFunction(()=>window.AzhiDebug.rollback.game.players[0].meter<25);
  const watch=await page();await watch.goto(base+'/team.html?room=E2EDUEL&watch=1');
  await watch.waitForFunction(()=>window.AzhiTeamDebug?.role==='spectator'&&window.AzhiTeamDebug?.frame>0);

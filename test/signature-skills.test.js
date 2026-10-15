@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const Core=require('../public/core.js'),Team=require('../public/team-core.js'),RB=require('../public/rollback.js');
 const IDS=['winnie','sezi','gambler','azhi'];
-const NAMES={winnie:'蜂蜜不用錢',sezi:'轉到你破產',gambler:'刷卡不用還',azhi:'薪水反擊日'};
+const NAMES={winnie:'不同意的請舉手',sezi:'高雄發大財',gambler:'加油加300',azhi:'膽大撐死膽小餓死'};
 function game(core,id='azhi'){
  const m=core===Core?core.create(id,'winnie',{seed:73}):core.create([id,'winnie','gambler','sezi'],{seed:73});
  m.players.forEach((p,i)=>{p.x=[340,450,100,850][i];});

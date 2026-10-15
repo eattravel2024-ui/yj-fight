@@ -1,11 +1,11 @@
 {
   "name": "azhi-haixian-fighting",
-  "version": "8.7.0",
+  "version": "8.8.0",
   "private": true,
-  "description": "阿志向錢衝 8.7：四角色一鍵專屬技、現代格鬥 UI、原創技能動畫與 60Hz Rollback",
+  "description": "狠話擂台 8.8：四角色出場、狠話必殺、同步倒數與 60Hz Rollback",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node --check public/core.js && node --check public/game.js && node --check public/rollback.js && node --check public/team-core.js && node --check public/team.js && node --check public/vfx.js && node --check public/engine/frame-data.js && node --check public/engine/commands.js && node --check public/engine/boxes.js && node --check public/engine/animation.js && node --check public/engine/ai.js && node --check public/skill-vfx.js && node --check public/legacy.js",
+    "check": "node --check server.js && node --check public/core.js && node --check public/game.js && node --check public/rollback.js && node --check public/team-core.js && node --check public/team.js && node --check public/vfx.js && node --check public/engine/frame-data.js && node --check public/engine/commands.js && node --check public/engine/boxes.js && node --check public/engine/animation.js && node --check public/engine/ai.js && node --check public/skill-vfx.js && node --check public/legacy.js && node --check public/presentation.js",
     "test": "node --test test/*.test.js",
     "test:e2e": "node --test test/browser/*.test.cjs"
   },

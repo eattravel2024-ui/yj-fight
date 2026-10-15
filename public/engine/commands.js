@@ -9,5 +9,10 @@ function command(p,key,tick){
  if(key==='heavy'&&match(p,[6,2,3],tick,24))return 'upper';
  return key;
 }
-return {direction,record,match,command};
+function doubleTap(p,tick){
+ const history=p.motion||[],a=history.at(-3),b=history.at(-2),c=history.at(-1);
+ if(!a||!b||!c||![4,6].includes(c.dir)||a.dir!==c.dir||b.dir!==5||tick-a.tick>12||c.tick!==tick||p.lastDashCommand===tick)return false;
+ p.lastDashCommand=tick;return true;
+}
+return {direction,record,match,command,doubleTap};
 });

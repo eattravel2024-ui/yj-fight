@@ -1,6 +1,6 @@
-# 8.7 手動發佈與回滾
+# 8.8 手動發佈與回滾
 
-本次開發沒有連線或部署正式 VPS。以下指令由你在審閱、測試、合併 PR 後手動執行；目前開發分支為 `feat/modern-fighter-experience`。正式發佈請使用已審閱的完整 commit SHA，確保部署內容與測試內容一致。不要在正在執行遊戲的 `/opt/azhi71` 內做 `git pull` 或安裝依賴。
+本次開發沒有連線或部署正式 VPS。以下指令由你在審閱、測試、合併 PR 後手動執行；目前開發分支為 `feat/signature-entrances`。正式發佈請使用已審閱的完整 commit SHA，確保部署內容與測試內容一致。不要在正在執行遊戲的 `/opt/azhi71` 內做 `git pull` 或安裝依賴。
 
 ## 發佈前驗收
 
@@ -68,7 +68,7 @@ sudo systemctl status azhi71 --no-pager
 sudo journalctl -u azhi71 -n 60 --no-pager
 ```
 
-回滾會把被取代的新版本保留為 `/opt/azhi71.rollback.terminal.<時間>`；不要刪除備份，直到舊版與所有遊戲模式都確認正常。回滾後的版本號應為備份中的舊版本，而不是 8.7.0。
+回滾會把被取代的新版本保留為 `/opt/azhi71.rollback.terminal.<時間>`；不要刪除備份，直到舊版與所有遊戲模式都確認正常。回滾後的版本號應為備份中的舊版本，而不是 8.8.0。
 
 ## 首次安裝（沒有 azhi71 的 Ubuntu）
 

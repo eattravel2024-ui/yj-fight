@@ -34,3 +34,7 @@ python3 tools/import_legacy_atlas.py --fighter azhi \
 
 - `public/art/cutins/*.webp`：保留四位角色的原創超必殺戰鬥特寫；僅作畫面演出，不改變伺服器攻擊判定。
 - `make_sprites.py` 與 `tools/import_legacy_atlas.py` 的角色清單同步為四位；`make_art.py` 僅產生原創場景，不從舊宣傳合照裁切或覆寫角色肖像。
+
+## 8.8 原創出場與狠話招式
+
+新增 public/presentation.js、手繪 SVG 港都舞台 public/art/port-arena.svg；技能掌印、金幣港景、300 加油機與骰子拳弧為原創 Canvas 幾何圖形。參考 vincent-li/kof13 的動作資料設計，以及 Cubicheng/StreetFighter README／展示截圖的自適應鏡頭概念，未引入其 Blueprint、程式碼、人物、場景或聲音資產。
