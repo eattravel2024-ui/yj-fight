@@ -8,7 +8,6 @@ OUT=Path(__file__).parent/'public'/'sprites';OUT.mkdir(exist_ok=True)
 W,H,FR=240,300,10
 ACTS=['idle','walk','jump','light','light2','light3','heavy','kick','low','upper','throw','dash','guard','hurt','special','ko','win']
 PAL={
- 'sam':dict(name='Sam',coat='#191f2f',coat2='#0a1322',skin='#e8b496',shade='#bb8477',hair='#15171c',trim='#a3b5cc',pants='#202736',shoe='#f3ede7',accent='#64c2ff'),
  'winnie':dict(name='維尼',coat='#d43243',coat2='#991e35',skin='#e7a979',shade='#b97855',hair='#20202d',trim='#ffce58',pants='#e8ad33',shoe='#eec858',accent='#ffb64d'),
  'sezi':dict(name='塞子',coat='#f1e9d2',coat2='#bcb4a9',skin='#e4aa87',shade='#b8776b',hair='#e3dbca',trim='#ffefa0',pants='#dbd5cc',shoe='#fff5df',accent='#ffdc76'),
  'gambler':dict(name='金沙賭神',coat='#6638bc',coat2='#341876',skin='#eec5b0',shade='#be8b88',hair='#0e1624',trim='#ffd34d',pants='#2c2450',shoe='#ffffff',accent='#ba8dff'),
@@ -57,10 +56,6 @@ def svg(cid,act,n):
  if act=='throw':lean=15*power;reach=54*power;raise_=29*power;backreach=52*power
  if act=='special':lean=9*power;reach=68*power;raise_=40*power;backreach=45*power
  # Original choreography per fighter, while keeping exact 17-row animation atlas.
- if cid=='sam':
-  if act=='heavy':lean+=10*power;raise_-=19*power;reach+=15*power
-  if act=='special':lean+=39*power;reach-=28*power;raise_-=30*power;bob+=6*power
-  if act=='throw':lean+=10*power;reach+=12*power
  if cid=='winnie':
   if act=='heavy':lean+=9*power;raise_-=35*power
   if act=='low':forward_leg+=29*power;bob+=10*power
@@ -144,8 +139,6 @@ def svg(cid,act,n):
   shapes.append(ellipse(head[0]+27,head[1]-26,15,19,hair,sw=5))
   shapes.append(poly([(head[0]-28,head[1]-21),(head[0]-17,head[1]-40),(head[0]+2,head[1]-42),(head[0]+19,head[1]-30),(head[0]+28,head[1]-17),(head[0]+3,head[1]-17),(head[0]-14,head[1]-12)],hair,width=4))
   shapes.append(f'<path d="M{head[0]-25},{head[1]-23} Q {head[0]-34},{head[1]+12} {head[0]-28},{head[1]+36}" fill="none" stroke="{hair}" stroke-width="11"/>')
- elif cid=='sam':
-  shapes.append(f'<path d="M{head[0]-23},{head[1]-23} Q {head[0]},{head[1]-43} {head[0]+21},{head[1]-23}" fill="none" stroke="#704f4a" stroke-width="2.8"/>')
  elif cid=='winnie':
   shapes.append(ellipse(head[0]-20,head[1]-32,13,13,'#e9ae3f'))
   shapes.append(ellipse(head[0]+22,head[1]-32,13,13,'#e9ae3f'))
@@ -174,8 +167,6 @@ def svg(cid,act,n):
   for j in range(3):shapes.append(f'<circle cx="{x+70+j*17}" cy="{268+y-j*7}" r="{2+int(power*4)}" fill="#ffd46a"/>')
  if cid=='sezi' and act=='special' and power>.26:
   shapes.append(f'<path d="M{x-56},{y+158} Q{x+32},{y+72} {x+130},{y+154}" fill="none" stroke="#f5eed9" stroke-width="{7+4*power}" stroke-linecap="round" opacity=".76"/>')
- if cid=='sam' and act=='special' and power>.35:
-  shapes.append(f'<path d="M{x-67},{y+152} L{x-117},{y+138} M{x-55},{y+168} L{x-131},{y+168} M{x-65},{y+184} L{x-113},{y+197}" stroke="#82caff" stroke-width="5" stroke-linecap="round" opacity=".70"/>')
  if cid=='azhi' and act=='special' and power>.28:
   shapes.append(f'<path d="M{x-35},{y+158} Q{x+35},{y+44} {x+126},{y+81}" fill="none" stroke="#ebe8d7" stroke-width="14" stroke-linecap="round" opacity=".94"/>')
   shapes.append(f'<path d="M{x-35},{y+158} Q{x+35},{y+44} {x+126},{y+81}" fill="none" stroke="#61d8a8" stroke-width="3" opacity=".8"/>')
@@ -208,7 +199,6 @@ for cid,c in PAL.items():
    frame.alpha_composite(patch,(int(x-26),int(hy-32)))
    # A concise character symbol on the outfit, matching each design.
    draw=ImageDraw.Draw(frame)
-   if cid=='sam':draw.line((x-18,146+bob,x+11,155+bob),fill='#526a7f',width=3)
    if cid=='gambler':draw.ellipse((x-8,149+bob,x+16,173+bob),outline='#e2ab49',width=3)
    atlas.paste(frame,(col*W,row*H))
  atlas.save(OUT/(cid+'.png'),optimize=True)

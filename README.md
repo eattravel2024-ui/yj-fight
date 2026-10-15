@@ -1,21 +1,27 @@
 # 阿志向錢衝 — Fighting Game
 
-> GitHub/Codex development baseline: **8.6.0**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.7.0**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
-Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, five playable characters and a single-player practice/arcade experience.
+Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
 ## Quick start
 
 Requirements: Node.js >= 20 (prefer 22 or 24).
 
 ```bash
-npm install
+npm ci --ignore-scripts
 npm run check
 npm test
 npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.7 gameplay update
+
+Modern fighting-game HUD, four original fighters, one-button signatures (U / 25 energy) and supers (O / 60 energy), original per-character effects, improved combat parity and preserved game modes. Sam has been removed as requested; old selections safely fall back to Azhi. See [release notes](docs/UPGRADE_8.7.md), [manual VPS commands](docs/MANUAL_RELEASE.md), and `npm run test:e2e` for browser validation.
+
+Ready, reconnect recovery and private-room authorization remain planned; room links are not access controls.
 
 ## Project layout
 
@@ -45,7 +51,7 @@ See [AGENTS.md](AGENTS.md), [Codex starter task](docs/CODEX_STARTER.md), and [de
 
 ## Publishing baseline
 
-This project is a source snapshot of 8.6.0, not a live sync with the VPS.
+This project is a source snapshot, with the reviewed 8.7 development upgrade, not a live sync with the VPS.
 The VPS IP is intentionally replaced with `YOUR_VPS_IP` in the public repository.
 Do not commit real credentials, production logs, or server backup directories.
 

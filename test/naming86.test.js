@@ -28,10 +28,10 @@ test('8.6 player names, room title, spectator identity and XSS protection', asyn
   assert.equal(cleanLabel('逢甲格鬥賽',24),'逢甲格鬥賽');
   const bad=connect();bad.incoming({type:'join',mode:'team',room:'BADNAME1',name:'<svg/onload=1>'});
   assert.match(bad.last('error').message,/暱稱/);assert.equal(rooms.has('BADNAME1'),false,'malformed name does not allocate room');
-  const a=connect();a.incoming({type:'join',mode:'team',room:'NAMETEST',name:'Sam 王者',title:'逢甲冠軍賽',char:'sam'});
-  assert.equal(a.last('joined').name,'Sam 王者');assert.equal(a.last('joined').host,true);
-  assert.equal(a.last('roster').title,'逢甲冠軍賽');assert.equal(a.last('roster').players[0].name,'Sam 王者');
-  const b=connect();b.incoming({type:'join',mode:'team',room:'NAMETEST',name:'Sam 王者',char:'azhi'});
+  const a=connect();a.incoming({type:'join',mode:'team',room:'NAMETEST',name:'海線 王者',title:'逢甲冠軍賽',char:'gambler'});
+  assert.equal(a.last('joined').name,'海線 王者');assert.equal(a.last('joined').host,true);
+  assert.equal(a.last('roster').title,'逢甲冠軍賽');assert.equal(a.last('roster').players[0].name,'海線 王者');
+  const b=connect();b.incoming({type:'join',mode:'team',room:'NAMETEST',name:'海線 王者',char:'azhi'});
   assert.match(b.last('error').message,/已被使用/);assert.equal(rooms.get('NAMETEST').players.length,1);
   b.incoming({type:'join',mode:'team',room:'NAMETEST',name:'第二位選手',char:'azhi'});
   assert.equal(b.last('joined').slot,1);

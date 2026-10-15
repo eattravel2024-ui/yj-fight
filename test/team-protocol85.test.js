@@ -29,7 +29,7 @@ test('four fighters + spectators + readonly late join + no side effects on spect
  server.unref();
  try{
   const actors=[connect(),connect(),connect(),connect()];
-  const roster=['sam','winnie','sezi','gambler'];
+  const roster=['azhi','winnie','sezi','gambler'];
   for(let i=0;i<4;i++)actors[i].incoming({type:'join',mode:'team',room:'HAIXIAN',char:roster[i]});
   assert.deepEqual(actors.map(ws=>ws.get('joined')[0].slot),[0,1,2,3]);
   assert.equal(actors[0].get('start').length,1);assert.equal(actors[3].get('start')[0].game.players.length,4);
@@ -54,7 +54,7 @@ test('four fighters + spectators + readonly late join + no side effects on spect
   assert.ok(actors[0].get('frames').length>before,'spectator leaving must not interrupt active 2v2 game');
   assert.equal(actors[0].get('spectator_count').at(-1).count,0);
   const check=await fetch('http://127.0.0.1:'+server.address().port+'/healthz').then(r=>r.json());
-  assert.equal(check.version,'8.6.0');assert.ok(check.teamRooms>=1);
+  assert.equal(check.version,require('../package.json').version);assert.ok(check.teamRooms>=1);
   const page=await fetch('http://127.0.0.1:'+server.address().port+'/team.html');assert.equal(page.status,200);
   assert.match(await page.text(),/四人同場/);
   const liveRoom=rooms.get('HAIXIAN');assert.ok(liveRoom.session);

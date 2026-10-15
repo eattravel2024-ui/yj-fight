@@ -23,10 +23,6 @@
     "win"
   ],
   "characters": {
-    "sam": {
-      "name": "Sam",
-      "file": "sprites/sam.png"
-    },
     "winnie": {
       "name": "維尼",
       "file": "sprites/winnie.png"

@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const dir=path.resolve(__dirname,'../public');
-test('new 2v2 UI has five fighters, player/watch modes and 4 visible team seats',()=>{
+test('new 2v2 UI has four fighters, player/watch modes and 4 visible team seats',()=>{
  const html=fs.readFileSync(path.join(dir,'team.html'),'utf8');const ui=fs.readFileSync(path.join(dir,'team.js'),'utf8');
  for(const id of ['teamRoster','teamCharacters','watchTab','playerTab','copyWatchLink','rematch','joinButton','arenaCanvas'])assert.ok(html.includes(`id="${id}"`));
  assert.match(ui,/for\(let i=0;i<\(serverMode==='team'\?4:2\)/);assert.match(ui,/role==='spectator'/);

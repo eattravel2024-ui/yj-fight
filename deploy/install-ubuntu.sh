@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-# Azhi 8.5 - non-destructive initial installation for Ubuntu with an existing 6.9 service.
+# Azhi - non-destructive initial installation for Ubuntu with an existing 6.9 service.
 # Never modifies 6.9, existing 80/443 websites, SSH, or UFW.
 SRC_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP=/opt/azhi71
@@ -9,10 +9,10 @@ USER_NAME=azhi71
 PRIVATE_PORT=31071
 PUBLIC_PORT=18071
 CONF=/etc/nginx/conf.d/azhi71.conf
-say(){ printf '\n[8.5] %s\n' "$*"; }
+say(){ printf '\n[Azhi] %s\n' "$*"; }
 fail(){ echo "[停止] $*" >&2; exit 1; }
 (( EUID == 0 )) || fail '請以 root 執行部署腳本'
-[[ -f "$SRC_DIR/server.js" && -f "$SRC_DIR/package.json" && -f "$SRC_DIR/public/core.js" ]] || fail '專案不完整，請解壓縮完整 ZIP。'
+[[ -f "$SRC_DIR/package-lock.json" && -f "$SRC_DIR/server.js" && -f "$SRC_DIR/package.json" && -f "$SRC_DIR/public/core.js" ]] || fail '專案不完整，請解壓縮完整 ZIP。'
 [[ -f /etc/os-release ]] && . /etc/os-release
 [[ ${ID:-} == ubuntu ]] || fail '本腳本僅針對 Ubuntu；其他系統請手動部署。'
 command -v node >/dev/null || fail '找不到 Node.js，請先安裝 v20 以上。'
@@ -26,12 +26,8 @@ command -v ss >/dev/null || fail '找不到 ss。'
 if ss -ltn "( sport = :${PRIVATE_PORT} )" | grep -q 'LISTEN';then fail "$PRIVATE_PORT 已被佔用";fi
 if ss -ltn "( sport = :${PUBLIC_PORT} )" | grep -q 'LISTEN';then fail "$PUBLIC_PORT 已被佔用";fi
 say '檢查 Node / 專案語法與 Nginx 現有服務'
-node --check "$SRC_DIR/server.js"
-node --check "$SRC_DIR/public/core.js"
-node --check "$SRC_DIR/public/game.js"
-node --check "$SRC_DIR/public/team-core.js"
-node --check "$SRC_DIR/public/team.js"
-for js in "$SRC_DIR"/public/engine/*.js;do node --check "$js";done
+(cd "$SRC_DIR" && npm run check && npm test) || fail '專案檢查／測試失敗；尚未安裝服務。'
+VERSION="$(node -p 'require(process.argv[1]).version' "$SRC_DIR/package.json")"
 if ! command -v nginx >/dev/null;then fail '找不到 Nginx。為避免影響既有網站，不自動安裝；請先確認環境。';fi
 nginx -t || fail '現有 Nginx 設定驗證失敗，請先修復。'
 if ! nginx -T 2>&1 | grep -E 'include[[:space:]]+/etc/nginx/conf.d/\*\.conf;' >/dev/null;then
@@ -40,14 +36,14 @@ fi
 say '創建獨立 azhi71 系統帳號，安裝到 /opt/azhi71'
 id -u "$USER_NAME" >/dev/null 2>&1 || useradd --system --user-group --home-dir "$APP" --shell /usr/sbin/nologin "$USER_NAME"
 mkdir -p "$APP"
-cp -a "$SRC_DIR/public" "$SRC_DIR/server.js" "$SRC_DIR/package.json" "$SRC_DIR/test" "$APP/"
+cp -a "$SRC_DIR/public" "$SRC_DIR/server.js" "$SRC_DIR/package.json" "$SRC_DIR/package-lock.json" "$SRC_DIR/test" "$APP/"
 chown -R "$USER_NAME:$USER_NAME" "$APP"
 # Install as unprivileged dedicated account; no global npm changes
-runuser -u "$USER_NAME" -- env npm_config_cache=/tmp/azhi71-npm-cache npm --prefix "$APP" install --omit=dev --ignore-scripts --no-audit --no-fund
+runuser -u "$USER_NAME" -- env npm_config_cache=/tmp/azhi71-npm-cache npm --prefix "$APP" ci --omit=dev --ignore-scripts --no-audit --no-fund
 NODE_BIN="$(command -v node)"
 cat > /etc/systemd/system/${SERVICE}.service <<SYSTEMD
 [Unit]
-Description=Azhi 8.5 60Hz Fighting Game
+Description=Azhi $VERSION 60Hz Fighting Game
 After=network.target
 [Service]
 Type=simple

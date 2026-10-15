@@ -12,7 +12,7 @@ from PIL import Image, ImageOps
 
 ACTS=['idle','walk','jump','light','light2','light3','heavy','kick','low','upper','throw','dash','guard','hurt','special','ko','win']
 ALIAS={'idle':'stand','walk':'D','jump':'W','light':'J','light2':'J','light3':'U','heavy':'K','kick':'I','low':'SK','upper':'SU','throw':'SJ','dash':'DD','guard':'C2G','hurt':'stand','special':'SI','ko':'stand','win':'stand'}
-CHARS=['sam','winnie','sezi','gambler','azhi']
+CHARS=['winnie','sezi','gambler','azhi']
 W,H,COLS=240,300,10
 
 def get_rect(meta, act):
@@ -51,7 +51,7 @@ def convert(src,meta,out):
         return {'source':str(src),'file':str(out),'actors':len(ACTS),'frames':len(ACTS)*COLS,'alias':chosen}
 
 def main():
-    a=argparse.ArgumentParser(description='Convert rights-cleared legacy KOF-style sprite atlas to a five-fighter original animation atlas')
+    a=argparse.ArgumentParser(description='Convert rights-cleared legacy KOF-style sprite atlas to a four-fighter original animation atlas')
     a.add_argument('--fighter',required=True,choices=CHARS)
     a.add_argument('--image',required=True,type=Path,help='User-provided local PNG (no downloads)')
     a.add_argument('--metadata',required=True,type=Path,help='JSON with rects mapping and optional aliases')
