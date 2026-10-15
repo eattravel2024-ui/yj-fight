@@ -39,6 +39,8 @@ mkdir -p "$STAGING"
 cp -a "$SRC/public" "$SRC/server.js" "$SRC/package.json" "$SRC/package-lock.json" "$SRC/test" "$SRC/README.md" "$STAGING/"
 for doc in "$SRC"/README_8.6_*.md "$SRC"/AUDIT_8.6_*.md; do [[ ! -f "$doc" ]] || cp -a "$doc" "$STAGING/"; done
 [[ ! -d "$SRC/tools" ]] || cp -a "$SRC/tools" "$STAGING/"
+# Preserve art originals/manifests required by the packaged authoring tools and asset tests.
+[[ ! -d "$SRC/assets" ]] || cp -a "$SRC/assets" "$STAGING/"
 [[ ! -f "$SRC/ART_AND_LICENSE.md" ]] || cp -a "$SRC/ART_AND_LICENSE.md" "$STAGING/"
 # Install exactly the reviewed lockfile before stopping the live service.
 # Do not reuse old node_modules: even patch versions must match this release.

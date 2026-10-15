@@ -84,3 +84,7 @@ python3 tools/import_legacy_atlas.py --fighter azhi \
 `tools/build_character_ui_art.py` 只等比例 Lanczos 縮放、置中於透明邊界、輸出 WebP（quality 92／alpha 100），不重繪、不補畫、不旋轉、不拉伸、不裁掉原畫布。Fullbody 768×1024、Portrait 512×512、HUD 256×256，保留原圖中既有的描邊／特效／傾斜構圖。新圖只用在 UI：主選單、既有角色卡及 HUD；四張戰鬥圖集與招式動畫不變。塞子新 UI 是持毛球武器的人形，戰鬥仍是原毛球角色，這次不把兩種素材誤作相同動作圖。
 
 沒有提供新的場景圖，未建立虛構地圖資產或改動場景載入。新素材為使用者提供並指定整合，公開發行的素材／肖像授權仍依專案既有規範辦理。
+
+## Phase 1.5 supplied stage artwork (8.10.2)
+
+User-provided 場景圖.zip contains 夜市地圖.png, 賭城地圖.png and 天安門地圖.png. These originals are retained unchanged in assets/source-art/phase1_5/stages; six proportional WebP derivatives and their provenance/alpha metadata are prepared for future UI/stage work. No third-party reference repository artwork was imported. Scene art is not activated in combat.

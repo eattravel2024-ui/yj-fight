@@ -1,8 +1,26 @@
 # 手動發佈與回滾
 
-目前本機人物整合版為 **8.10.1**，尚未推送 GitHub；以下固定 Git 標籤仍是已發布的 **8.10.0 Phase 1**。若要自行試用人物版，請使用本次提供的完整 8.10.1 來源包；不要以為舊標籤已包含新圖。
+目前發布里程碑為 **8.10.2 / Phase 1.5**：新人物已整合至 UI，三張場景僅完成素材準備，實際戰鬥場景仍沿用既有版本。本次開發未連線或部署正式 VPS。
 
-本次開發沒有連線或部署正式 VPS。以下指令由你確認更新內容後手動執行；快速迭代不要求每次先建立或合併 PR；目前開發分支為 `feat/arcade-phase1`。正式發佈請使用已審閱的完整 commit SHA，確保部署內容與測試內容一致。不要在正在執行遊戲的 `/opt/azhi71` 內做 `git pull` 或安裝依賴。
+## 目前版本：從 GitHub 固定檢查點部署
+
+自行登入 VPS 後執行。使用全新的來源資料夾，避開舊資料夾單分支 fetch 限制及本機修改；不在 `/opt/azhi71` 中 git pull。需要既有 azhi71 安裝及 Node.js 20+。
+
+```bash
+set -euo pipefail
+RELEASE_DIR="$(mktemp -d "$HOME/azhi-8.10.2.XXXXXX")"
+git clone --branch checkpoint-phase1-5-8.10.2 --depth 1 https://github.com/eattravel2024-ui/yj-fight.git "$RELEASE_DIR"
+cd "$RELEASE_DIR"
+npm ci --ignore-scripts --no-fund
+sudo bash deploy/upgrade-ubuntu.sh
+curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+```
+
+健康版本應顯示 `8.10.2`。私人 Repository 請沿用主機既有 GitHub 認證，勿將 token 寫進指令或貼到聊天。固定標籤使用 detached HEAD 是預期行為。
+
+更新腳本會先測試、安裝鎖定依賴及保留完整舊版備份，再短暫停止 `azhi71` 服務更新；失敗會嘗試回滾。不更動 Nginx、SSH、Docker 或其他遊戲服務。沿用原網址，完成後強制重新整理。夜市場景原圖有半透明 Alpha，留待 Phase 3 整合，不影響目前對戰。
+
+以下舊 Phase 1 指令僅供回退／歷史參考，不含本次人物與場景素材。
 
 ## Phase 1 GitHub 檢查點
 
@@ -40,27 +58,27 @@ curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
 
 8.10.0 更新漫畫街機主選單、共用導航及存檔入口驗證，保留原有戰鬥與所有模式。這是 Phase 1，不包含新任務選單／選圖／新版結算。Phase 2 尚未開始。
 
-## 快速更新（目前 8.10.1）
+## 來源包更新（8.10.2）
 
-小幅修改沿用同一開發分支，不必先管理多個分支或 PR。下載本次提供的 azhi-fighting-8.10.1.tar.gz，在電腦上傳：
+小幅修改沿用同一開發分支，不必先管理多個分支或 PR。下載本次提供的 azhi-fighting-8.10.2.tar.gz，在電腦上傳：
 
 ```bash
-scp ~/Downloads/azhi-fighting-8.10.1.tar.gz YOUR_USER@YOUR_VPS_IP:/tmp/
+scp ~/Downloads/azhi-fighting-8.10.2.tar.gz YOUR_USER@YOUR_VPS_IP:/tmp/
 ```
 
 自行登入 VPS 後執行（適用既有 /opt/azhi71 與 azhi71.service，需 Node 20+）：
 
 ```bash
 set -euo pipefail
-RELEASE_DIR="$(mktemp -d "$HOME/azhi-update-8.10.1.XXXXXX")"
-tar -xzf /tmp/azhi-fighting-8.10.1.tar.gz -C "$RELEASE_DIR" --strip-components=1
+RELEASE_DIR="$(mktemp -d "$HOME/azhi-update-8.10.2.XXXXXX")"
+tar -xzf /tmp/azhi-fighting-8.10.2.tar.gz -C "$RELEASE_DIR" --strip-components=1
 cd "$RELEASE_DIR"
 npm ci --ignore-scripts --no-fund
 sudo bash deploy/upgrade-ubuntu.sh
 curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
 ```
 
-更新腳本自行執行語法及 Node 檢查、安裝鎖定依賴、備份、更新與版本健康檢查，不需另外安裝瀏覽器或手跑長套測試。會短暫中斷對局；完成後瀏覽器強制重新整理，健康版本應為 8.10.1。若沒有現有 azhi71，使用本文件末尾「首次安裝」流程。
+更新腳本自行執行語法及 Node 檢查、安裝鎖定依賴、備份、更新與版本健康檢查，不需另外安裝瀏覽器或手跑長套測試。會短暫中斷對局；完成後瀏覽器強制重新整理，健康版本應為 8.10.2。若沒有現有 azhi71，使用本文件末尾「首次安裝」流程。
 
 以下保留完整 Git／回滾流程供需要時查閱，不是每次快速更新的必做清單。
 

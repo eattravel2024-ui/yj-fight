@@ -17,7 +17,7 @@
 - Phase 0 inventory: completed against 8.9.9; see local audit report.
 - [x] Phase 1 (8.10.0): manga main menu, shared visual tokens, formal client adapters, UI navigation and strict save validation. Preserve all existing modes and Fight Fund removal.
 - [x] Phase 1.5 character UI art (8.10.1): 12 supplied originals preserved, optimized role assets, central UI registry and safe fallback; no battle sprite substitution.
-- [ ] Phase 1.5 scene art: pending user upload; prepare metadata/previews only, do not change battle stages.
+- [x] Phase 1.5 scene art (8.10.2): three originals, optimized backgrounds/previews and metadata prepared; battle stages unchanged. Night-market source alpha preserved for Phase 3 review.
 - [ ] Phase 2: independent Character Select with actual character/skill data and consistent art.
 - [ ] Phase 3: mission registry/progress migration, true stage selection and server-owned online stage settings.
 - [ ] Phase 4: resource preparation, VS, pause/results and confirmed next/retry flow.

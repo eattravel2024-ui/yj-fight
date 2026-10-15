@@ -2,7 +2,7 @@
 
 ## Goal
 Maintain and improve the existing browser-based 60 Hz fighting game, without removing existing modes.
-Current baseline: 8.10.1. Preserve the four playable characters (維尼, 塞子, 金沙賭神, 阿志), 1v1, 2v2, spectators, player/room names, arcade mode, and WebSocket networking. Sam was removed at the user’s request; do not restore that character or its assets.
+Current baseline: 8.10.2. Preserve the four playable characters (維尼, 塞子, 金沙賭神, 阿志), 1v1, 2v2, spectators, player/room names, arcade mode, and WebSocket networking. Sam was removed at the user’s request; do not restore that character or its assets.
 
 ## Source map
 - `server.js`: HTTP + authoritative WebSocket rooms, 1v1 and 2v2, validation and identities.
@@ -45,7 +45,7 @@ Current baseline: 8.10.1. Preserve the four playable characters (維尼, 塞子,
 5. 2v2 load, latency and rollback testing; state checksum/desync diagnostics.
 
 ## Arcade 2.0 phased delivery
-Phase 1.5 (8.10.1) supplied character UI art is integrated; scene art is pending. Character selection layout and all combat/stage data are unchanged. Phase 1 main menu/common navigation is implemented on `feat/arcade-phase1`. Stop after each approved phase; do not implement Phase 2–5 or push GitHub without user authorization. Home has six entries; confirming local modes opens the existing fighter panel, not a new Character Select. Escape returns subpanel → home → arena. Preserve busy-room guards on all cross-mode routes.
+Phase 1.5 supplied character UI art is integrated (8.10.1); three scene sources/optimized assets/metadata are prepared (8.10.2), without changing live stages. Character selection layout and all combat/stage data are unchanged. Phase 1 main menu/common navigation is implemented on `feat/arcade-phase1`. Stop after each approved phase; do not implement Phase 2–5 or push GitHub without user authorization. Home has six entries; confirming local modes opens the existing fighter panel, not a new Character Select. Escape returns subpanel → home → arena. Preserve busy-room guards on all cross-mode routes.
 
 ## User preference: fast iteration
 Reuse the current development branch for small follow-up changes; do not create a new branch or require a new PR for every iteration. Run the relevant lightweight checks automatically. Use browser or extended suites only when justified by the change. Package one current source archive and give short manual VPS update instructions; never connect to production. Consolidate review/PRs at milestones rather than making the user manage branch stacks.

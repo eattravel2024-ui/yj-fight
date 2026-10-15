@@ -37,6 +37,8 @@ say '創建獨立 azhi71 系統帳號，安裝到 /opt/azhi71'
 id -u "$USER_NAME" >/dev/null 2>&1 || useradd --system --user-group --home-dir "$APP" --shell /usr/sbin/nologin "$USER_NAME"
 mkdir -p "$APP"
 cp -a "$SRC_DIR/public" "$SRC_DIR/server.js" "$SRC_DIR/package.json" "$SRC_DIR/package-lock.json" "$SRC_DIR/test" "$APP/"
+# Asset validation requires the preserved source art and manifests.
+[[ ! -d "$SRC_DIR/assets" ]] || cp -a "$SRC_DIR/assets" "$APP/"
 chown -R "$USER_NAME:$USER_NAME" "$APP"
 # Install as unprivileged dedicated account; no global npm changes
 runuser -u "$USER_NAME" -- env npm_config_cache=/tmp/azhi71-npm-cache npm --prefix "$APP" ci --omit=dev --ignore-scripts --no-audit --no-fund

@@ -1,6 +1,6 @@
 # 狠話擂台 — Big Talk / Real Fight
 
-> GitHub/Codex development baseline: **8.10.1**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.10.2**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -21,7 +21,7 @@ Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html`
 
 The user's twelve PNGs are preserved byte-for-byte under `assets/source-art/phase1_5/characters/`, with hashes/dimensions in the adjacent manifest. Optimized transparent WebP roles are fullbody 768×1024, portrait 512×512 and HUD 256×256. `character-art.js` is the single UI path registry, with same-character legacy fallback and a bounded terminal text state.
 
-The existing main menu, character cards and health-bar portraits use these assets; selection layout, fight sprites, collision, moves, skills and stage loading are unchanged. Sezi's new humanoid UI illustration deliberately coexists with the existing wool-ball battle animation. Scene art is still pending; Phase 2/3 are not started. Rebuild derivatives with `python tools/build_character_ui_art.py` (Pillow for authoring only). See [Phase 1.5 art inventory and validation](docs/ARCADE_2_PHASE1_5.md).
+The existing main menu, character cards and health-bar portraits use these assets; selection layout, fight sprites, collision, moves, skills and stage loading are unchanged. Sezi's new humanoid UI illustration deliberately coexists with the existing wool-ball battle animation. Three supplied scenes are preserved and optimized under `public/art/stages/` with `stages-manifest.json`; they are not wired into live stages. Night-market source alpha is semi-transparent and preserved for Phase 3 review. Phase 2/3 are not started. Rebuild derivatives with `python tools/build_character_ui_art.py` (Pillow for authoring only). See [Phase 1.5 art inventory and validation](docs/ARCADE_2_PHASE1_5.md).
 
 ## 8.10.0 Arcade 2.0 — Phase 1
 

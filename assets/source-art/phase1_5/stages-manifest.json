@@ -1,0 +1,124 @@
+{
+  "sourceArchive": "User-provided 場景圖.zip",
+  "purpose": "Prepared art only; IDs are asset IDs, not live engine stage IDs",
+  "processing": "No crop, stretch or flatten; fullsize WebP and proportional <=640x360 preview; quality 92, alpha 100",
+  "stages": {
+    "night-market": {
+      "name": "嘴砲夜市",
+      "source": {
+        "path": "assets/source-art/phase1_5/stages/夜市地圖.png",
+        "width": 1672,
+        "height": 941,
+        "format": "PNG",
+        "mode": "RGBA",
+        "bytes": 3260737,
+        "sha256": "8f8df68a1bd1253c098ae683078f1bfb6618b1fd93aa0fd9ecb196bab9b9db82",
+        "alphaRange": [
+          101,
+          250
+        ]
+      },
+      "assets": {
+        "background": {
+          "path": "public/art/stages/night-market/background.webp",
+          "width": 1672,
+          "height": 941,
+          "format": "WEBP",
+          "mode": "RGBA",
+          "bytes": 813330,
+          "sha256": "af284275bcf328b07c133418c2b756173e5a22a8eacd64c88d88758c1355a559",
+          "alphaRange": [
+            101,
+            250
+          ]
+        },
+        "preview": {
+          "path": "public/art/stages/night-market/preview.webp",
+          "width": 640,
+          "height": 360,
+          "format": "WEBP",
+          "mode": "RGBA",
+          "bytes": 153118,
+          "sha256": "0d519e5433afb8d525c747f0758e92479cac1005c0c145c499fc3a49e0912e4e",
+          "alphaRange": [
+            102,
+            249
+          ]
+        }
+      },
+      "note": "Source is semi-transparent (alpha 101–250); preserved, review compositing in Phase 3."
+    },
+    "golden-casino": {
+      "name": "金沙賭城",
+      "source": {
+        "path": "assets/source-art/phase1_5/stages/賭城地圖.png",
+        "width": 1672,
+        "height": 941,
+        "format": "PNG",
+        "mode": "RGB",
+        "bytes": 2880860,
+        "sha256": "1010764d5995e15eadcdf033b0bd3448109d899801649eb3a9ea23542827d6af",
+        "alphaRange": null
+      },
+      "assets": {
+        "background": {
+          "path": "public/art/stages/golden-casino/background.webp",
+          "width": 1672,
+          "height": 941,
+          "format": "WEBP",
+          "mode": "RGB",
+          "bytes": 543770,
+          "sha256": "2c93b423e5b738513a9c3454df57af700ed89e320386aba481b1420ea33a0223",
+          "alphaRange": null
+        },
+        "preview": {
+          "path": "public/art/stages/golden-casino/preview.webp",
+          "width": 640,
+          "height": 360,
+          "format": "WEBP",
+          "mode": "RGB",
+          "bytes": 112912,
+          "sha256": "153dc8f5c17cc8db40f4656c3ed71c22d83f3ffd8e2a0493f6e0b2f9dfbc0958",
+          "alphaRange": null
+        }
+      },
+      "note": "Opaque source."
+    },
+    "tiananmen-square": {
+      "name": "天安門廣場",
+      "source": {
+        "path": "assets/source-art/phase1_5/stages/天安門地圖.png",
+        "width": 1672,
+        "height": 941,
+        "format": "PNG",
+        "mode": "RGB",
+        "bytes": 2813150,
+        "sha256": "b2cbcba87a4801a9c4e37cc4f15e97214d9862a7e93eaf676d8a5c4ee480add4",
+        "alphaRange": null
+      },
+      "assets": {
+        "background": {
+          "path": "public/art/stages/tiananmen-square/background.webp",
+          "width": 1672,
+          "height": 941,
+          "format": "WEBP",
+          "mode": "RGB",
+          "bytes": 469404,
+          "sha256": "0e30115fa153361fc30775abc38bd3428c2f6192dc6530d852443e45caddc258",
+          "alphaRange": null
+        },
+        "preview": {
+          "path": "public/art/stages/tiananmen-square/preview.webp",
+          "width": 640,
+          "height": 360,
+          "format": "WEBP",
+          "mode": "RGB",
+          "bytes": 85066,
+          "sha256": "1bc54bbb9853bcf1d82e04bfb672c342c7019cdead1e678f0057d017f3865376",
+          "alphaRange": null
+        }
+      },
+      "note": "Opaque source."
+    }
+  }
+}
