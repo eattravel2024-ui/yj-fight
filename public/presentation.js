@@ -36,7 +36,7 @@ function drawEntrance(ctx,game,options={}){
  const players=game.players||[],reduced=!!options.reducedMotion,t=reduced?.6:entry.progress;
  ctx.save();ctx.fillStyle='#060b13dc';ctx.fillRect(0,0,960,75);ctx.fillRect(0,475,960,65);
  ctx.fillStyle='#e5bc75';ctx.font='700 12px system-ui';ctx.textAlign='left';ctx.fillText('街頭狠話 / CHARACTER INTRO',26,28);
- ctx.fillStyle='#f5efe3';ctx.font='900 24px system-ui';ctx.fillText('狠話擂台',26,58);
+ ctx.fillStyle='#f5efe3';ctx.font='900 24px system-ui';ctx.fillText('陪公子練武',26,58);
  ctx.textAlign='right';ctx.fillStyle='#f4cc79';ctx.font='900 42px system-ui';ctx.fillText(String(entry.count).padStart(2,'0'),930,55);
  for(const p of players){const data=Frames.CHAR[p.char];if(!data)continue;const side=p.slot%2,row=Math.floor(p.slot/2),x=26+side*477,y=95+row*83;
   ctx.save();ctx.translate(x,y);ctx.globalAlpha=reduced?.9:Math.min(1,entry.progress*6+.2);ctx.fillStyle='#0a1425dd';ctx.fillRect(0,0,431,68);

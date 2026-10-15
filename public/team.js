@@ -8,10 +8,9 @@
  const hud=window.AzhiHUD.create(),coach=window.AzhiCoach.create(canvas.parentElement);
  const playback=A.createPlayback(),motionQuery=matchMedia('(prefers-reduced-motion: reduce)');let reducedMotion=motionQuery.matches;
  const skillFX=window.AzhiSkillFX.create({quality:'high',reducedMotion});motionQuery.addEventListener('change',event=>{reducedMotion=event.matches;skillFX.setReducedMotion(reducedMotion)});
- const charIds=Object.keys(C.CHAR),stageAssets={night:'art/night.svg',garage:'art/garage.svg',harbor:'art/port-arena.svg'},stageNames={night:'逢甲霓虹夜市',garage:'海線改車廠',harbor:'港都狠話擂台'};
+ const charIds=Object.keys(C.CHAR),stageArt=window.AzhiStageArt.create(),stageNames=Object.fromEntries(Object.entries(window.AzhiStageArt.STAGES).map(([id,stage])=>[id,stage.name]));
  const Art=window.AzhiCharacterArt;
- const sprites={},stages={};for(const id of charIds){let s=new Image();s.src='sprites/'+id+'.png?v=8100';sprites[id]=s;}
- for(const [id,path] of Object.entries(stageAssets)){const image=new Image();image.src=path;stages[id]=image;}
+ const sprites={};for(const id of charIds){let s=new Image();s.src='sprites/'+id+'.png?v=8100';sprites[id]=s;}
  let playerNames=[],roomTitle='海線格鬥房',isHost=false,onlineName='';
  let ws=null,room='',role='player',selected='azhi',slot=-1,session=null,state=null,prevState=null,matchId='',serverFrame=0,serverMode='team',lastPacket=0,inputs={},pulses=[],delay=RB.INPUT_DELAY,rollbackCount=0,rtt=0,networkComplete=false,pending=null,watchers=0,waiting=true,watching=false,matchDone=false;
  let lastClock=performance.now(),acc=0,lastHud=0,shake=0,flash=0,effects=[],showBoxes=false,visualEffects=true,audioOn=true,audio=null,soundEnabled=false;
@@ -135,9 +134,9 @@
   b.addEventListener('pointerdown',e=>{if(menuOpen()||role==='spectator'||slot<0||!session||networkComplete)return;e.preventDefault();b.setPointerCapture(e.pointerId);const was=!!pressed[k];pressed[k]=true;if(!was&&attackKeys.has(k))pulses.push(k);soundEnabled=true;b.classList.add('held')});
   for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>{pressed[k]=false;b.classList.remove('held')});
  }
- function drawStage(now){const id=state?.stage||'night',img=stages[id];if(img?.complete&&img.naturalWidth)ctx.drawImage(img,0,0,960,540);else{const grad=ctx.createLinearGradient(0,0,0,540);grad.addColorStop(0,'#111a3a');grad.addColorStop(1,'#432846');ctx.fillStyle=grad;ctx.fillRect(0,0,960,540)}
+ function drawStage(now){stageArt.draw(ctx,state?.stage||'night');
  const shade=ctx.createLinearGradient(0,0,0,540);shade.addColorStop(0,'#070c1744');shade.addColorStop(.65,'#090a1720');shade.addColorStop(1,'#03051170');ctx.fillStyle=shade;ctx.fillRect(0,0,960,540);
- ctx.save();ctx.fillStyle='#050c1e6a';ctx.fillRect(0,420,960,120);const c=now*.3;for(let k=0;k<18;k++){const x=(k*149)%960;ctx.fillStyle=k%2?'#56bfff19':'#ff729e20';ctx.beginPath();ctx.moveTo(x,426);ctx.lineTo(x+5,426);ctx.lineTo(x+Math.sin(c+k)*9+11,538);ctx.lineTo(x+Math.sin(c+k)*9-5,538);ctx.fill()}ctx.restore();}
+ }
  function drawFighter(p,now){const image=sprites[p.char]||sprites.azhi;if(!image?.complete||!image.naturalWidth)return;
  const pose=P.fighterPose(state,p,reducedMotion),game=state,winner=game?.ruleset==='team'?game.winnerTeam===(p.team??p.slot%2):game?.winner===p.slot;
  const action=p.hp<=0?'ko':game?.status==='finished'&&winner?'win':p.move?.name?(p.move.name.startsWith('light')?p.move.name:p.move.name==='super'?'special':p.move.name):p.stun>2?'hurt':p.guard?'guard':p.y>1?'jump':p.dash>0?'dash':p.crouch?'low':Math.abs(p.x-(prevState?.players?.[p.slot]?.x??p.x))>.35?'walk':'idle';

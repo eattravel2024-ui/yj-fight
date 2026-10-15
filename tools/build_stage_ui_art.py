@@ -23,7 +23,7 @@ def describe(path):
 
 def build():
     manifest = {'sourceArchive': 'User-provided 場景圖.zip',
-                'purpose': 'Prepared art only; IDs are asset IDs, not live engine stage IDs',
+                'purpose': 'Stage art assets; asset IDs differ from simulation IDs mapped in public/stage-art.js',
                 'processing': 'No crop, stretch or flatten; fullsize WebP and proportional <=640x360 preview; quality 92, alpha 100',
                 'stages': {}}
     for asset_id, (name, filename) in STAGES.items():
@@ -38,7 +38,7 @@ def build():
                 output.save(target, 'WEBP', quality=92, alpha_quality=100, method=6, exact=True)
                 outputs[role] = describe(target)
         manifest['stages'][asset_id] = {'name': name, 'source': describe(source), 'assets': outputs,
-            'note': 'Source is semi-transparent (alpha 101–250); preserved, review compositing in Phase 3.' if asset_id == 'night-market' else 'Opaque source.'}
+            'note': 'Source is semi-transparent (alpha 101–250); preserved; runtime uses an opaque underlay.' if asset_id == 'night-market' else 'Opaque source.'}
     target = ROOT / 'assets/source-art/phase1_5/stages-manifest.json'
     target.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps(manifest, ensure_ascii=False, indent=2))

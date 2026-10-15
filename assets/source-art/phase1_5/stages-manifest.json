@@ -1,6 +1,6 @@
 {
   "sourceArchive": "User-provided 場景圖.zip",
-  "purpose": "Prepared art only; IDs are asset IDs, not live engine stage IDs",
+  "purpose": "Stage art assets; asset IDs differ from simulation IDs mapped in public/stage-art.js",
   "processing": "No crop, stretch or flatten; fullsize WebP and proportional <=640x360 preview; quality 92, alpha 100",
   "stages": {
     "night-market": {
@@ -46,7 +46,7 @@
           ]
         }
       },
-      "note": "Source is semi-transparent (alpha 101–250); preserved, review compositing in Phase 3."
+      "note": "Source is semi-transparent (alpha 101–250); preserved; runtime uses an opaque underlay."
     },
     "golden-casino": {
       "name": "金沙賭城",
