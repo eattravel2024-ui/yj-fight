@@ -19,3 +19,15 @@
 .skill-button strong{white-space:normal;line-height:1.45}.skill-button{min-height:70px}
 .section-kicker{color:#dba58f}.mode.active{border-color:#df987d;background:linear-gradient(120deg,#3c2932,#24232b)}
 @media(max-width:600px){.intro,.hero{padding-left:12px}.skill-button{min-height:70px}.skill-button strong{font-size:10px}.skill-button small{font-size:8px}}
+
+/* 8.8.2: give the arena the full row; supporting panels stay available below. */
+.battle-layout,.layout{grid-template-columns:minmax(0,1fr)}
+.battle-main{min-width:0}
+.side,.aside{grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}
+.fighter-panel{grid-row:auto}
+.character-list,.char-choices{grid-template-columns:repeat(4,minmax(0,1fr))}
+.char-card img,.char-choices img{height:115px}
+body.fight-focus .game-panel{max-width:none}
+body.fight-focus .arena canvas{max-height:none;object-fit:fill}
+@media(max-width:1000px){.side,.aside{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.side,.aside{grid-template-columns:minmax(0,1fr)}.char-card img,.char-choices img{height:105px}}

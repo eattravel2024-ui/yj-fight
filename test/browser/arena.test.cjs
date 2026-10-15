@@ -90,3 +90,27 @@ test('four real browser clients start 2v2 with four retained characters',async()
  await players[0].waitForFunction(()=>window.AzhiTeamDebug.session.game.status==='playing');
  for(const p of players)assert.deepEqual(p.errors,[]);
 });
+test('wide stage keeps smaller fighters and a fixed camera after countdown and impact',async()=>{
+ for(const viewport of [{width:1440,height:900},{width:390,height:844}]){
+  const p=await page({viewport,isMobile:viewport.width<600,hasTouch:viewport.width<600});
+  await p.addInitScript(()=>{
+   window.spriteScales=[];const draw=CanvasRenderingContext2D.prototype.drawImage;
+   CanvasRenderingContext2D.prototype.drawImage=function(image,...args){
+    if(this.canvas.id==='stage'&&image?.src?.includes('/sprites/')){window.spriteScales.push(Math.abs(this.getTransform().a)*args[6]/args[2]);if(window.spriteScales.length>120)window.spriteScales.shift();}
+    return draw.call(this,image,...args);
+   };
+  });
+  await p.goto(base);await p.waitForFunction(()=>window.AzhiDebug);
+  const before=await p.locator('#stage').boundingBox();assert.ok(before.width>=viewport.width*.9);
+  await p.locator('[data-mode="practice"]').click();await p.locator('#mainAction').click();
+  await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
+  const after=await p.locator('#stage').boundingBox();assert.ok(Math.abs(before.width-after.width)<1);
+  await p.evaluate(()=>{window.spriteScales=[];window.AzhiDebug.previewHit('super');});
+  await p.waitForFunction(()=>window.spriteScales.length>=20);
+  const scales=await p.evaluate(()=>window.spriteScales);assert.ok(scales.every(s=>Math.abs(s-.76)<.001),'impact and idle frames must retain the smaller sprite scale');
+  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  assert.deepEqual(p.errors,[]);await p.screenshot({path:`coverage/wide-stage-${viewport.width}.png`,fullPage:true});
+ }
+ const team=await page({viewport:{width:1440,height:900}});await team.goto(base+'/team.html');await team.waitForFunction(()=>window.AzhiTeamDebug);
+ const arena=await team.locator('#arenaCanvas').boundingBox();assert.ok(arena.width>1296);assert.deepEqual(team.errors,[]);
+});

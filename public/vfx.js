@@ -18,9 +18,9 @@ function create(opts={}){
   const burst={type,style,x:cap(Number(e.x)||480,10,950),y:cap(Number(e.y)||330,20,515),direction,at:Number.isFinite(at)?at:performance.now(),accent:e.accent||style.color,flecks};bursts.push(burst);if(bursts.length>30)bursts.shift();return burst;
  }
  function list(now){bursts=bursts.filter(b=>now-b.at<b.style.life);return bursts}
- function camera(now){if(mode==='low'||reduce)return{x:0,y:0,scale:1};let x=0,y=0,z=0;
-  for(const b of list(now)){const t=(now-b.at)/b.style.life;if(t>.45)continue;const energy=Math.pow(1-t/.45,2)*b.style.kick*factor();x+=Math.sin(t*115+b.x*.02)*energy;y+=Math.cos(t*140+b.y*.01)*energy*.5;z+=energy*.0017}
-  return{x:cap(x,-18,18),y:cap(y,-10,10),scale:Math.min(1.035,1+z)};
+ function camera(now){if(mode==='low'||reduce)return{x:0,y:0,scale:1};let x=0,y=0;
+  for(const b of list(now)){const t=(now-b.at)/b.style.life;if(t>.45)continue;const energy=Math.pow(1-t/.45,2)*b.style.kick*factor();x+=Math.sin(t*115+b.x*.02)*energy;y+=Math.cos(t*140+b.y*.01)*energy*.5}
+  return{x:cap(x,-18,18),y:cap(y,-10,10),scale:1};
  }
  function back(ctx,now){for(const b of list(now)){
   const t=cap((now-b.at)/b.style.life,0,1),r=b.style.radius,fade=(1-t)*(1-t);

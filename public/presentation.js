@@ -25,15 +25,11 @@ function fighterPose(game,p,reducedMotion=false){
  if(Frames.CHAR[p.char]?.entrance.pose==='courage'){base.scale+=.06*flourish;base.rotation=side*.09*flourish;}
  return base;
 }
+// Keep the complete arena visible before, during and after every fight.
+// Character movement and hit feedback must never change the viewing distance.
+const FIGHTER_SCALE=.76,SPRITE_BASELINE=292;
 function createCamera(){
- let view={center:480,zoom:1};
- return {update(players,dt=1/60,locked=false){
-  if(locked){view={center:480,zoom:1};return {...view};}
-  const xs=(players||[]).map(p=>p.x).filter(Number.isFinite);if(!xs.length)return {...view};
-  const min=Math.min(...xs),max=Math.max(...xs),zoom=clamp(960/(max-min+350),1,1.16),half=480/zoom;
-  const center=clamp((min+max)/2,half,960-half),blend=1-Math.exp(-clamp(dt,0,.1)*7);
-  view={center:view.center+(center-view.center)*blend,zoom:view.zoom+(zoom-view.zoom)*blend};return {...view};
- },apply(ctx,view){ctx.translate(480,448);ctx.scale(view.zoom,view.zoom);ctx.translate(-view.center,-448);},reset(){view={center:480,zoom:1};}};
+ return {update(){return {center:480,zoom:1};},apply(){},reset(){}};
 }
 function drawEntrance(ctx,game,options={}){
  const entry=intro(game);if(!entry)return false;
@@ -52,5 +48,5 @@ function drawEntrance(ctx,game,options={}){
  const who=players[Math.min(players.length-1,Math.floor(entry.progress*players.length))];ctx.fillText(Frames.CHAR[who?.char]?.entrance.line||'全員就位，倒數後開戰。',480,511,880);
  ctx.restore();return true;
 }
-return {intro,fighterPose,skillPose,createCamera,drawEntrance};
+return {intro,fighterPose,skillPose,createCamera,drawEntrance,FIGHTER_SCALE,SPRITE_BASELINE};
 });

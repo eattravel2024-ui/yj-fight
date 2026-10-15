@@ -1,6 +1,6 @@
 {
   "name": "azhi-haixian-fighting",
-  "version": "8.8.1",
+  "version": "8.8.2",
   "private": true,
   "description": "狠話擂台 8.8：四角色出場、狠話必殺、同步倒數與 60Hz Rollback",
   "scripts": {
