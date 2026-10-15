@@ -40,10 +40,10 @@ function hit(m,attacker,target,data,move=attacker.move,source=attacker,defence=t
  const counterBonus=['special','super'].includes(move.name)&&CHAR[attacker.char].specialMode==='counter'&&(counter||move.countered)?1.38:1;
  const scale=C.comboScale(m,target,move.name,!block&&!armor);
  const dmg=Math.max(1,Math.round(scale*data.damage*CHAR[attacker.char].power*(spin?.45:1)*counterBonus*(block?data.level==='mid'&&move.name==='special'?.23:.10:armor?.26:1)));
- target.hp=clamp(target.hp-dmg,0,100);
- if(!block&&!armor){target.stun=Math.max(target.stun,data.hitstun+(counter?10:0));target.move=null;target.buffer=[];target.chain=0;target.flash=12;
+ const appliedDamage=Math.min(target.hp,dmg);target.hp=clamp(target.hp-dmg,0,100);
+ if(!block&&!armor){target.blockstun=0;target.stun=Math.max(target.stun,data.hitstun+(counter?10:0));target.move=null;target.buffer=[];target.chain=0;target.flash=12;
   if(move.name==='upper'){target.vy=6.5;target.y=Math.max(1,target.y)}
- }else if(block){target.stun=Math.max(target.stun,6)}
+ }else if(block){target.stun=Math.max(target.stun,6);target.blockstun=target.stun;}
  C.applyPushback(attacker,target,source.face*(block?7:data.knock+(counter?6:0)));
  attacker.meter=clamp(attacker.meter+(block?3:data.gain),0,100);target.meter=clamp(target.meter+(block?2:4),0,100);
  attacker.combo=!block&&m.tick-attacker.lastHit<70?attacker.combo+1:block?0:1;attacker.lastHit=m.tick;
@@ -51,7 +51,7 @@ function hit(m,attacker,target,data,move=attacker.move,source=attacker,defence=t
  move.hitCounts=move.hitCounts||{};move.hitCounts[target.slot]=(move.hitCounts[target.slot]||0)+1;
  const stop=block?4:move.name==='super'?12:move.name==='special'?10:move.name==='heavy'||move.name==='upper'?8:5;
  m.hitstop=Math.max(m.hitstop,stop);
- m.events.push({kind:armor?'armor':'hit',slot:attacker.slot,target:target.slot,x:target.x,y:target.y,damage:dmg,block,combo:attacker.combo,counter,move:move.name,hitstop:stop});
+ m.events.push({kind:armor?'armor':'hit',slot:attacker.slot,target:target.slot,x:target.x,y:target.y,damage:dmg,appliedDamage,block,combo:attacker.combo,counter,counterBoost:counterBonus>1,move:move.name,hitstop:stop});
 }
 function spawnProjectile(m,p){
  C.spawnSpecialProjectile(m,p);m.projectiles.at(-1).team=p.team;
@@ -60,11 +60,11 @@ function updateProjectiles(m,snapshots=C.combatSnapshots(m)){for(let i=m.project
  const owner=m.players[shot.owner];const box={x:shot.x-shot.w/2,y:shot.y-shot.h/2,w:shot.w,h:shot.h};
  const defence=snapshots.filter(q=>q.hp>0&&q.team===1-shot.team&&B.intersect(box,B.hurtbox(q))).sort((a,b)=>Math.abs(a.x-shot.x)-Math.abs(b.x-shot.x)||a.slot-b.slot)[0],foe=defence?m.players[defence.slot]:null;
  if(foe){const blocked=defence.guard&&(shot.level==='low'?defence.crouch:!defence.crouch);const scale=C.comboScale(m,foe,shot.fromMove,!blocked);const dmg=Math.max(1,Math.round(scale*shot.damage*CHAR[owner.char].power*(blocked?.1:1)));
-  foe.hp=clamp(foe.hp-dmg,0,100);if(!blocked){foe.stun=Math.max(foe.stun,30);foe.move=null;foe.buffer=[];foe.chain=0;foe.flash=12}else foe.stun=Math.max(foe.stun,5);
+  const appliedDamage=Math.min(foe.hp,dmg);foe.hp=clamp(foe.hp-dmg,0,100);if(!blocked){foe.blockstun=0;foe.stun=Math.max(foe.stun,30);foe.move=null;foe.buffer=[];foe.chain=0;foe.flash=12}else{foe.stun=Math.max(foe.stun,5);foe.blockstun=foe.stun;}
   C.applyPushback(owner,foe,Math.sign(shot.vx)*24);if(owner.move?.name===shot.fromMove)owner.move.hit=true;
   owner.combo=!blocked&&m.tick-owner.lastHit<70?owner.combo+1:blocked?0:1;owner.lastHit=m.tick;
   owner.meter=clamp(owner.meter+(blocked?2:8),0,100);m.hitstop=Math.max(m.hitstop,blocked?4:7);
-  m.events.push({kind:'hit',slot:owner.slot,target:foe.slot,x:foe.x,y:foe.y,damage:dmg,block:blocked,combo:owner.combo,counter:false,move:shot.fromMove||'special',hitstop:blocked?4:7});m.projectiles.splice(i,1);continue;}
+  m.events.push({kind:'hit',slot:owner.slot,target:foe.slot,x:foe.x,y:foe.y,damage:dmg,appliedDamage,block:blocked,combo:owner.combo,counter:false,move:shot.fromMove||'special',hitstop:blocked?4:7});m.projectiles.splice(i,1);continue;}
  if(shot.life<=0||shot.x<-50||shot.x>1010)m.projectiles.splice(i,1);
 }}
 function resolveAll(m){for(let rep=0;rep<3;rep++)for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){
@@ -125,6 +125,6 @@ function step(m){
  updateProjectiles(m,snapshots);for(const p of m.players)C.resolveCancels(m,p,startMove);
  resolveAll(m);finishRound(m);
 }
-function serialize(m){return {ruleset:'team',type:'state',status:m.status,round:m.round,time:Math.max(0,Math.ceil(m.time)),tick:m.tick,introDuration:m.introDuration||0,introFrames:m.introFrames||0,serverHz:FPS,stage:m.stage,scores:m.scores.slice(),winnerTeam:m.winnerTeam,hitstop:m.hitstop,projectiles:m.projectiles.map(p=>({...p})),players:m.players.map(p=>({slot:p.slot,team:p.team,char:p.char,x:p.x,y:p.y,hp:p.hp,meter:p.meter,face:p.face,guard:p.guard,crouch:p.crouch,stun:p.stun,move:p.move?{name:p.move.name,frame:p.move.frame,hit:p.move.hit,blocked:p.move.blocked}:null,flash:p.flash,combo:p.combo,dash:p.dash,vy:p.vy,armorTimer:p.armorTimer,armorCharges:p.armorCharges})),events:m.events.splice(0,50)};}
+function serialize(m){return {ruleset:'team',type:'state',status:m.status,round:m.round,time:Math.max(0,Math.ceil(m.time)),tick:m.tick,introDuration:m.introDuration||0,introFrames:m.introFrames||0,serverHz:FPS,stage:m.stage,scores:m.scores.slice(),winnerTeam:m.winnerTeam,hitstop:m.hitstop,projectiles:m.projectiles.map(p=>({...p})),players:m.players.map(p=>({slot:p.slot,team:p.team,char:p.char,x:p.x,y:p.y,hp:p.hp,meter:p.meter,face:p.face,guard:p.guard,crouch:p.crouch,stun:p.stun,blockstun:p.blockstun,move:p.move?{name:p.move.name,frame:p.move.frame,hit:p.move.hit,blocked:p.move.blocked}:null,flash:p.flash,combo:p.combo,dash:p.dash,vy:p.vy,armorTimer:p.armorTimer,armorCharges:p.armorCharges})),events:m.events.splice(0,50)};}
 return {FPS,CHAR,teams,ATTACKS,create,input,step,serialize,nearest,living};
 });

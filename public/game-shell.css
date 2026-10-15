@@ -436,3 +436,29 @@ body.game-app{
  .app-menu #fighterSelect .char-card .data,.app-menu #fighterSelect .char-choices .data{padding:8px 5px}
  .app-menu-foot .app-confirm-action{min-width:140px;font-size:12px}
 }
+
+/* One compact live hint and one brief receipt; neither consumes arena height. */
+.combat-coach,.combat-receipt{position:absolute;z-index:8;pointer-events:none;left:50%;transform:translateX(-50%);width:min(560px,calc(100% - 28px));padding:8px 13px;border:1px solid #375369;border-radius:4px;background:#07131de8;line-height:1.5;text-align:center}
+.combat-coach{bottom:10px}
+.combat-coach strong,.combat-receipt strong{display:block;font-size:12px;color:#d4e9f3}
+.combat-coach span,.combat-receipt span{display:block;font-size:10px;color:#93b2c4;margin-top:2px}
+.combat-coach[data-state=cancel]{border-color:#70e7de;background:#0a3033eb}
+.combat-coach[data-state=cancel] strong{color:#91fff0}
+.combat-coach[data-state=super-ready] strong{color:#ffe2a3}
+.combat-receipt{top:45px;width:min(430px,calc(100% - 28px));border-color:#778b9c;background:#101d29ed}
+.combat-receipt[data-state=hit]{border-color:#efca74}
+.combat-receipt[data-state=hit] strong{color:#ffe3a6}
+.combat-receipt[data-state=miss] strong{color:#b2c4d0}
+.combat-receipt[data-state=armor] strong{color:#ffe3a6}
+@media(max-width:600px),(max-height:550px){
+ .combat-coach,.combat-receipt{padding:5px 8px;width:min(500px,calc(100% - 18px))}
+ .combat-coach{bottom:6px}
+ .combat-coach strong,.combat-receipt strong{font-size:10px}
+ .combat-coach span,.combat-receipt span{font-size:9px;line-height:1.35}
+ .combat-receipt{top:34px;width:min(350px,calc(100% - 18px))}
+}
+
+.arena.coaching #inputReadout{display:none}
+
+.combat-receipt[data-state=hit] strong{font-size:16px}
+@media(max-width:600px),(max-height:550px){.combat-receipt[data-state=hit] strong{font-size:13px}}

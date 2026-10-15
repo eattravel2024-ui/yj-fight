@@ -9,7 +9,7 @@ const AI=typeof require==='function'&&typeof module==='object'?require('./engine
 function moveFor(p,name){const base=Object.hasOwn(MOVE,name)?MOVE[name]:null;if(!base)return null;const cid=typeof p==='string'?p:p?.char;const mod=Object.hasOwn(CHAR,cid)?CHAR[cid].moves?.[name]:null;if(!mod)return base;const m={...base,...mod};m.start=m.startup;m.cancelStart=m.startup+Math.max(1,Math.floor(m.active*.45));m.cancelEnd=m.startup+m.active+Math.max(2,Math.floor(m.recovery*.36));m.cancelable=true;m.cancelWindow=[m.cancelStart,m.cancelEnd];return m;}
 const ATTACKS=['light','heavy','kick','low','upper','throw','special','super'];
 const bound=(v,a,b)=>Math.max(a,Math.min(b,v));
-function fighter(char,slot){char=Object.hasOwn(CHAR,char)?char:'azhi';return {slot,char,x:slot?686:274,y:0,vy:0,face:slot?-1:1,hp:100,meter:30,wins:0,stun:0,guard:false,crouch:false,move:null,combo:0,lastHit:-999,comboTaken:0,comboFrameBase:0,lastDamageTick:-999,flash:0,dash:0,dashCd:0,inputs:{},prev:{},buffer:[],ko:false,chain:0,airHits:0,cpuWait:0,motion:[],lastCommand:-100,guardFrames:0,lastDashCommand:-100,armorTimer:0,armorCharges:0}}
+function fighter(char,slot){char=Object.hasOwn(CHAR,char)?char:'azhi';return {slot,char,x:slot?686:274,y:0,vy:0,face:slot?-1:1,hp:100,meter:30,wins:0,stun:0,blockstun:0,guard:false,crouch:false,move:null,combo:0,lastHit:-999,comboTaken:0,comboFrameBase:0,lastDamageTick:-999,flash:0,dash:0,dashCd:0,inputs:{},prev:{},buffer:[],ko:false,chain:0,airHits:0,cpuWait:0,motion:[],lastCommand:-100,guardFrames:0,lastDashCommand:-100,armorTimer:0,armorCharges:0}}
 function create(a='azhi',b='winnie',opts={}){const m={players:[fighter(a,0),fighter(b,1)],tick:0,round:1,time:75,status:'playing',pause:0,events:[],difficulty:opts.difficulty??1,stage:opts.stage||'night',seed:opts.seed||137,hitstop:0,projectiles:[],practice:!!opts.practice,introDuration:introLength(opts.introFrames),introFrames:introLength(opts.introFrames)};if(opts.practice){m.players[0].meter=100;m.players[1].meter=100;}return m;}
 function introLength(value){return Number.isSafeInteger(value)?bound(value,0,180):0}
 function entranceStep(m){if(!(m.introFrames>0))return false;m.introFrames--;for(const p of m.players){p.inputs={};p.prev={};p.buffer=[];p.motion=[];}return true}
@@ -43,9 +43,9 @@ function canAfford(p,name){const data=moveFor(p,name);return !!data&&p.meter>=(d
 function bufferedMove(p,predicate=()=>true){return p.buffer.find(q=>predicate(q.key)&&canAfford(p,q.key))}
 // Resolve timer expiry and guard for every fighter before either side can hit.
 function prepareFighter(p,tick){
- p.stun=Math.max(0,p.stun-1);p.flash=Math.max(0,p.flash-1);p.armorTimer=Math.max(0,p.armorTimer-1);if(!p.armorTimer)p.armorCharges=0;p.dashCd=Math.max(0,p.dashCd-1);
+ p.stun=Math.max(0,p.stun-1);p.blockstun=Math.max(0,(p.blockstun||0)-1);p.flash=Math.max(0,p.flash-1);p.armorTimer=Math.max(0,p.armorTimer-1);if(!p.armorTimer)p.armorCharges=0;p.dashCd=Math.max(0,p.dashCd-1);
  p.buffer=p.buffer.filter(q=>q.until>=tick);p.crouch=!!p.inputs.down&&p.y===0&&!p.move;
- p.guard=!!p.inputs.guard&&p.stun===0&&!p.move&&p.y===0;
+ p.guard=!!p.inputs.guard&&(p.stun===0||p.blockstun>0)&&!p.move&&p.y===0;
 }
 function overlap(p,foe,d){return Boxes.hits(p,foe,d)}
 // Freeze contact geometry/defence before applying any same-frame damage or pushback.
@@ -71,21 +71,21 @@ function hit(m,p,foe,a=p.move,source=p,defence=foe){if(!a||a.hit)return;const d=
  const scale=comboScale(m,foe,a.name,!blocking&&!armored);
  const dmg=Math.max(1,Math.round(scale*d.damage*CHAR[p.char].power*multi*counterBonus*(blocking?d.level==='mid'&&a.name==='special'?.23:.10:armored?.26:1)));
  a.hit=true;a.blocked=blocking;a.hits=(a.hits||0)+1;
- foe.hp=bound(foe.hp-dmg,0,100);
- if(!blocking&&!armored){foe.stun=Math.max(foe.stun,d.hitstun+(counter?10:0));foe.move=null;foe.buffer=[];foe.chain=0;foe.flash=12;
+ const appliedDamage=Math.min(foe.hp,dmg);foe.hp=bound(foe.hp-dmg,0,100);
+ if(!blocking&&!armored){foe.blockstun=0;foe.stun=Math.max(foe.stun,d.hitstun+(counter?10:0));foe.move=null;foe.buffer=[];foe.chain=0;foe.flash=12;
   if(a.name==='upper'){foe.vy=6.5;foe.y=Math.max(foe.y,1)}
- }else if(!armored)foe.stun=Math.max(6,foe.stun);
+ }else if(!armored){foe.stun=Math.max(6,foe.stun);foe.blockstun=foe.stun;}
  applyPushback(p,foe,source.face*(blocking?7:d.knock+(counter?6:0)));
  p.meter=bound(p.meter+(blocking?3:d.gain),0,100);foe.meter=bound(foe.meter+(blocking?2:4),0,100);
  p.combo=(!blocking&&m.tick-p.lastHit<70)?p.combo+1:(blocking?0:1);p.lastHit=m.tick;
  const stop=blocking?4:a.name==='super'?12:a.name==='special'?10:a.name==='heavy'||a.name==='upper'?8:5;m.hitstop=Math.max(m.hitstop,stop);
- m.events.push({kind:armored?'armor':'hit',slot:p.slot,x:foe.x,y:foe.y,damage:dmg,block:blocking,combo:p.combo,counter,move:a.name,hitstop:stop});
+ m.events.push({kind:armored?'armor':'hit',slot:p.slot,target:foe.slot,x:foe.x,y:foe.y,damage:dmg,appliedDamage,block:blocking,combo:p.combo,counter,counterBoost:counterBonus>1,move:a.name,hitstop:stop});
 }
 function spawnSpecialProjectile(m,p){
  const isSuper=p.move?.name==='super';const isWave=p.char==='winnie';
  // Deterministic seeded roulette: every client/server running identical inputs gets the same outcome.
  const roll=CHAR[p.char].specialMode==='cards'?rng(m):.5;
- const fortune=CHAR[p.char].specialMode==='cards'?(roll<.16?'jackpot':roll>.91?'blank':'standard'):'standard';
+ const fortune=CHAR[p.char].specialMode==='cards'?(roll<.16?'jackpot':roll>.91&&!isSuper?'blank':'standard'):'standard';
  if(CHAR[p.char].specialMode==='cards'){m.events.push({kind:'fortune',slot:p.slot,fortune});if(fortune==='blank')p.stun=Math.max(p.stun,9)}
  const py=isWave?35:p.y+112;
  m.projectiles.push({owner:p.slot,char:p.char,kind:isWave?'wave':'card',level:isWave?'low':'mid',x:p.x+p.face*(isWave?65:62),y:py,vx:p.face*(isWave?8.2:10.5),life:isWave?45:42,w:isWave?(isSuper?81:58):(isSuper?52:38),h:isWave?34:24,damage:(isWave?14:16)*(isSuper?1.85:1)*(fortune==='jackpot'?1.75:fortune==='blank'?.3:1),fortune,fromMove:p.move?.name||'special'});
@@ -100,13 +100,13 @@ function updateProjectiles(m,snapshots=combatSnapshots(m)){
    const blocked=defence.guard&&(shot.level==='low'?defence.crouch:!defence.crouch);
    const scale=comboScale(m,foe,shot.fromMove,!blocked);
    const dmg=Math.max(1,Math.round(scale*shot.damage*CHAR[p.char].power*(blocked?.1:1)));
-   foe.hp=bound(foe.hp-dmg,0,100);
-   if(!blocked){foe.stun=Math.max(foe.stun,30);foe.move=null;foe.chain=0;foe.flash=12;}else foe.stun=Math.max(foe.stun,5);
+   const appliedDamage=Math.min(foe.hp,dmg);foe.hp=bound(foe.hp-dmg,0,100);
+   if(!blocked){foe.blockstun=0;foe.stun=Math.max(foe.stun,30);foe.move=null;foe.chain=0;foe.flash=12;}else{foe.stun=Math.max(foe.stun,5);foe.blockstun=foe.stun;}
    applyPushback(p,foe,Math.sign(shot.vx)*24);
    if(p.move?.name===shot.fromMove)p.move.hit=true;
    p.combo=(!blocked&&m.tick-p.lastHit<70)?p.combo+1:(blocked?0:1);p.lastHit=m.tick;
    p.meter=bound(p.meter+(blocked?2:8),0,100);m.hitstop=Math.max(m.hitstop,blocked?4:7);
-   m.events.push({kind:'hit',slot:p.slot,x:foe.x,y:foe.y,damage:dmg,block:blocked,combo:p.combo,counter:false,move:shot.fromMove||'special',hitstop:blocked?4:7});
+   m.events.push({kind:'hit',slot:p.slot,target:foe.slot,x:foe.x,y:foe.y,damage:dmg,appliedDamage,block:blocked,combo:p.combo,counter:false,move:shot.fromMove||'special',hitstop:blocked?4:7});
    m.projectiles.splice(i,1);continue;
   }
   if(shot.life<=0||shot.x<0||shot.x>960)m.projectiles.splice(i,1);
@@ -201,7 +201,7 @@ function step(m){if(m.status==='between'){if(--m.pause<=0){m.round++;reset(m)}re
  resolvePushboxes(a,b);
  if(m.time<=0||m.players.some(p=>p.hp<=0))endRound(m);
 }
-function serialize(m){return {type:'state',status:m.status,round:m.round,time:Math.max(0,Math.ceil(m.time)),tick:m.tick,introDuration:m.introDuration||0,introFrames:m.introFrames||0,serverHz:FPS,stage:m.stage,difficulty:m.difficulty,winner:m.winner??null,hitstop:m.hitstop,projectiles:m.projectiles.map(p=>({...p})),players:m.players.map(p=>({slot:p.slot,char:p.char,x:p.x,y:p.y,hp:p.hp,meter:p.meter,face:p.face,guard:p.guard,crouch:p.crouch,stun:p.stun,move:p.move?{name:p.move.name,frame:p.move.frame,hit:p.move.hit,blocked:p.move.blocked}:null,flash:p.flash,combo:p.combo,dash:p.dash,wins:p.wins,vy:p.vy,armorTimer:p.armorTimer,armorCharges:p.armorCharges})),events:m.events.splice(0,40)}}
+function serialize(m){return {type:'state',status:m.status,round:m.round,time:Math.max(0,Math.ceil(m.time)),tick:m.tick,introDuration:m.introDuration||0,introFrames:m.introFrames||0,serverHz:FPS,stage:m.stage,difficulty:m.difficulty,winner:m.winner??null,hitstop:m.hitstop,projectiles:m.projectiles.map(p=>({...p})),players:m.players.map(p=>({slot:p.slot,char:p.char,x:p.x,y:p.y,hp:p.hp,meter:p.meter,face:p.face,guard:p.guard,crouch:p.crouch,stun:p.stun,blockstun:p.blockstun,move:p.move?{name:p.move.name,frame:p.move.frame,hit:p.move.hit,blocked:p.move.blocked}:null,flash:p.flash,combo:p.combo,dash:p.dash,wins:p.wins,vy:p.vy,armorTimer:p.armorTimer,armorCharges:p.armorCharges})),events:m.events.splice(0,40)}}
 function cpu(m,slot,skill=1,passive=false){
  const p=m.players[slot],foe=m.players[1-slot];if(passive){input(m,slot,{});return}
  if(p.cpuWait>0){p.cpuWait--;input(m,slot,p.cpuKeys||{});return}

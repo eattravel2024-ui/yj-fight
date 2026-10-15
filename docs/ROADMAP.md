@@ -10,7 +10,7 @@
 ## P1 — user experience and core mechanics
 - [x] 8.9.5: shared full-window shell and in-game lobby/selection/rooms/settings/guide in both 1v1 and 2v2/spectator clients; preserves named rooms, invitations, Ready and rematch. Follow-up: public room discovery, reconnect and private-room permissions.
 - Mac keyboard focus and mobile virtual controls customization; accessible touch areas.
-- Practice/tutorial: input buffering, cancel windows, hitstop, combos, anti-air and team mechanics.
+- [x] 8.9.7: live cancel/energy hints and actual skill hit receipts; supers verified in both rulesets. Continue tutorials for anti-air and team mechanics.
 - 8.9: same-frame contact trades and combo damage scaling implemented in both rulesets with rollback replay tests. Next: balance the four characters with matchup simulations, real matches and aggregate telemetry (opt-in where appropriate).
 
 ## P2 — polish and growth
@@ -20,6 +20,7 @@
 - 8.9.4: user-provided arcade UI integrated with real HP, energy, damage trails and round wins; preserves viewport fit and accessible reduced motion.
 - 8.9.5: animated in-game panels, fixed selection confirmation, keyboard focus/Escape, local menu pause, neutral online menu input and automatic room navigation after disconnect. Native fullscreen is optional; responsive viewport fit works without it.
 - 8.9.6: mode/fighter selection combined in the lobby, uniform photo crops and card states, one fixed primary action and no Fight Fund panel.
+- 8.9.7: compact live combat coach, authoritative online damage receipts and reduced 320ms super cut-ins; fixes low-damage super roulette and continuous multi-hit guard.
 - Private local stats, achievements, match replay export with privacy safeguards.
 - Spectator camera/timeline and safe anonymized display names.
 - Gamepad support, captions for effects, reduced motion and low-end device mode.

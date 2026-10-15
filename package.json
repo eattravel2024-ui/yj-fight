@@ -1,11 +1,11 @@
 {
   "name": "azhi-haixian-fighting",
-  "version": "8.9.6",
+  "version": "8.9.7",
   "private": true,
-  "description": "狠話擂台 8.9.6：滿版擂台、遊戲內大廳、選角與設定",
+  "description": "狠話擂台 8.9.7：滿版擂台、遊戲內大廳、選角與設定",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node --check public/core.js && node --check public/game.js && node --check public/rollback.js && node --check public/team-core.js && node --check public/team.js && node --check public/vfx.js && node --check public/engine/frame-data.js && node --check public/engine/commands.js && node --check public/engine/boxes.js && node --check public/engine/animation.js && node --check public/engine/ai.js && node --check public/skill-vfx.js && node --check public/legacy.js && node --check public/presentation.js && node --check public/lobby.js && node --check public/hud.js && node --check public/game-shell.js",
+    "check": "node --check server.js && node --check public/core.js && node --check public/game.js && node --check public/rollback.js && node --check public/team-core.js && node --check public/team.js && node --check public/vfx.js && node --check public/engine/frame-data.js && node --check public/engine/commands.js && node --check public/engine/boxes.js && node --check public/engine/animation.js && node --check public/engine/ai.js && node --check public/skill-vfx.js && node --check public/legacy.js && node --check public/presentation.js && node --check public/lobby.js && node --check public/hud.js && node --check public/game-shell.js && node --check public/combat-coach.js",
     "test": "node --test test/*.test.js",
     "test:e2e": "node --test test/browser/*.test.cjs"
   },

@@ -146,6 +146,40 @@ test('each fighter has a named entrance and a matching one-button skill in the b
  }
  assert.deepEqual(p.errors,[]);
 });
+test('live combat coaching follows real J K U cancels and reports actual signature damage',async()=>{
+ const p=await page({viewport:{width:1366,height:768}});await p.goto(base);await chooseMode(p,'practice');await p.locator('#mainAction').click();
+ await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
+ await p.evaluate(()=>{const g=window.AzhiDebug.local;g.players[0].x=300;g.players[1].x=375;});
+ await p.locator('#stage').focus();await p.keyboard.press('KeyJ');
+ await p.waitForFunction(()=>document.querySelector('.combat-coach').dataset.state==='cancel');
+ assert.match(await p.locator('.combat-coach strong').textContent(),/K 重拳/);
+ await p.keyboard.press('KeyK');await p.waitForFunction(()=>window.AzhiDebug.local.players[0].move?.name==='heavy');
+ await p.waitForFunction(()=>document.querySelector('.combat-coach').dataset.state==='cancel');
+ assert.match(await p.locator('.combat-coach strong').textContent(),/U 必殺/);
+ await p.keyboard.press('KeyU');await p.waitForFunction(()=>window.AzhiDebug.local.players[0].move?.name==='special');
+ await p.waitForFunction(()=>document.querySelector('.combat-receipt').dataset.state==='hit');
+ assert.match(await p.locator('.combat-receipt strong').textContent(),/加油加300.*HP/);
+ assert.equal(await p.locator('#inputReadout').isVisible(),false);
+ assert.deepEqual(p.errors,[]);
+});
+test('all four one-button supers show real damage receipts; close-range misses are explained',async()=>{
+ const p=await page({viewport:{width:1366,height:768}});await p.goto(base);
+ for(const [i,id] of ['winnie','sezi','gambler','azhi'].entries()){
+  await chooseMode(p,'practice');await p.locator('#characterList button').nth(i).click();await p.locator('#mainAction').click();await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
+  await p.evaluate(()=>{const g=window.AzhiDebug.local;g.seed=1800;g.players[0].x=300;g.players[1].x=410;});
+  await p.locator('#superTrigger').click();await p.waitForFunction(()=>document.querySelector('.combat-receipt').dataset.state==='hit');
+  await p.waitForFunction(()=>!window.AzhiDebug.local.players[0].move&&!window.AzhiDebug.local.projectiles.length);
+  const damage=await p.evaluate(()=>100-window.AzhiDebug.local.players[1].hp);assert.ok(damage>=28&&damage<=36,id);
+  assert.match(await p.locator('.combat-receipt strong').textContent(),new RegExp('−'+damage+' HP'));
+  if(id==='sezi')assert.match(await p.locator('.combat-receipt span').textContent(),/3 段/);
+  if(id==='gambler')assert.ok(await p.evaluate(()=>window.AzhiDebug.local.players[0].armorTimer>0));
+  if(id==='azhi')await p.screenshot({path:'coverage/super-actual-hit.png'});
+ }
+ await chooseMode(p,'practice');await p.locator('#characterList [data-char="gambler"]').click();await p.locator('#mainAction').click();await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
+ await p.locator('#superTrigger').click();await p.waitForFunction(()=>document.querySelector('.combat-receipt').dataset.state==='miss');
+ assert.match(await p.locator('.combat-receipt span').textContent(),/靠近/);assert.equal(await p.evaluate(()=>window.AzhiDebug.local.players[1].hp),100);
+ assert.deepEqual(p.errors,[]);
+});
 test('mobile touch skill, no horizontal page overflow and reduced motion',async()=>{
  const p=await page({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'});await p.goto(base);await p.waitForFunction(()=>window.AzhiDebug);
  await chooseMode(p,'practice');await p.locator('#mainAction').click();
@@ -181,6 +215,7 @@ test('two real browser clients play 1v1 and spectator stays read only',async()=>
  assert.equal(afterMenu.meter,menuState.meter,'typing U in a menu does not trigger combat');assert.deepEqual(afterMenu.input,{keys:{},pulses:[]},'online menu sends neutral input without pausing rollback');
  await a.keyboard.up('KeyD');await a.keyboard.press('Escape');await a.locator('#stage').focus();await a.keyboard.press('KeyU');
  await a.waitForFunction(()=>window.AzhiDebug.rollback.game.players[0].meter<25);
+ await a.waitForFunction(()=>document.querySelector('.combat-receipt').dataset.state==='hit');assert.match(await a.locator('.combat-receipt strong').textContent(),/加油加300.*HP/);
  const watch=await page();await watch.goto(base+'/team.html?room=E2EDUEL&watch=1');
  await watch.waitForFunction(()=>window.AzhiTeamDebug?.role==='spectator'&&window.AzhiTeamDebug?.frame>0);
  assert.equal(await watch.evaluate(()=>window.AzhiTeamDebug.slot),-1);

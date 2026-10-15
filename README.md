@@ -1,6 +1,6 @@
 # 狠話擂台 — Big Talk / Real Fight
 
-> GitHub/Codex development baseline: **8.9.6**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.9.7**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,10 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.9.7 live combo hints and visible super results
+
+Combat now shows follow-up keys from the actual cancel tree, energy requirements, and receipts for real skill damage, blocks and misses. Online receipts use server-confirmed events. All four supers are damage-tested in 1v1 and 2v2; Azhi's super keeps jackpot chances but no longer draws a low-damage blank. Multi-hit guarding now persists through blockstun while the guard button is held. See [combat feedback notes](docs/COMBAT_FEEDBACK_8.9.7.md).
 
 ## 8.9.6 focused lobby
 
