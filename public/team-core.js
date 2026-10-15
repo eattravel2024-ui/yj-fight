@@ -35,9 +35,9 @@ function hit(m,attacker,target,data){
  if(target.dash>0&&target.dash<=6)return;
  const block=target.guard&&data.level!=='throw'&&(data.level==='mid'||(data.level==='low'&&target.crouch)||(data.level==='high'&&!target.crouch));
  const counter=!block&&!!target.move&&target.move.frame<C.moveFor(target,target.move.name).start;
- const armor=!block&&target.char==='azhi'&&target.armorCharges>0&&target.armorTimer>0&&['light','light2','light3'].includes(move.name);
+ const armor=!block&&CHAR[target.char].specialMode==='counter'&&target.armorCharges>0&&target.armorTimer>0&&['light','light2','light3'].includes(move.name);
  if(armor){target.armorCharges--;if(target.move&&['special','super'].includes(target.move.name))target.move.countered=true;}
- const counterBonus=['special','super'].includes(move.name)&&attacker.char==='azhi'&&(counter||move.countered)?1.38:1;
+ const counterBonus=['special','super'].includes(move.name)&&CHAR[attacker.char].specialMode==='counter'&&(counter||move.countered)?1.38:1;
  const dmg=Math.max(1,Math.round(data.damage*CHAR[attacker.char].power*(spin?.45:1)*counterBonus*(block?data.level==='mid'&&move.name==='special'?.23:.10:armor?.26:1)));
  target.hp=clamp(target.hp-dmg,0,100);
  if(!block&&!armor){target.stun=Math.max(target.stun,data.hitstun+(counter?10:0));target.move=null;target.buffer=[];target.chain=0;target.flash=12;
@@ -99,7 +99,7 @@ function step(m){
  for(const p of m.players){if(p.hp<=0)continue;
   if(p.move){const name=p.move.name,d=C.moveFor(p,name);p.move.frame++;
    if(p.move.frame>=d.start&&p.move.frame<d.start+d.active){
-    if((name==='special'||name==='super')&&['gambler','winnie'].includes(p.char)){
+    if((name==='special'||name==='super')&&['cards','shockwave'].includes(CHAR[p.char].specialMode)){
       if(!p.move.spawned){spawnProjectile(m,p);p.move.spawned=true}
     }else{
       if((name==='special'||name==='super')&&p.char==='sezi')p.x=clamp(p.x+p.face*3.3,48,912);

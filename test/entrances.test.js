@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
 const C=require('../public/core'),T=require('../public/team-core'),RB=require('../public/rollback');
-const names=['不同意的請舉手','高雄發大財','加油加300','膽大撐死膽小餓死'];
+const names=['不同意的請舉手','高雄發大財','膽大撐死膽小餓死','加油加300'];
 test('requested signature names preserve all four character identities',()=>{
  assert.deepEqual(Object.values(C.CHAR).map(c=>c.special),names);
  assert.ok(Object.values(C.CHAR).every(c=>c.entrance&&c.entrance.line));

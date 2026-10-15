@@ -30,8 +30,8 @@ test('confirmed special can cancel to super when 60 meter remains',()=>{
  assert.equal(p.move?.name,'super');assert.equal(p.meter,40);
  assert.ok(m.events.some(e=>e.kind==='super'));
 });
-test('super requires meter, and its hitstop is stronger than a light jab',()=>{
- const m=C.create();
+test('melee super requires meter, and its hitstop is stronger than a light jab',()=>{
+ const m=C.create('gambler','winnie');
  C.input(m,0,{pulses:['super']});C.step(m);assert.equal(m.players[0].move,null);
  m.players[0].meter=100;m.players[0].x=430;m.players[1].x=515;
  C.input(m,0,{pulses:['super']});
@@ -61,16 +61,16 @@ test('browser includes I uppercut, O super and rematch controls',()=>{
  assert.match(html,/id="rematchButton"/);assert.match(browser,/KeyO:'super'/);
  assert.match(server,/msg\.type==='rematch'/);assert.match(server,/room\.rematchVotes\.size===room\.maxPlayers/);
 });
-test('Azhi black-gold armor absorbs the first light hit without hitstun',()=>{
- const m=C.create('winnie','azhi');const attacker=m.players[0],foe=m.players[1];
+test('Gambler black-gold armor absorbs the first light hit without hitstun',()=>{
+ const m=C.create('winnie','gambler');const attacker=m.players[0],foe=m.players[1];
  attacker.x=430;foe.x=510;foe.armorTimer=90;foe.armorCharges=1;
  C.input(m,0,{pulses:['light']});
  for(let i=0;i<8;i++)C.step(m);
  assert.ok(foe.hp<100);assert.equal(foe.stun,0);assert.equal(foe.armorCharges,0);
  assert.ok(m.events.some(e=>e.kind==='armor'));
 });
-test('Gambler fortune effects use deterministic seeded RNG, not Math.random',()=>{
- const a=C.create('gambler','winnie',{seed:199}),b=C.create('gambler','winnie',{seed:199});
+test('Transferred fortune effects use deterministic seeded RNG, not Math.random',()=>{
+ const a=C.create('azhi','winnie',{seed:199}),b=C.create('azhi','winnie',{seed:199});
  for(const m of [a,b]){
   m.players[0].meter=100;
   C.input(m,0,{pulses:['special']});

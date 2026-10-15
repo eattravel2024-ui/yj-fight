@@ -58,8 +58,8 @@ test('right-side character specials respect mirrored facing and active boxes',()
  const m=C.create('winnie','gambler');const [a,b]=m.players;a.x=370;b.x=500;b.face=-1;
  assert.ok(C.overlap(b,a,C.moveFor(b,'special')));
 });
-test('gambler launches a real projectile that crosses distance and hits',()=>{
- const m=C.create('gambler','winnie');const [p,foe]=m.players;p.x=275;foe.x=540;p.meter=100;
+test('Azhi launches the transferred real projectile that crosses distance and hits',()=>{
+ const m=C.create('azhi','winnie');const [p,foe]=m.players;p.x=275;foe.x=540;p.meter=100;
  C.input(m,0,{special:true});C.input(m,1,{});
  let spawned=false,hit=false;
  for(let i=0;i<90;i++){

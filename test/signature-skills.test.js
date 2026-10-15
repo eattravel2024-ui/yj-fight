@@ -2,7 +2,7 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const Core=require('../public/core.js'),Team=require('../public/team-core.js'),RB=require('../public/rollback.js');
 const IDS=['winnie','sezi','gambler','azhi'];
-const NAMES={winnie:'不同意的請舉手',sezi:'高雄發大財',gambler:'加油加300',azhi:'膽大撐死膽小餓死'};
+const NAMES={winnie:'不同意的請舉手',sezi:'高雄發大財',gambler:'膽大撐死膽小餓死',azhi:'加油加300'};
 function game(core,id='azhi'){
  const m=core===Core?core.create(id,'winnie',{seed:73}):core.create([id,'winnie','gambler','sezi'],{seed:73});
  m.players.forEach((p,i)=>{p.x=[340,450,100,850][i];});
@@ -47,7 +47,7 @@ for(const [mode,core] of [['1v1',Core],['2v2',Team]]){
   p.face=1;assert.equal(event.direction,-1,'later facing changes must not reverse an activated effect');
  });
  test(`${mode}: projectile super impacts preserve the source move for visual feedback`,()=>{
-  for(const id of ['winnie','gambler']){const m=game(core,id);m.players[0].meter=100;
+  for(const id of ['winnie','azhi']){const m=game(core,id);m.players[0].meter=100;
    core.input(m,0,{pulses:['super']});advance(core,m,50);
    const impact=m.events.find(e=>e.kind==='hit'&&e.slot===0);assert.ok(impact,`${id} projectile should hit`);
    assert.equal(impact.move,'super',`${id} super impact must keep its source move`);
@@ -75,8 +75,8 @@ for(const [mode,core] of [['1v1',Core],['2v2',Team]]){
   }
   assert.equal(hp[0],hp[1]);
  });
- test(`${mode}: Azhi signature absorbs an opening jab once and records the counter charge`,()=>{
-  const m=game(core),p=m.players[0],foe=m.players[1];foe.char='azhi';foe.x=p.x+75;
+ test(`${mode}: Gambler signature absorbs an opening jab once and records the counter charge`,()=>{
+  const m=game(core,'gambler'),p=m.players[0],foe=m.players[1];foe.char='azhi';foe.x=p.x+75;
   core.input(m,0,{special:true});core.step(m);
   foe.move={name:'light',frame:Core.moveFor(foe,'light').start-1,hit:false,blocked:false,hits:0,spawned:false,hitSlots:[]};
   core.step(m);assert.equal(p.move?.name,'special');assert.equal(p.move?.countered,true);

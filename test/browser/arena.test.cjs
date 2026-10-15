@@ -41,7 +41,7 @@ test('desktop practice: four fighters, easy skill and preserved legacy entry',as
 });
 test('each fighter has a named entrance and a matching one-button skill in the browser',async()=>{
  const p=await page({viewport:{width:1280,height:900}});await p.goto(base);await p.waitForFunction(()=>window.AzhiDebug);
- for(const [i,name] of ['不同意的請舉手','高雄發大財','加油加300','膽大撐死膽小餓死'].entries()){
+ for(const [i,name] of ['不同意的請舉手','高雄發大財','膽大撐死膽小餓死','加油加300'].entries()){
   await p.locator('[data-mode="practice"]').click();await p.locator('#characterList button').nth(i).click();await p.locator('#mainAction').click();
   await p.waitForFunction(()=>window.AzhiDebug.local.introFrames>0);
   assert.equal(await p.locator('#specialName').textContent(),name);

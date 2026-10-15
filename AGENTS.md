@@ -2,7 +2,7 @@
 
 ## Goal
 Maintain and improve the existing browser-based 60 Hz fighting game, without removing existing modes.
-Current baseline: 8.8.0. Preserve the four playable characters (維尼, 塞子, 金沙賭神, 阿志), 1v1, 2v2, spectators, player/room names, arcade mode, and WebSocket networking. Sam was removed at the user’s request; do not restore that character or its assets.
+Current baseline: 8.8.1. Preserve the four playable characters (維尼, 塞子, 金沙賭神, 阿志), 1v1, 2v2, spectators, player/room names, arcade mode, and WebSocket networking. Sam was removed at the user’s request; do not restore that character or its assets.
 
 ## Source map
 - `server.js`: HTTP + authoritative WebSocket rooms, 1v1 and 2v2, validation and identities.
@@ -38,3 +38,6 @@ Current baseline: 8.8.0. Preserve the four playable characters (維尼, 塞子, 
 3. Privacy and auth boundaries: room password/invite, spectator permissions, abuse/rate limits.
 4. Gameplay tuning, training/tutorial flow, touch ergonomics.
 5. 2v2 load, latency and rollback testing; state checksum/desync diagnostics.
+
+## User preference: fast iteration
+Reuse the current development branch for small follow-up changes; do not create a new branch or require a new PR for every iteration. Run the relevant lightweight checks automatically. Use browser or extended suites only when justified by the change. Package one current source archive and give short manual VPS update instructions; never connect to production. Consolidate review/PRs at milestones rather than making the user manage branch stacks.

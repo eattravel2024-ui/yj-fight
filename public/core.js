@@ -33,7 +33,7 @@ function startMove(m,p,name){let key=name;
  const wasLight=p.move&&p.move.name.startsWith('light');
  p.chain=key.startsWith('light')?(key==='light'?1:key==='light2'?2:0):0;
  p.move={name:key,frame:0,hit:false,blocked:false,hits:0,spawned:false};p.meter=bound(p.meter-(d.cost||0),0,100);p.crouch=false;
- if(p.char==='azhi'&&(key==='special'||key==='super')){p.armorTimer=key==='super'?180:d.startup;p.armorCharges=1;m.events.push({kind:'buff',slot:p.slot,style:'black-gold'})}
+ if(CHAR[p.char].specialMode==='counter'&&(key==='special'||key==='super')){p.armorTimer=key==='super'?180:d.startup;p.armorCharges=1;m.events.push({kind:'buff',slot:p.slot,style:'black-gold'})}
  if(key==='special'&&p.char==='sezi')p.x=bound(p.x+p.face*23,48,912);
  m.events.push({kind:'swing',slot:p.slot,name:key,chain:!!wasLight});
  if(key==='special'||key==='super'){const char=CHAR[p.char];m.events.push({kind:'skill',slot:p.slot,char:p.char,move:key,name:key==='super'?char.superName:char.special,style:char.specialMode,direction:p.face,x:p.x,y:p.y})}
@@ -54,10 +54,10 @@ function hit(m,p,foe){const a=p.move;if(!a||a.hit)return;const d=moveFor(p,a.nam
  const blocking=foe.guard&&d.level!=='throw'&&(d.level==='mid'||(d.level==='low'&&foe.crouch)||(d.level==='high'&&!foe.crouch));
  const counter=!blocking&&!!foe.move&&foe.move.frame<moveFor(foe,foe.move.name).start;
  const multi=(a.name==='special'||a.name==='super')&&p.char==='sezi'?0.45:1;
- const counterBonus=(a.name==='special'||a.name==='super')&&p.char==='azhi'&&(counter||a.countered)?1.38:1;
- const azhiArmor=!blocking&&foe.char==='azhi'&&foe.armorCharges>0&&foe.armorTimer>0&&['light','light2','light3'].includes(a.name);
- const armored=azhiArmor;
- if(azhiArmor){foe.armorCharges--;if(foe.move&&['special','super'].includes(foe.move.name))foe.move.countered=true;}
+ const counterBonus=(a.name==='special'||a.name==='super')&&CHAR[p.char].specialMode==='counter'&&(counter||a.countered)?1.38:1;
+ const counterArmor=!blocking&&CHAR[foe.char].specialMode==='counter'&&foe.armorCharges>0&&foe.armorTimer>0&&['light','light2','light3'].includes(a.name);
+ const armored=counterArmor;
+ if(counterArmor){foe.armorCharges--;if(foe.move&&['special','super'].includes(foe.move.name))foe.move.countered=true;}
  const dmg=Math.max(1,Math.round(d.damage*CHAR[p.char].power*multi*counterBonus*(blocking?d.level==='mid'&&a.name==='special'?.23:.10:armored?.26:1)));
  a.hit=true;a.blocked=blocking;a.hits=(a.hits||0)+1;
  foe.hp=bound(foe.hp-dmg,0,100);
@@ -73,9 +73,9 @@ function hit(m,p,foe){const a=p.move;if(!a||a.hit)return;const d=moveFor(p,a.nam
 function spawnSpecialProjectile(m,p){
  const isSuper=p.move?.name==='super';const isWave=p.char==='winnie';
  // Deterministic seeded roulette: every client/server running identical inputs gets the same outcome.
- const roll=p.char==='gambler'?rng(m):.5;
- const fortune=p.char==='gambler'?(roll<.16?'jackpot':roll>.91?'blank':'standard'):'standard';
- if(p.char==='gambler'){m.events.push({kind:'fortune',slot:p.slot,fortune});if(fortune==='blank')p.stun=Math.max(p.stun,9)}
+ const roll=CHAR[p.char].specialMode==='cards'?rng(m):.5;
+ const fortune=CHAR[p.char].specialMode==='cards'?(roll<.16?'jackpot':roll>.91?'blank':'standard'):'standard';
+ if(CHAR[p.char].specialMode==='cards'){m.events.push({kind:'fortune',slot:p.slot,fortune});if(fortune==='blank')p.stun=Math.max(p.stun,9)}
  const py=isWave?35:p.y+112;
  m.projectiles.push({owner:p.slot,char:p.char,kind:isWave?'wave':'card',level:isWave?'low':'mid',x:p.x+p.face*(isWave?65:62),y:py,vx:p.face*(isWave?8.2:10.5),life:isWave?45:42,w:isWave?(isSuper?81:58):(isSuper?52:38),h:isWave?34:24,damage:(isWave?14:16)*(isSuper?1.85:1)*(fortune==='jackpot'?1.75:fortune==='blank'?.3:1),fortune,fromMove:p.move?.name||'special'});
  m.events.push({kind:'projectile',slot:p.slot,x:p.x,y:py,style:isWave?'wave':'card',super:isSuper});
@@ -140,7 +140,7 @@ function step(m){if(m.status==='between'){if(--m.pause<=0){m.round++;reset(m)}re
  for(const p of m.players){const foe=m.players[1-p.slot];
   if(p.move){const name=p.move.name,d=moveFor(p,name);p.move.frame++;
     if(p.move.frame>=d.start&&p.move.frame<d.start+d.active){
-      if((name==='special'||name==='super')&&(p.char==='gambler'||p.char==='winnie')){
+      if((name==='special'||name==='super')&&['cards','shockwave'].includes(CHAR[p.char].specialMode)){
        if(!p.move.spawned){spawnSpecialProjectile(m,p);p.move.spawned=true}
       }else{
        if((name==='special'||name==='super')&&p.char==='sezi'){
@@ -148,7 +148,7 @@ function step(m){if(m.status==='between'){if(--m.pause<=0){m.round++;reset(m)}re
         if((p.move.frame-d.start)%4===0&&(p.move.hits||0)<3)p.move.hit=false;
        }
       }
-      if(p.move.frame===d.start&&(name==='heavy'||name==='upper'))p.x=bound(p.x+p.face*11,48,912);if(!((name==='special'||name==='super')&&(p.char==='gambler'||p.char==='winnie')))hit(m,p,foe)}
+      if(p.move.frame===d.start&&(name==='heavy'||name==='upper'))p.x=bound(p.x+p.face*11,48,912);if(!((name==='special'||name==='super')&&['cards','shockwave'].includes(CHAR[p.char].specialMode)))hit(m,p,foe)}
     if(p.move&&canCancel(p)){const q=bufferedMove(p,key=>canChain(p.move.name,key));if(q){p.buffer.splice(p.buffer.indexOf(q),1);startMove(m,p,q.key)}}
     if(p.move&&p.move.frame>=d.start+d.active+d.recovery){p.move=null;p.chain=0}
   }

@@ -10,8 +10,8 @@ function skillPose(p,reducedMotion=false){
  const t=clamp(p.move.frame/duration,0,1),pulse=Math.sin(t*Math.PI),face=p.face===-1?-1:1;
  if(p.char==='winnie'){base.rotation=-face*.12*pulse;base.dy=-8*pulse;base.scale=1+.035*pulse;}
  if(p.char==='sezi'){base.rotation=face*.2*Math.sin(t*Math.PI*4);base.dy=-12*pulse;}
- if(p.char==='gambler'){base.dx=-face*10*pulse;base.rotation=face*.055*pulse;}
- if(p.char==='azhi'){base.dx=face*9*pulse;base.scale=1+.06*pulse;base.dy=3*pulse;}
+ if(Frames.CHAR[p.char]?.entrance.pose==='fuel'){base.dx=-face*10*pulse;base.rotation=face*.055*pulse;}
+ if(Frames.CHAR[p.char]?.entrance.pose==='courage'){base.dx=face*9*pulse;base.scale=1+.06*pulse;base.dy=3*pulse;}
  return base;
 }
 function fighterPose(game,p,reducedMotion=false){
@@ -21,8 +21,8 @@ function fighterPose(game,p,reducedMotion=false){
  const flourish=Math.sin(Math.PI*clamp((t-.2)/.65,0,1));
  if(p.char==='winnie'){base.dy=-16*flourish;base.rotation=-side*.055*flourish;}
  if(p.char==='sezi'){base.rotation=side*Math.PI*2*(1-arrival);base.dy=-42*Math.sin(Math.PI*arrival);}
- if(p.char==='gambler'){base.dx+=side*16*flourish;base.dy=-9*Math.abs(Math.sin(t*Math.PI*4))*(1-t);}
- if(p.char==='azhi'){base.scale+=.06*flourish;base.rotation=side*.09*flourish;}
+ if(Frames.CHAR[p.char]?.entrance.pose==='fuel'){base.dx+=side*16*flourish;base.dy=-9*Math.abs(Math.sin(t*Math.PI*4))*(1-t);}
+ if(Frames.CHAR[p.char]?.entrance.pose==='courage'){base.scale+=.06*flourish;base.rotation=side*.09*flourish;}
  return base;
 }
 function createCamera(){

@@ -5,8 +5,8 @@ const TAU=Math.PI*2;
 const STYLES=Object.freeze({
  winnie:Object.freeze({style:'shockwave',color:'#ffc44e',light:'#fff1b0',count:18}),
  sezi:Object.freeze({style:'spin',color:'#ffd15b',light:'#fff3b2',count:16}),
- gambler:Object.freeze({style:'cards',color:'#69dce9',light:'#fff0c7',count:13}),
- azhi:Object.freeze({style:'counter',color:'#eabb63',light:'#fff3c6',count:12})
+ gambler:Object.freeze({style:'counter',color:'#eabb63',light:'#fff3c6',count:12}),
+ azhi:Object.freeze({style:'cards',color:'#69dce9',light:'#fff0c7',count:13})
 });
 const cap=(n,min,max)=>Math.max(min,Math.min(max,n));
 function clock(){return typeof performance==='object'?performance.now():Date.now();}

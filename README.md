@@ -1,6 +1,6 @@
 # 狠話擂台 — Big Talk / Real Fight
 
-> GitHub/Codex development baseline: **8.8.0**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.8.1**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -19,7 +19,7 @@ Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html`
 
 ## 8.8 character entrances and signature moves
 
-Four original fighters return with dedicated entrances, frame-driven skill choreography and easy one-button signatures: 維尼「不同意的請舉手」、塞子「高雄發大財」、金沙賭神「加油加300」、阿志「膽大撐死膽小餓死」. Press U (25 energy) or O (60 energy). Includes synchronized pre-fight countdown, original port arena, adaptive camera and double-tap dash. See [8.8 release notes](docs/UPGRADE_8.8.md) and [manual VPS commands](docs/MANUAL_RELEASE.md).
+Four original fighters return with dedicated entrances, frame-driven skill choreography and easy one-button signatures: 維尼「不同意的請舉手」、塞子「高雄發大財」、金沙賭神「膽大撐死膽小餓死」、阿志「加油加300」. Press U (25 energy) or O (60 energy). Includes synchronized pre-fight countdown, original port arena, adaptive camera and double-tap dash. See [8.8 release notes](docs/UPGRADE_8.8.md) and [manual VPS commands](docs/MANUAL_RELEASE.md).
 
 ## 8.7 gameplay update
 

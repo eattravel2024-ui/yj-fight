@@ -2,7 +2,7 @@
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;root.AzhiAI=api})(typeof globalThis==='object'?globalThis:this,function(){
 'use strict';
 function decide(p,foe,rand,skill=1){
- const keys={},style=({winnie:'guard',sezi:'rush',gambler:'zoner',azhi:'balanced'})[p.char]||'balanced';
+ const keys={},style=({winnie:'guard',sezi:'rush',gambler:'balanced',azhi:'zoner'})[p.char]||'balanced';
  const distance=Math.abs(p.x-foe.x),toward=foe.x<p.x?'left':'right',away=toward==='left'?'right':'left';
  const attack=foe.move?.name,active=attack&&foe.move.frame>=2&&foe.move.frame<=16;
  const aggression=skill>=3?1.3:skill>=2?1:0.72;

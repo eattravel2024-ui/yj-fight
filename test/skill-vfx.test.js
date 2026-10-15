@@ -7,7 +7,7 @@ function recordingContext(){const calls=[];const ctx=new Proxy({}, {get:(target,
 test('each original fighter has distinct skill choreography without mutating confirmed events',()=>{
  const fx=VFX.create();const events=characters.map(char=>Object.freeze(event(char)));
  for(const e of events)assert.equal(fx.emit(e,100),true);
- assert.deepEqual(fx.snapshot(100).map(b=>b.style),['shockwave','spin','cards','counter']);
+ assert.deepEqual(fx.snapshot(100).map(b=>b.style),['shockwave','spin','counter','cards']);
  const paths=characters.map(char=>{const one=VFX.create();one.emit(event(char),100);const {ctx,calls}=recordingContext();one.draw(ctx,350);return JSON.stringify(calls);});
  assert.equal(new Set(paths).size,4);
  assert.equal(events[0].x,320);
