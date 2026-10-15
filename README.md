@@ -1,6 +1,6 @@
 # 狠話擂台 — Big Talk / Real Fight
 
-> GitHub/Codex development baseline: **8.9.0**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.9.1**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,10 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.9.1 viewport and character selection
+
+The stage now fits the viewport height so health bars and the full fight remain visible together. Character selection sits before the arena, with a current-fighter summary, selected-card badges and a link from the battle area. Mobile landscape keeps the full stage aspect ratio using letterboxing. Combat rules, fighter scale and fixed camera are unchanged.
 
 ## 8.9 Ready, skill status and combat fairness
 

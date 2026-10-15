@@ -27,8 +27,7 @@
 .fighter-panel{grid-row:auto}
 .character-list,.char-choices{grid-template-columns:repeat(4,minmax(0,1fr))}
 .char-card img,.char-choices img{height:115px}
-body.fight-focus .game-panel{max-width:none}
-body.fight-focus .arena canvas{max-height:none;object-fit:fill}
+
 @media(max-width:1000px){.side,.aside{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.side,.aside{grid-template-columns:minmax(0,1fr)}.char-card img,.char-choices img{height:105px}}
 /* 8.9 Ready lobby and actionable skill states. */
@@ -43,3 +42,25 @@ body.fight-focus .arena canvas{max-height:none;object-fit:fill}
 .skill-button[data-state=cancel]{border-color:#8df1ae;box-shadow:inset 0 0 18px #77e98c20}
 .skill-button[data-state=cancel] small{color:#a6f7b9}
 .skill-button[data-state=recovery]:not(:disabled),.skill-button[data-state=hitstop]:not(:disabled){border-color:#d0b582}
+
+/* 8.9.1: keep health + stage in the viewport and put character choice before combat. */
+.game-panel,.board,body.fight-focus .game-panel{width:100%;max-width:min(1100px,calc((100svh - 240px)*16/9));margin-inline:auto}
+.hud,.score{scroll-margin-top:8px}
+.fighter-panel{max-width:1100px;margin:0 auto 20px;border:1px solid #dca56f;background:linear-gradient(115deg,#302632,#121d2b 70%);padding:18px;scroll-margin-top:16px}
+.fighter-panel .section-title{margin:3px 0 8px;font-size:22px}
+.selection-summary{color:#ffe1a2!important;font-size:15px!important;font-weight:750;margin:6px 0!important;line-height:1.6}
+.selection-hint{color:#d1deec!important;font-size:12px!important;margin:4px 0 12px!important}
+.fighter-panel .character-list,.fighter-panel .char-choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.fighter-panel .char-card,.fighter-panel .char-choices button{display:grid;grid-template-columns:72px minmax(0,1fr);align-items:center;min-height:100px;text-align:left;position:relative}
+.fighter-panel .char-card img,.fighter-panel .char-choices img{width:72px;height:100px;object-fit:cover;object-position:center 20%}
+.fighter-panel .char-card .data,.fighter-panel .char-choices span{padding:10px;min-height:0;background:transparent}
+.fighter-panel .char-card strong,.fighter-panel .char-choices span{font-size:14px}
+.fighter-panel .char-card small,.fighter-panel .char-choices small{font-size:10px;line-height:1.7}
+.fighter-panel .char-card.selected,.fighter-panel .char-choices button.on{border-color:#ffe1a2;box-shadow:0 0 0 2px #ffca83;background:#49372c}
+.fighter-panel .char-card.selected .char-number,.selection-badge{position:absolute;top:3px;left:3px;background:#ffe1a2;color:#24180e;font-size:9px;padding:3px 5px;border-radius:3px;line-height:1.2}
+.selection-badge:empty{display:none}
+.fighter-select-link{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:8px 12px;border:1px solid #c99564;border-radius:4px;color:#ffe1a2;background:#332831;font-size:12px;white-space:nowrap}
+.game-head{flex-wrap:wrap}.game-head .round-progress{margin-left:auto}
+body.fight-focus .fighter-panel{display:none}
+@media(max-width:700px){.fighter-panel .character-list,.fighter-panel .char-choices{grid-template-columns:repeat(2,minmax(0,1fr))}.fighter-panel{padding:12px}.fighter-panel .char-card,.fighter-panel .char-choices button{grid-template-columns:58px minmax(0,1fr);min-height:86px}.fighter-panel .char-card img,.fighter-panel .char-choices img{width:58px;height:86px}.fighter-panel .char-card strong,.fighter-panel .char-choices span{font-size:12px}.fighter-panel .char-card small,.fighter-panel .char-choices small{font-size:9px}.selection-summary{font-size:13px!important}}
+@media(max-height:600px){.game-panel,.board,body.fight-focus .game-panel{max-width:1100px}.arena{height:calc(100svh - 125px);min-height:100px}.arena canvas,.team-page .arena canvas,body.fight-focus .arena canvas{height:100%;max-height:100%;object-fit:contain}.hud,.score{padding-block:8px}.hud-portrait{height:36px}.team-head{margin-bottom:4px}.scene-topline,.corner{font-size:8px}}

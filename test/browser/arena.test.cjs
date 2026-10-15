@@ -102,8 +102,8 @@ test('four real browser clients start 2v2 with four retained characters',async()
  await players[0].waitForFunction(()=>window.AzhiTeamDebug.session.game.status==='playing');
  for(const p of players)assert.deepEqual(p.errors,[]);
 });
-test('wide stage keeps smaller fighters and a fixed camera after countdown and impact',async()=>{
- for(const viewport of [{width:1440,height:900},{width:390,height:844}]){
+test('viewport fits health and stage with prominent selection and a fixed camera',async()=>{
+ for(const viewport of [{width:1440,height:900},{width:1366,height:768},{width:390,height:844},{width:844,height:390}]){
   const p=await page({viewport,isMobile:viewport.width<600,hasTouch:viewport.width<600});
   await p.addInitScript(()=>{
    window.spriteScales=[];const draw=CanvasRenderingContext2D.prototype.drawImage;
@@ -113,16 +113,32 @@ test('wide stage keeps smaller fighters and a fixed camera after countdown and i
    };
   });
   await p.goto(base);await p.waitForFunction(()=>window.AzhiDebug);
-  const before=await p.locator('#stage').boundingBox();assert.ok(before.width>=viewport.width*.9);
+  const selector=await p.locator('#fighterSelect').boundingBox(),before=await p.locator('#stage').boundingBox();
+  assert.ok(selector.y+selector.height<=before.y,'selection comes before combat');
+  if(viewport.width===1440){await p.locator('#focusToggle').click();await p.locator('.fighter-select-link').click();assert.equal(await p.locator('#focusToggle').getAttribute('aria-pressed'),'false');}
+  await p.locator('#characterList button').first().click();
+  assert.match(await p.locator('#selectionSummary').textContent(),/維尼/);
+  assert.equal(await p.locator('#characterList button[aria-pressed=true]').count(),1);
+  assert.match(await p.locator('#characterList button').first().textContent(),/已選擇/);
   await p.locator('[data-mode="practice"]').click();await p.locator('#mainAction').click();
   await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
-  const after=await p.locator('#stage').boundingBox();assert.ok(Math.abs(before.width-after.width)<1);
+  const after=await p.locator('#stage').boundingBox(),hud=await p.locator('.hud').boundingBox();
+  assert.ok(Math.abs(before.width-after.width)<1);
+  assert.ok(hud.y>=0&&hud.y+hud.height<=viewport.height,'full health bars stay in view');
+  assert.ok(after.y>=hud.y+hud.height-1&&after.y+after.height<=viewport.height,'whole stage fits below health bars');
+  if(viewport.height>600)assert.ok(Math.abs(after.width/after.height-16/9)<.01);
   await p.evaluate(()=>{window.spriteScales=[];window.AzhiDebug.previewHit('super');});
   await p.waitForFunction(()=>window.spriteScales.length>=20);
   const scales=await p.evaluate(()=>window.spriteScales);assert.ok(scales.every(s=>Math.abs(s-.76)<.001),'impact and idle frames must retain the smaller sprite scale');
   assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
-  assert.deepEqual(p.errors,[]);await p.screenshot({path:`coverage/wide-stage-${viewport.width}.png`,fullPage:true});
+  assert.deepEqual(p.errors,[]);await p.screenshot({path:`coverage/wide-stage-${viewport.width}.png`,fullPage:false});
  }
  const team=await page({viewport:{width:1440,height:900}});await team.goto(base+'/team.html');await team.waitForFunction(()=>window.AzhiTeamDebug);
- const arena=await team.locator('#arenaCanvas').boundingBox();assert.ok(arena.width>1296);assert.deepEqual(team.errors,[]);
+ const arena=await team.locator('#arenaCanvas').boundingBox(),select=await team.locator('#fighterSelect').boundingBox();
+ assert.ok(select.y+select.height<arena.y);assert.ok(arena.width<=1100);
+ await team.locator('#teamCharacters button').first().click();assert.match(await team.locator('#selectionSummary').textContent(),/維尼/);
+ await team.locator('.score').evaluate(el=>el.scrollIntoView({block:'start',behavior:'instant'}));
+ const score=await team.locator('.score').boundingBox(),stage=await team.locator('#arenaCanvas').boundingBox();
+ assert.ok(score.y>=0&&stage.y+stage.height<=900);assert.deepEqual(team.errors,[]);
+ await team.screenshot({path:'coverage/team-viewport-fit.png'});
 });
