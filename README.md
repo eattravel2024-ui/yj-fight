@@ -1,6 +1,6 @@
 # 陪公子練武 — Spar With the Young Master
 
-> GitHub/Codex development baseline: **8.11.1**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.11.2**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,10 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.11.2 — in-scene arcade combat HUD
+
+Health/portraits/timer now overlay the fitted 16:9 stage; power meters and compact U/O hints sit along its lower edge. Real round/KO/timeout/winner announcements reuse the existing audio system and confirmed online events. Background-only WebP variants lower visual noise while preserving source art, fighter atlases, proportions and simulation. Team health nodes are reused so damage trails animate correctly. The standalone classic adventure 6.8 and its links are retired at the user's request; modern arcade, practice, multiplayer, spectating and saves remain. This checkpoint is local only; deploy the provided archive using [manual release instructions](docs/MANUAL_RELEASE.md). See [delivery and screenshots](docs/COMBAT_HUD_8.11.2.md).
 
 ## 8.11.1 — original OST and shared Audio Manager
 

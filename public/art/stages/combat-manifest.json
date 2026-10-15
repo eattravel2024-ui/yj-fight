@@ -1,0 +1,44 @@
+{
+  "night-market": {
+    "source": "art/stages/night-market/background.webp",
+    "sourceSha256": "af284275bcf328b07c133418c2b756173e5a22a8eacd64c88d88758c1355a559",
+    "output": "art/stages/night-market/combat.webp",
+    "outputSha256": "5e3df1bedf62df8208420019ba73c8a4754a4ff2fa00de0d3445d12e18cda8ac",
+    "width": 1672,
+    "height": 941,
+    "bytes": 387852,
+    "saturation": 0.8,
+    "brightness": 0.91,
+    "contrast": 0.93,
+    "coolTint": 0.025,
+    "purpose": "Background layer only; proportional rendering, no stage geometry changes"
+  },
+  "golden-casino": {
+    "source": "art/stages/golden-casino/background.webp",
+    "sourceSha256": "2c93b423e5b738513a9c3454df57af700ed89e320386aba481b1420ea33a0223",
+    "output": "art/stages/golden-casino/combat.webp",
+    "outputSha256": "d953bdf2d58b59d175838bfd2cbde524553b7fba4fc0d276bcef7227357b899f",
+    "width": 1672,
+    "height": 941,
+    "bytes": 449492,
+    "saturation": 0.78,
+    "brightness": 0.9,
+    "contrast": 0.92,
+    "coolTint": 0.025,
+    "purpose": "Background layer only; proportional rendering, no stage geometry changes"
+  },
+  "tiananmen-square": {
+    "source": "art/stages/tiananmen-square/background.webp",
+    "sourceSha256": "0e30115fa153361fc30775abc38bd3428c2f6192dc6530d852443e45caddc258",
+    "output": "art/stages/tiananmen-square/combat.webp",
+    "outputSha256": "fc28a69651768d0b312aa8def40eece9a1e668bd05954bc2fe5388ecfa267b5d",
+    "width": 1672,
+    "height": 941,
+    "bytes": 366774,
+    "saturation": 0.78,
+    "brightness": 0.91,
+    "contrast": 0.94,
+    "coolTint": 0.025,
+    "purpose": "Background layer only; proportional rendering, no stage geometry changes"
+  }
+}

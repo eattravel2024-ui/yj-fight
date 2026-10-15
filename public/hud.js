@@ -24,12 +24,14 @@ function create(){
   let trail=rail.querySelector('.health-trail'),readout=rail.querySelector('.health-readout');
   if(!trail){trail=document.createElement('div');trail.className='health-trail';trail.setAttribute('aria-hidden','true');rail.prepend(trail);}
   if(!readout){readout=document.createElement('span');readout.className='health-readout';readout.setAttribute('aria-hidden','true');rail.append(readout);}
+  const previous=Number(rail.dataset.hp??state.hp);rail.dataset.hit=String(state.hp<previous);rail.dataset.hp=state.hp;const person=rail.closest('.hud-person,.mini-fighter');if(person)person.dataset.hit=String(state.hp<previous);
   fill.style.width=state.hp+'%';trail.style.width=state.trail+'%';readout.textContent=Math.ceil(state.hp)+' / 100';
   rail.dataset.health=state.level;rail.setAttribute('role','meter');rail.setAttribute('aria-label',state.level==='danger'?'血量偏低':'血量');
   rail.setAttribute('aria-valuemin','0');rail.setAttribute('aria-valuemax','100');rail.setAttribute('aria-valuenow',Math.ceil(state.hp));
  }
  function meter(rail,value){
   if(!rail)return;const energy=clamp(value),level=energy>=100?'max':energy>=60?'super':energy>=25?'special':'charging';
+  const before=Number(rail.dataset.energy??energy);rail.dataset.change=energy>before?'gain':energy<before?'spend':'steady';rail.dataset.energy=energy;
   rail.dataset.level=level;rail.setAttribute('role','meter');rail.setAttribute('aria-label','能量，必殺需 25、超必殺需 60');
   rail.setAttribute('aria-valuemin','0');rail.setAttribute('aria-valuemax','100');rail.setAttribute('aria-valuenow',Math.floor(energy));
   rail.title=Math.floor(energy)+' / 100 · U 25 · O 60'+(level==='max'?' · MAX':'');

@@ -23,7 +23,7 @@ function fixture(t,scenario='success'){
  fs.writeFileSync(path.join(app,'server.js'),'old-server');
  fs.writeFileSync(path.join(app,'package.json'),JSON.stringify({version:'8.6.0'}));
  fs.writeFileSync(path.join(root,'azhi71.service'),'fixture service');
- const required=['public/index.html','public/team.html','public/team-core.js','public/team.js','public/engine/frame-data.js','public/rollback.js','public/engine/commands.js','public/engine/boxes.js','public/sprites/manifest.json','public/skill-vfx.js','public/legacy.js','test/fixture.test.js','README.md','server.js'];
+ const required=['public/index.html','public/team.html','public/team-core.js','public/team.js','public/engine/frame-data.js','public/rollback.js','public/engine/commands.js','public/engine/boxes.js','public/sprites/manifest.json','public/skill-vfx.js','public/combat-hud.js','test/fixture.test.js','README.md','server.js'];
  for(const file of required){const filename=path.join(src,file);fs.mkdirSync(path.dirname(filename),{recursive:true});fs.writeFileSync(filename,'new fixture content');}
  fs.writeFileSync(path.join(src,'package.json'),JSON.stringify({version:releaseVersion}));
  fs.writeFileSync(path.join(src,'package-lock.json'),'fixture reviewed lockfile');
@@ -72,7 +72,7 @@ deployTest('deployment --check leaves live app, service, log and lock untouched'
 deployTest('deployment stages complete public assets and frozen runtime dependencies before replacing live app',t=>{
  const f=fixture(t);assert.equal(f.result.status,0,f.result.stderr);
  assert.equal(JSON.parse(fs.readFileSync(path.join(f.app,'package.json'))).version,releaseVersion);
- for(const file of ['public/skill-vfx.js','public/legacy.js','package-lock.json','node_modules/ws'])assert.equal(fs.existsSync(path.join(f.app,file)),true,file);
+ for(const file of ['public/skill-vfx.js','public/combat-hud.js','package-lock.json','node_modules/ws'])assert.equal(fs.existsSync(path.join(f.app,file)),true,file);
  const backups=f.files().filter(name=>name.startsWith('live.backup.'));assert.equal(backups.length,1);
  assert.equal(fs.readFileSync(path.join(f.root,backups[0],'server.js'),'utf8'),'old-server');
  assert.match(f.calls('npm.calls'),/ci --omit=dev --ignore-scripts/);

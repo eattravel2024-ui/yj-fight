@@ -31,22 +31,25 @@ const FIGHTER_SCALE=.76,SPRITE_BASELINE=292;
 function createCamera(){
  return {update(){return {center:480,zoom:1};},apply(){},reset(){}};
 }
+// Soft contact shadow follows x and jump height; never touches the collision model.
+function drawContactShadow(ctx,p){
+ const lift=clamp((p.y||0)/180,0,1),rx=34-13*lift;
+ ctx.save();const shade=ctx.createRadialGradient(p.x,450,0,p.x,450,rx);
+ shade.addColorStop(0,'rgba(0,4,12,'+(.45-.20*lift)+')');shade.addColorStop(1,'rgba(0,4,12,0)');
+ ctx.fillStyle=shade;ctx.translate(p.x,450);ctx.scale(1,.27);ctx.translate(-p.x,-450);ctx.beginPath();ctx.arc(p.x,450,rx,0,Math.PI*2);ctx.fill();ctx.restore();
+}
 function drawEntrance(ctx,game,options={}){
  const entry=intro(game);if(!entry)return false;
- const players=game.players||[],reduced=!!options.reducedMotion,t=reduced?.6:entry.progress;
- ctx.save();ctx.fillStyle='#060b13dc';ctx.fillRect(0,0,960,75);ctx.fillRect(0,475,960,65);
- ctx.fillStyle='#e5bc75';ctx.font='700 12px system-ui';ctx.textAlign='left';ctx.fillText('街頭狠話 / CHARACTER INTRO',26,28);
- ctx.fillStyle='#f5efe3';ctx.font='900 24px system-ui';ctx.fillText('陪公子練武',26,58);
- ctx.textAlign='right';ctx.fillStyle='#f4cc79';ctx.font='900 42px system-ui';ctx.fillText(String(entry.count).padStart(2,'0'),930,55);
- for(const p of players){const data=Frames.CHAR[p.char];if(!data)continue;const side=p.slot%2,row=Math.floor(p.slot/2),x=26+side*477,y=95+row*83;
-  ctx.save();ctx.translate(x,y);ctx.globalAlpha=reduced?.9:Math.min(1,entry.progress*6+.2);ctx.fillStyle='#0a1425dd';ctx.fillRect(0,0,431,68);
-  ctx.fillStyle=data.accent;ctx.fillRect(side?427:0,0,4,68);ctx.textAlign='left';ctx.font='800 12px system-ui';ctx.fillText(data.name+' / '+data.entrance.title,16,20,398);
-  ctx.fillStyle='#fff4dc';ctx.font='900 20px system-ui';ctx.fillText(data.special,16,46,398);ctx.restore();
-  ctx.save();ctx.translate(p.x,355-p.y*.82);ctx.scale(.65,.65);ctx.globalAlpha=.65;FX.drawEmblem(ctx,p.char,t,true);ctx.restore();
+ // Fighter arrival/skills keep their existing choreography. Compact state-derived
+ // name ribbons leave the new in-scene health/timer and announcer unobstructed.
+ const reduced=!!options.reducedMotion;
+ ctx.save();ctx.globalAlpha=reduced?.9:clamp(entry.progress*5,0,1);ctx.textAlign='center';
+ for(const p of game.players||[]){const data=Frames.CHAR[p.char];if(!data)continue;
+  const x=clamp(p.x,125,835),y=game.ruleset==='team'?365+Math.floor(p.slot/2)*25:385;
+  ctx.fillStyle='#06111cdd';ctx.fillRect(x-116,y,232,22);ctx.fillStyle=data.accent;ctx.fillRect(x-116,y,3,22);
+  ctx.font='800 11px system-ui';ctx.fillStyle='#f5efe1';ctx.fillText(data.name+' / '+data.special,x,y+15,216);
  }
- ctx.textAlign='center';ctx.font='700 16px system-ui';ctx.fillStyle='#e2dbc7';
- const who=players[Math.min(players.length-1,Math.floor(entry.progress*players.length))];ctx.fillText(Frames.CHAR[who?.char]?.entrance.line||'全員就位，倒數後開戰。',480,511,880);
  ctx.restore();return true;
 }
-return {intro,fighterPose,skillPose,createCamera,drawEntrance,FIGHTER_SCALE,SPRITE_BASELINE};
+return {intro,fighterPose,skillPose,createCamera,drawEntrance,drawContactShadow,FIGHTER_SCALE,SPRITE_BASELINE};
 });

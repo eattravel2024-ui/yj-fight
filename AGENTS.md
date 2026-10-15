@@ -2,9 +2,10 @@
 
 ## Goal
 Maintain and improve the existing browser-based 60 Hz fighting game, without removing existing modes.
-Current baseline: 8.11.1. Preserve the four playable characters (維尼, 塞子, 金沙賭神, 阿志), 1v1, 2v2, spectators, player/room names, arcade mode, and WebSocket networking. Sam was removed at the user’s request; do not restore that character or its assets.
+Current baseline: 8.11.2. Preserve the four playable characters (維尼, 塞子, 金沙賭神, 阿志), 1v1, 2v2, spectators, player/room names, arcade mode, and WebSocket networking. Sam was removed at the user’s request; do not restore that character or its assets. The user explicitly retired the standalone classic adventure 6.8 in 8.11.2; do not restore its page/script/links. Preserve modern arcade, practice and saves.
 
 ## Source map
+- `public/combat-hud.js/css`: in-scene DOM overlays, fitted 16:9 viewport, real round/result announcements; online KO/results must use confirmed packets. Keep real HP instantaneous and presentation-only trails. `tools/build_combat_backgrounds.py` creates background-only variants; preserve all original art and fighter proportions.
 - `server.js`: HTTP + authoritative WebSocket rooms, 1v1 and 2v2, validation and identities.
 - `public/core.js`: deterministic fighting simulation. Do not couple to canvas frame rate.
 - `public/team-core.js`: four-fighter simulation, no friendly fire, team rules.
@@ -53,3 +54,5 @@ The user separately authorized OST integration in 8.11.1. It does not complete P
 
 ## User preference: fast iteration
 Reuse the current development branch for small follow-up changes; do not create a new branch or require a new PR for every iteration. Run the relevant lightweight checks automatically. Use browser or extended suites only when justified by the change. Package one current source archive and give short manual VPS update instructions; never connect to production. Consolidate review/PRs at milestones rather than making the user manage branch stacks.
+
+8.11.2 combat presentation was explicitly requested outside the phased roadmap: background-only variants, HUD/energy/announcements and retirement of classic 6.8. Combat/rollback/server/atlases stay unchanged; only presentation.js protected hash changed for compact entrance ribbons and contact shadows. The attached request forbids remote push; keep this checkpoint local and deliver a source archive until the user authorizes publication.

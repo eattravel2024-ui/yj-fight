@@ -36,7 +36,7 @@ async function chooseMode(p,mode){
 async function assertViewport(p,canvasSelector,hudSelector,viewport){
  const canvas=await p.locator(canvasSelector).boundingBox(),hud=await p.locator(hudSelector).boundingBox();
  assert.ok(hud.y>=0&&hud.y+hud.height<=viewport.height+1,'all health bars fit in the viewport');
- assert.ok(canvas.x>=0&&canvas.y>=hud.y+hud.height-1&&canvas.x+canvas.width<=viewport.width+1&&canvas.y+canvas.height<=viewport.height+1,'entire canvas fits below health bars');
+ assert.ok(canvas.x>=0&&hud.y>=canvas.y-1&&hud.y+hud.height<=canvas.y+canvas.height+1&&canvas.x+canvas.width<=viewport.width+1&&canvas.y+canvas.height<=viewport.height+1,'entire canvas fits with health bars inside the stage');
  const display=await p.locator(canvasSelector).evaluate(el=>({width:el.width,height:el.height,fit:getComputedStyle(el).objectFit}));
  assert.equal(display.width/display.height,16/9);
  assert.ok(display.fit==='contain'||Math.abs(canvas.width/canvas.height-16/9)<.01,'the entire 960 × 540 scene is displayed without cropping');
@@ -108,10 +108,10 @@ test('retired character save migrates without losing progress or currency',async
  assert.equal(save.character,'azhi');assert.equal(save.chapter,3);assert.equal(save.coins,782);assert.equal(save.clears,4);
  assert.deepEqual(p.errors,[]);
 });
-test('desktop practice: four fighters, easy skill and preserved legacy entry',async()=>{
+test('desktop practice: four fighters, easy skill and no classic entry',async()=>{
  const p=await page({viewport:{width:1440,height:1000}});await p.goto(base);await p.waitForFunction(()=>window.AzhiDebug);
  assert.equal(await p.locator('#characterList button').count(),4);
- assert.ok(await p.locator('a[href*="adventure-legacy"]').count());
+ assert.equal(await p.locator('a[href*="adventure-legacy"]').count(),0);
  await p.locator('[data-menu-entry="practice"]').focus();await p.keyboard.press('Space');await p.waitForFunction(()=>window.AzhiShell.currentPanel==='fighters');assert.equal(await p.evaluate(()=>window.AzhiDebug.mode),'practice');await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());
  await p.waitForFunction(()=>window.AzhiDebug.local?.practice===true);
  await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);await p.locator('#stage').focus();await p.keyboard.press('KeyU');
@@ -178,12 +178,8 @@ test('mobile touch skill, no horizontal page overflow and reduced motion',async(
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  assert.deepEqual(p.errors,[]);await p.screenshot({path:'coverage/mobile-arena.png',fullPage:false});
 });
-test('legacy adventure remains usable under real CSP',async()=>{
- const p=await page();await p.goto(base+'/adventure-legacy-6.8.html');await p.locator('#nav button').first().waitFor();
- await p.locator('#nav [data-legacy-action="go(\'city\')"]').click();await p.locator('.map').waitFor();
- assert.match(await p.locator('#pagetitle').textContent(),/城市/);
- await p.locator('[data-legacy-action="job()"]').click();assert.match(await p.locator('#toast').textContent(),/完成/);
- assert.deepEqual(p.errors,[]);
+test('retired classic adventure and script are no longer served',async()=>{
+ const p=await page();for(const route of ['/adventure-legacy-6.8.html','/legacy.js']){const r=await p.request.get(base+route);assert.equal(r.status(),404);}
 });
 test('two real browser clients play 1v1 and spectator stays read only',async()=>{
  const a=await page(),b=await page();

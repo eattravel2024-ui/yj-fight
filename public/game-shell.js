@@ -63,8 +63,7 @@
  const fullscreen=document.createElement('button');fullscreen.type='button';fullscreen.className='secondary';fullscreen.dataset.fullscreen='';fullscreen.textContent='切換全螢幕';setting('瀏覽器全螢幕','可隱藏瀏覽器工具列；不支援時仍使用滿版遊戲。',fullscreen);
  const motionNote=document.createElement('p');motionNote.textContent='選單與效果會配合裝置的「減少動態效果」偏好。';panes.settings.append(motionNote);
  move(document.querySelector('.career-panel'),panes.settings);
- const guideLink=document.createElement('p');guideLink.innerHTML='<a href="/adventure-legacy-6.8.html">經典冒險 6.8 ↗</a>';if(!panes.guide.querySelector('a[href*="adventure-legacy"]'))panes.guide.append(guideLink);
- battle.classList.add('app-battle');document.body.append(bar,battle,menu);document.body.classList.add('game-app');
+ battle.classList.add('app-battle');document.body.append(bar,battle,menu);document.body.classList.add('game-app');window.AzhiCombatHUD.mount(battle,team);
  const skip=document.querySelector('.skip-link');if(skip)skip.href=team?'#arenaCanvas':'#stage';const canvas=$(team?'arenaCanvas':'stage');
  function menuSound(type){const now=performance.now();if(type==='move'&&now-lastMenuSound<90)return;lastMenuSound=now;if(gameAPI.soundEnabled)gameAPI.playMenuSound(type);}
  function selectEntry(id,{focus=false,sound=true}={}){
@@ -114,7 +113,7 @@
   if(panel==='fighters')characterSelect.open();else characterSelect.leave();
  }
  function close(){characterSelect.leave();flow.close();if(menu.open)menu.close();document.body.classList.remove('menu-open');window.dispatchEvent(new CustomEvent('azhi:menu',{detail:{open:false,panel}}));refresh();canvas.focus({preventScroll:true});}
- function onBattleStart(detail={}){flow.battleStarted(detail);document.body.dataset.battleMode=detail.mode||'playing';document.body.classList.add('is-playing');close();}
+ function onBattleStart(detail={}){window.AzhiCombatHUD.begin(gameAPI.game,{mode:detail.mode||gameAPI.mode});flow.battleStarted(detail);document.body.dataset.battleMode=detail.mode||'playing';document.body.classList.add('is-playing');close();}
  window.AzhiShell={open,close,onBattleStart,isOpen:()=>menu.open,get currentPanel(){return panel;},get flow(){return flow.snapshot;}};
  for(const element of [bar,tabs])element.addEventListener('click',event=>{const trigger=event.target.closest('[data-panel]');if(trigger)open(trigger.dataset.panel);});
  tabs.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const list=Object.keys(labels),index=list.indexOf(panel),next=event.key==='Home'?0:event.key==='End'?list.length-1:(index+(event.key==='ArrowRight'?1:-1)+list.length)%list.length;open(list[next]);});

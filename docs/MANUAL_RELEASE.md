@@ -1,26 +1,32 @@
 # 手動發佈與回滾
 
-目前發布里程碑為 **8.11.1**：《陪公子練武》加入 21 段原創 OST、共用 Audio Manager、BGM／SFX 音量、短曲事件、預載與淡入淡出；Phase 2 選角及所有既有模式保留。瀏覽器首次點擊／按鍵後才啟用音訊。本次開發未連線或部署正式 VPS。
+目前版本 **8.11.2**：場景內街機 HUD、背景降噪、能量／技能提示與真實回合演出；依要求移除獨立的經典冒險 6.8。街機、練習、1v1、2v2、觀戰及存檔保留。本次未連線或部署正式 VPS。
 
-## 目前版本：從 GitHub 固定檢查點部署
+## 8.11.2：下載來源包部署（本次尚未推送 GitHub）
 
-自行登入 VPS 後執行。使用全新的來源資料夾，避開舊資料夾單分支 fetch 限制及本機修改；不在 `/opt/azhi71` 中 git pull。需要既有 azhi71 安裝及 Node.js 20+。
+本機檢查點為 `checkpoint-combat-hud-8.11.2`。附件要求不要推送遠端，因此 GitHub 目前仍是 8.11.1；直接 git pull 不會取得本次改版。請先下載 `azhi-fighting-8.11.2.tar.gz`，在自己的電腦上傳：
+
+```bash
+scp ~/Downloads/azhi-fighting-8.11.2.tar.gz YOUR_USER@YOUR_VPS_IP:/tmp/
+```
+
+自行登入原 VPS 後執行（需既有 `/opt/azhi71`、`azhi71.service` 及 Node.js 20+）：
 
 ```bash
 set -euo pipefail
-RELEASE_DIR="$(mktemp -d "$HOME/azhi-8.11.1.XXXXXX")"
-git clone --branch checkpoint-audio-8.11.1 --depth 1 https://github.com/eattravel2024-ui/yj-fight.git "$RELEASE_DIR"
+RELEASE_DIR="$(mktemp -d "$HOME/azhi-8.11.2.XXXXXX")"
+tar -xzf /tmp/azhi-fighting-8.11.2.tar.gz -C "$RELEASE_DIR" --strip-components=1
 cd "$RELEASE_DIR"
 npm ci --ignore-scripts --no-fund
 sudo bash deploy/upgrade-ubuntu.sh
 curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
 ```
 
-健康版本應顯示 `8.11.1`。音訊原始檔及轉碼檔都已包含，不需要在 VPS 安裝 FFmpeg、Python 或 MIDI 播放器。私人 Repository 請沿用主機既有 GitHub 認證，勿將 token 寫進指令或貼到聊天。固定標籤使用 detached HEAD 是預期行為。
+健康版本應為 **8.11.2**。更新保留完整舊版備份，不更動 Nginx、SSH、Docker 或其他遊戲；會短暫中斷比賽。完成後強制重新整理。VPS 不需 Pillow、Python 或 FFmpeg，戰鬥用背景與音檔已包含。
 
-更新腳本會先測試、安裝鎖定依賴及保留完整舊版備份，再短暫停止 `azhi71` 服務更新；失敗會嘗試回滾。不更動 Nginx、SSH、Docker 或其他遊戲服務。沿用原網址，完成後強制重新整理。夜市場景原圖的半透明 Alpha 已透過固定底色合成；原有舞台 ID、地面與相機保留。
+需要回退時，使用更新腳本輸出的備份路徑及本文件下方回滾流程；GitHub 前版固定標籤為 `checkpoint-audio-8.11.1`。本次建議先以來源包試玩，再決定是否發布／合併；沒有合併 main。
 
-以下舊 Phase 1 指令僅供回退／歷史參考，不含本次人物與場景素材。
+以下為前版歷史流程，不包含 8.11.2 新 HUD。
 
 ## Phase 1 GitHub 檢查點
 
