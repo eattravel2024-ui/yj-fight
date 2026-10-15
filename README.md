@@ -1,6 +1,6 @@
 # 狠話擂台 — Big Talk / Real Fight
 
-> GitHub/Codex development baseline: **8.9.3**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.9.4**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,10 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.9.4 arcade UI integration
+
+The user's UI reference is integrated as a local cyan/magenta arcade theme with angled dual-layer health bars, damage trails, low-health colors, round-win diamonds and energy thresholds. The HUD displays the real engine's 100 HP / 100 energy values (U 25 / O 60); all existing modes, Ready, spectator permissions and video-based character animation remain intact. No Tailwind CDN or prototype simulation is required. See [UI integration notes](docs/UI_INTEGRATION_8.9.4.md).
 
 ## 8.9.3 Gambler video-based animation
 

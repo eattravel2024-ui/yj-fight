@@ -96,6 +96,9 @@ test('four real browser clients start 2v2 with four retained characters',async()
  for(const p of players)await p.locator('#readyButton').click();
  await players[0].locator('#startMatchButton').click();
  for(const p of players)await p.waitForFunction(()=>window.AzhiTeamDebug?.session?.frame>5);
+ assert.equal(await players[0].locator('.mini-track .health-readout').count(),4);
+ const liveScore=await players[0].locator('.score').boundingBox(),liveStage=await players[0].locator('#arenaCanvas').boundingBox();assert.ok(liveScore.y>=0&&liveStage.y+liveStage.height<=720);
+ await players[0].screenshot({path:'coverage/arcade-team-live.png'});
  const roster=await players[0].evaluate(()=>window.AzhiTeamDebug.game.players.map(p=>p.char));assert.deepEqual(new Set(roster),new Set(['winnie','sezi','gambler','azhi']));
  const previous=await players[0].evaluate(()=>{const s=window.AzhiTeamDebug.session;s.game.status='finished';return s.frame;});
  await players[0].waitForFunction(frame=>window.AzhiTeamDebug.session.frame>frame,previous);
@@ -163,4 +166,20 @@ for(const fighter of ['azhi','gambler'])test(fighter+' video-based transparent p
   await p.waitForTimeout(80);await p.screenshot({path:`coverage/${fighter}-video-kick-${face}.png`});
  }
  assert.deepEqual(p.errors,[]);
+});
+
+test('arcade UI displays real health, danger, energy thresholds and round wins without external UI dependencies',async()=>{
+ const p=await page({viewport:{width:1366,height:768},reducedMotion:'reduce'}),external=[];
+ p.on('request',request=>{if(!request.url().startsWith(base))external.push(request.url());});
+ await p.goto(base);await p.locator('[data-mode="practice"]').click();await p.locator('#mainAction').click();await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
+ await p.evaluate(()=>{const a=window.AzhiDebug.local.players[0];a.hp=20;a.meter=60;a.wins=1;});
+ await p.waitForFunction(()=>document.querySelector('#p1Bar').parentElement.dataset.health==='danger');
+ const rail=p.locator('#p1Bar').locator('..');assert.equal(await rail.getAttribute('aria-valuenow'),'20');assert.equal(await rail.locator('.health-readout').textContent(),'20 / 100');
+ assert.equal(await rail.locator('.health-trail').evaluate(el=>el.style.width),'20%','reduced motion skips damage trail');
+ assert.equal(await p.locator('#p1Meter').locator('..').getAttribute('data-level'),'super');assert.equal(await p.locator('#p1Wins .won').count(),1);
+ await p.screenshot({path:'coverage/arcade-hud-danger.png'});
+ await p.evaluate(()=>{const g=window.AzhiDebug.local;g.round++;g.players[0].hp=100;g.players[0].meter=100;});
+ await p.waitForFunction(()=>document.querySelector('#p1Bar').parentElement.getAttribute('aria-valuenow')==='100');
+ assert.equal(await rail.locator('.health-trail').evaluate(el=>el.style.width),'100%');assert.equal(await p.locator('#p1Meter').locator('..').getAttribute('data-level'),'max');
+ assert.deepEqual(external,[]);assert.deepEqual(p.errors,[]);
 });

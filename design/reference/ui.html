@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Fighting Game HUD & UI Template</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入街機與電競風格字體 -->
+    <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Orbitron:wght@600;800;900&family=Russo+One&family=Noto+Sans+TC:wght@700;900&display=swap" rel="stylesheet">
+    <!-- 引入 FontAwesome 圖示 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --p1-color: #00f0ff;
+            --p1-glow: rgba(0, 240, 255, 0.6);
+            --p2-color: #ff0055;
+            --p2-glow: rgba(255, 0, 85, 0.6);
+            --hp-high-start: #10b981;
+            --hp-high-end: #a3e635;
+            --hp-mid-start: #f59e0b;
+            --hp-mid-end: #fde047;
+            --hp-low-start: #dc2626;
+            --hp-low-end: #f97316;
+            --trail-color: #ef4444;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', 'Orbitron', sans-serif;
+            user-select: none;
+            overflow: hidden;
+            background-color: #090a0f;
+        }
+
+        .font-arcade {
+            font-family: 'Black Ops One', 'Russo One', sans-serif;
+        }
+
+        .font-cyber {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 街機斜角變形 (Skew) */
+        .skew-p1 {
+            transform: skewX(-22deg);
+        }
+        .skew-p1-reverse {
+            transform: skewX(22deg);
+        }
+        .skew-p2 {
+            transform: skewX(22deg);
+        }
+        .skew-p2-reverse {
+            transform: skewX(-22deg);
+        }
+
+        /* 雙層血條動畫設定 */
+        .hp-main-bar {
+            transition: width 0.12s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .hp-trail-bar {
+            transition: width 0.65s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* 血條高光掃過特效 */
+        .bar-gloss::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 45%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.45), rgba(255,255,255,0.05));
+            pointer-events: none;
+        }
+
+        /* 低血量危險閃爍動畫 */
+        @keyframes danger-pulse {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.9)) brightness(1.1); }
+            50% { filter: drop-shadow(0 0 20px rgba(239, 68, 68, 1)) brightness(1.5); }
+        }
+        .danger-state {
+            animation: danger-pulse 0.5s infinite ease-in-out;
+        }
+
+        /* 滿氣 MAX 彩虹流光與閃爍 */
+        @keyframes max-meter-glow {
+            0% { filter: drop-shadow(0 0 6px #00f0ff) brightness(1.1); }
+            50% { filter: drop-shadow(0 0 16px #fff) brightness(1.4); }
+            100% { filter: drop-shadow(0 0 6px #00f0ff) brightness(1.1); }
+        }
+        .meter-max-active {
+            animation: max-meter-glow 0.6s infinite;
+        }
+
+        /* 連擊數彈跳動畫 */
+        @keyframes combo-hit-pop {
+            0% { transform: scale(1.85) rotate(-6deg); filter: brightness(2); }
+            40% { transform: scale(0.92) rotate(2deg); }
+            100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+        }
+        .combo-pop {
+            animation: combo-hit-pop 0.22s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+        }
+
+        /* 中央系統大字播報動畫 */
+        @keyframes announcer-slam {
+            0% { transform: scale(3.5) skewX(-12deg); opacity: 0; filter: blur(12px); }
+            20% { transform: scale(0.95) skewX(-12deg); opacity: 1; filter: blur(0px); }
+            30% { transform: scale(1.06) skewX(-12deg); }
+            80% { transform: scale(1) skewX(-12deg); opacity: 1; filter: blur(0px); }
+            100% { transform: scale(1.4) skewX(-12deg); opacity: 0; filter: blur(10px); }
+        }
+        .animate-announcer {
+            animation: announcer-slam 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* 畫面震動特效 */
+        @keyframes screen-shake {
+            0%, 100% { transform: translate(0, 0); }
+            15% { transform: translate(-10px, 8px); }
+            30% { transform: translate(10px, -8px); }
+            45% { transform: translate(-8px, -6px); }
+            60% { transform: translate(8px, 6px); }
+            75% { transform: translate(-4px, 4px); }
+        }
+        .shake-heavy {
+            animation: screen-shake 0.32s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+        }
+        @keyframes screen-shake-light {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-4px, 3px); }
+            50% { transform: translate(4px, -3px); }
+            75% { transform: translate(-2px, -2px); }
+        }
+        .shake-light {
+            animation: screen-shake-light 0.16s ease-in-out both;
+        }
+
+        /* 必殺技暗場特效 */
+        @keyframes super-flash-bg {
+            0% { opacity: 0; }
+            15% { opacity: 0.9; background: radial-gradient(circle, rgba(0,240,255,0.4) 0%, rgba(0,0,0,0.95) 70%); }
+            85% { opacity: 0.85; }
+            100% { opacity: 0; }
+        }
+        .super-darken {
+            animation: super-flash-bg 1.2s ease-out forwards;
+        }
+
+        /* 待機角色呼吸律動 */
+        @keyframes fighter-idle {
+            0%, 100% { transform: translateY(0px) scaleY(1); }
+            50% { transform: translateY(-8px) scaleY(1.02); }
+        }
+        .fighter-stance {
+            animation: fighter-idle 1.4s infinite ease-in-out;
+        }
+
+        /* 受擊閃白紅 */
+        @keyframes fighter-hit-anim {
+            0% { filter: brightness(4) drop-shadow(0 0 25px #ff0055); transform: translateX(25px) rotate(8deg); }
+            50% { filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); transform: translateX(-10px); }
+            100% { filter: brightness(1); transform: translateX(0) rotate(0); }
+        }
+        .fighter-hit-p1 {
+            animation: fighter-hit-anim 0.3s ease-out;
+        }
+        .fighter-hit-p2 {
+            animation: fighter-hit-anim 0.3s ease-out;
+        }
+
+        /* 3D 地板網格 */
+        .stage-grid {
+            background-size: 60px 60px;
+            background-image: 
+                linear-gradient(to right, rgba(0, 240, 255, 0.18) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 0, 85, 0.18) 1px, transparent 1px);
+            transform: perspective(450px) rotateX(68deg);
+            transform-origin: center top;
+        }
+
+        /* 文字外框與金屬質感 */
+        .text-stroke-dark {
+            -webkit-text-stroke: 2px #090a0f;
+            paint-order: stroke fill;
+        }
+        .text-stroke-heavy {
+            -webkit-text-stroke: 6px #000000;
+            paint-order: stroke fill;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen relative select-none overflow-hidden bg-slate-950 text-white">
+
+    <!-- ==================== 主遊戲視窗容器 (包含背景、角色與 HUD) ==================== -->
+    <div id="game-viewport" class="relative w-full h-full flex flex-col justify-between overflow-hidden">
+
+        <!-- 0. 格鬥舞台背景與動態角色示意層 (Background & Stage Layer) -->
+        <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+            <!-- 遠景霓虹夜空 -->
+            <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-indigo-950/60 via-slate-950 to-black"></div>
+            
+            <!-- 舞台聚光燈 -->
+            <div class="absolute -top-24 left-1/4 w-96 h-[120%] bg-cyan-500/10 rotate-12 blur-3xl"></div>
+            <div class="absolute -top-24 right-1/4 w-96 h-[120%] bg-rose-500/10 -rotate-12 blur-3xl"></div>
+
+            <!-- 遠景賽博城市剪影 -->
+            <div class="absolute bottom-[26%] inset-x-0 h-48 opacity-30 flex items-end justify-center gap-2 px-8">
+                <div class="w-16 h-36 bg-slate-800 border-t-2 border-cyan-400"></div>
+                <div class="w-24 h-48 bg-slate-900 border-t-2 border-rose-500"></div>
+                <div class="w-20 h-28 bg-slate-800 border-t border-indigo-400"></div>
+                <div class="w-32 h-44 bg-slate-900 border-t-2 border-cyan-400 flex flex-col justify-around p-2">
+                    <div class="h-1 bg-cyan-500/40 w-full"></div>
+                    <div class="h-1 bg-cyan-500/40 w-full"></div>
+                </div>
+                <div class="w-28 h-52 bg-slate-800 border-t-2 border-amber-400"></div>
+                <div class="w-20 h-32 bg-slate-900 border-t border-rose-500"></div>
+                <div class="w-24 h-40 bg-slate-800 border-t-2 border-cyan-400"></div>
+            </div>
+
+            <!-- 透視格鬥擂台地板 -->
+            <div class="absolute bottom-0 inset-x-0 h-[28%] bg-gradient-to-t from-black via-slate-900/90 to-indigo-950/50 border-t-2 border-cyan-500/40 overflow-hidden">
+                <div class="stage-grid w-[140%] -left-[20%] h-[200%] absolute top-0"></div>
+            </div>
+
+            <!-- 必殺技暗場特效遮罩 -->
+            <div id="super-bg-flash" class="absolute inset-0 opacity-0 pointer-events-none z-10"></div>
+
+            <!-- 格鬥角色示意區 (P1 與 P2 動態待機與受擊互動) -->
+            <div class="absolute inset-x-0 bottom-[12%] h-[55%] max-w-6xl mx-auto flex justify-between items-end px-12 sm:px-28 z-20">
+                
+                <!-- P1 角色 (蒼藍龍戰士 RYUJI) -->
+                <div id="p1-fighter-wrap" class="relative flex flex-col items-center transition-transform duration-150">
+                    <div class="fighter-stance relative group">
+                        <!-- 氣場光暈 -->
+                        <div id="p1-aura" class="absolute -inset-4 bg-cyan-500/20 rounded-full blur-xl transition-opacity duration-300"></div>
+                        <!-- 角色 SVG 剪影 -->
+                        <svg class="w-36 h-52 sm:w-48 sm:h-64 drop-shadow-[0_0_15px_rgba(0,240,255,0.6)]" viewBox="0 0 200 260" fill="none">
+                            <!-- 飄動頭帶 -->
+                            <path d="M75 40 C40 35, 20 50, 5 42 C25 60, 45 55, 75 48 Z" fill="#ff0055" />
+                            <!-- 頭部與髮型 -->
+                            <polygon points="85,18 105,12 115,25 112,50 85,50 78,32" fill="#0f172a" stroke="#00f0ff" stroke-width="3"/>
+                            <!-- 頭帶正面 -->
+                            <rect x="80" y="28" width="34" height="8" fill="#ff0055" />
+                            <!-- 發光雙眼 -->
+                            <polygon points="100,36 111,36 108,40 99,40" fill="#00f0ff"/>
+                            <!-- 軀幹與道服 -->
+                            <polygon points="68,55 125,55 135,125 62,125" fill="#1e293b" stroke="#00f0ff" stroke-width="3"/>
+                            <path d="M75 55 L102 105 L120 55" stroke="#38bdf8" stroke-width="3" fill="none"/>
+                            <!-- 黑腰帶 -->
+                            <rect x="60" y="120" width="76" height="12" fill="#090a0f" stroke="#00f0ff" stroke-width="2"/>
+                            <!-- 前導拳 (右拳蓄力) -->
+                            <g class="translate-x-2">
+                                <polygon points="118,65 168,78 162,100 112,88" fill="#0f172a" stroke="#00f0ff" stroke-width="3"/>
+                                <circle cx="170" cy="88" r="16" fill="#00f0ff" class="animate-pulse opacity-80"/>
+                                <circle cx="170" cy="88" r="9" fill="#ffffff"/>
+                            </g>
+                            <!-- 後防禦手 -->
+                            <polygon points="68,65 40,95 65,112 85,95" fill="#0f172a" stroke="#00f0ff" stroke-width="3"/>
+                            <!-- 雙腿格鬥站姿 -->
+                            <polygon points="65,132 95,132 78,235 45,235" fill="#1e293b" stroke="#00f0ff" stroke-width="3"/>
+                            <polygon points="102,132 132,132 155,235 122,235" fill="#0f172a" stroke="#00f0ff" stroke-width="3"/>
+                        </svg>
+                    </div>
+                    <!-- 角色腳下光圈 -->
+                    <div class="w-36 h-5 bg-cyan-500/30 rounded-full blur-sm border border-cyan-400/50 -mt-3"></div>
+                    <span class="mt-1 text-[11px] font-cyber tracking-widest text-cyan-400/80 bg-slate-950/80 px-2 py-0.5 rounded border border-cyan-500/30">P1: RYUJI</span>
+                </div>
+
+                <!-- P2 角色 (緋紅魔影 KAZAMA) -->
+                <div id="p2-fighter-wrap" class="relative flex flex-col items-center transition-transform duration-150">
+                    <div class="fighter-stance relative group" style="animation-delay: -0.7s;">
+                        <!-- 氣場光暈 -->
+                        <div id="p2-aura" class="absolute -inset-4 bg-rose-500/20 rounded-full blur-xl transition-opacity duration-300"></div>
+                        <!-- 角色 SVG 剪影 (面向左側) -->
+                        <svg class="w-36 h-52 sm:w-48 sm:h-64 drop-shadow-[0_0_15px_rgba(255,0,85,0.6)]" viewBox="0 0 200 260" fill="none">
+                            <!-- 惡魔雙翼殘影 -->
+                            <polygon points="120,75 185,25 170,95 195,115 130,120" fill="rgba(255,0,85,0.25)" stroke="#ff0055" stroke-width="2"/>
+                            <!-- 頭部與狂野長髮 -->
+                            <polygon points="120,12 90,18 82,48 115,50 130,30" fill="#0f172a" stroke="#ff0055" stroke-width="3"/>
+                            <!-- 緋紅雙眼 -->
+                            <polygon points="86,35 98,37 96,41 85,39" fill="#ff0055"/>
+                            <!-- 裝甲軀幹 -->
+                            <polygon points="75,55 135,55 140,125 68,125" fill="#1e1b4b" stroke="#ff0055" stroke-width="3"/>
+                            <polygon points="85,60 115,60 100,115" fill="#881337"/>
+                            <!-- 前爪手 (左爪紫焰) -->
+                            <g class="-translate-x-2">
+                                <polygon points="82,68 32,75 38,98 88,90" fill="#0f172a" stroke="#ff0055" stroke-width="3"/>
+                                <circle cx="30" cy="86" r="16" fill="#ff0055" class="animate-pulse opacity-80"/>
+                                <circle cx="30" cy="86" r="9" fill="#fde047"/>
+                            </g>
+                            <!-- 後蓄力手 -->
+                            <polygon points="132,65 162,92 135,112 115,95" fill="#0f172a" stroke="#ff0055" stroke-width="3"/>
+                            <!-- 雙腿站姿 -->
+                            <polygon points="70,132 100,132 50,235 82,235" fill="#0f172a" stroke="#ff0055" stroke-width="3"/>
+                            <polygon points="108,132 138,132 155,235 122,235" fill="#1e1b4b" stroke="#ff0055" stroke-width="3"/>
+                        </svg>
+                    </div>
+                    <!-- 角色腳下光圈 -->
+                    <div class="w-36 h-5 bg-rose-500/30 rounded-full blur-sm border border-rose-400/50 -mt-3"></div>
+                    <span class="mt-1 text-[11px] font-cyber tracking-widest text-rose-400/80 bg-slate-950/80 px-2 py-0.5 rounded border border-rose-500/30">P2: KAZAMA</span>
+                </div>
+
+            </div>
+
+            <!-- 打擊火花容器 -->
+            <div id="hit-spark-layer" class="absolute inset-0 pointer-events-none z-30"></div>
+        </div>
+
+
+        <!-- ==================== 1. 頂部對戰資訊列 (TOP HUD) ==================== -->
+        <header class="relative z-30 w-full max-w-[1440px] mx-auto pt-3 sm:pt-5 px-3 sm:px-8">
+            <div class="flex items-start justify-between gap-2 sm:gap-4">
+
+                <!-- >>>>>>>>>> P1 狀態欄 (左側) <<<<<<<<<< -->
+                <div class="flex-1 flex items-start gap-2 sm:gap-3">
+                    
+                    <!-- P1 角色頭像框 -->
+                    <div class="relative shrink-0 group">
+                        <div class="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-br from-cyan-500 via-blue-700 to-slate-950 p-1 skew-p1 shadow-[0_0_20px_rgba(0,240,255,0.4)] border-2 border-cyan-300 relative overflow-hidden">
+                            <div class="w-full h-full bg-slate-900 overflow-hidden flex items-center justify-center skew-p1-reverse scale-125">
+                                <!-- P1 頭像 SVG -->
+                                <svg viewBox="0 0 100 100" class="w-full h-full">
+                                    <rect width="100" height="100" fill="#0f172a"/>
+                                    <circle cx="50" cy="50" r="42" fill="#0284c7" opacity="0.25"/>
+                                    <!-- 角色臉部特寫 -->
+                                    <polygon points="28,25 55,15 78,28 72,78 32,78" fill="#1e293b" stroke="#00f0ff" stroke-width="2.5"/>
+                                    <rect x="26" y="32" width="50" height="10" fill="#ff0055"/>
+                                    <polygon points="38,48 50,51 38,54" fill="#00f0ff"/>
+                                    <polygon points="68,48 56,51 68,54" fill="#00f0ff"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <span class="absolute -bottom-2 -left-1 bg-cyan-400 text-slate-950 font-cyber font-black text-[10px] sm:text-xs px-2 py-0.5 skew-p1 shadow-md">
+                            1P
+                        </span>
+                    </div>
+
+                    <!-- P1 名稱、勝利燈號、血條、防禦條 -->
+                    <div class="flex-1 flex flex-col pt-0.5">
+                        
+                        <!-- 第一排：角色名稱 + 回合勝利指示燈 (Round Win Markers) -->
+                        <div class="flex items-center justify-between mb-1 px-1">
+                            <div class="flex items-center gap-2">
+                                <h2 class="font-arcade text-base sm:text-xl md:text-2xl tracking-wider text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                                    RYUJI <span class="hidden md:inline-block text-xs font-cyber text-cyan-400 font-bold ml-1">DRAGON FIST</span>
+                                </h2>
+                                <!-- 危險閃爍標籤 -->
+                                <span id="p1-danger-badge" class="hidden bg-red-600 text-white text-[10px] font-cyber font-black px-1.5 py-0.5 rounded animate-bounce shadow-[0_0_10px_#ef4444]">
+                                    DANGER
+                                </span>
+                            </div>
+
+                            <!-- P1 勝利局數指示燈 (2勝制) -->
+                            <div class="flex items-center gap-1.5 sm:gap-2" title="勝利回合數 (Wins)">
+                                <div id="p1-win-1" class="w-3.5 h-3.5 sm:w-4 sm:h-4 rotate-45 border-2 border-amber-300 bg-amber-400 shadow-[0_0_10px_#fbbf24] transition-all duration-300"></div>
+                                <div id="p1-win-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4 rotate-45 border-2 border-slate-500 bg-slate-900/90 transition-all duration-300"></div>
+                            </div>
+                        </div>
+
+                        <!-- 第二排：P1 斜角雙層生命值條 (Health Bar + Damage Trail) -->
+                        <!-- 注意：P1 血條往中間(右邊)對齊扣血，讓視覺向中心匯聚 -->
+                        <div id="p1-hp-frame" class="relative h-6 sm:h-8 md:h-9 w-full bg-slate-950/95 border-2 border-slate-300/90 skew-p1 p-0.5 shadow-[0_0_20px_rgba(0,0,0,0.85)] overflow-hidden">
+                            <!-- 背景格線底紋 -->
+                            <div class="absolute inset-0 opacity-20 bg-[repeating-linear-gradient(90deg,transparent,transparent_12px,#fff_12px,#fff_13px)]"></div>
+                            
+                            <!-- 延遲扣血殘影紅條 (Damage Trail Bar) - 靠右錨定 -->
+                            <div id="p1-hp-trail" class="hp-trail-bar absolute top-0.5 bottom-0.5 right-0.5 bg-gradient-to-r from-red-600 via-rose-500 to-orange-400" style="width: calc(100% - 4px);"></div>
+                            
+                            <!-- 主生命值條 (Main Health Bar) - 靠右錨定 -->
+                            <div id="p1-hp-main" class="hp-main-bar bar-gloss absolute top-0.5 bottom-0.5 right-0.5 bg-gradient-to-r from-emerald-500 via-green-400 to-lime-300 shadow-[0_0_12px_rgba(52,211,153,0.6)]" style="width: calc(100% - 4px);"></div>
+
+                            <!-- 血量百分比數字與刻度 -->
+                            <div class="relative z-10 w-full h-full flex items-center justify-between px-3 skew-p1-reverse pointer-events-none">
+                                <span id="p1-hp-text" class="font-cyber font-black text-xs sm:text-sm text-white drop-shadow-[0_1px_3px_rgba(0,0,0,1)]">1000 / 1000</span>
+                                <span class="text-[10px] font-cyber text-white/70 hidden sm:inline">VIT</span>
+                            </div>
+                        </div>
+
+                        <!-- 第三排：P1 防禦值/暈眩條 (Guard / Stun Gauge) -->
+                        <div class="mt-1.5 flex items-center justify-end gap-2 w-[88%] ml-auto">
+                            <span id="p1-stun-label" class="font-cyber text-[10px] font-bold text-amber-300 tracking-wider uppercase drop-shadow">STUN</span>
+                            <div class="flex-1 h-2 sm:h-2.5 bg-slate-950/90 border border-slate-600 skew-p1 p-0.5 overflow-hidden">
+                                <div id="p1-stun-bar" class="h-full float-right bg-gradient-to-r from-amber-500 to-yellow-300 transition-all duration-150 shadow-[0_0_8px_#f59e0b]" style="width: 15%;"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+
+                <!-- >>>>>>>>>> 中央倒數計時器與回合標示 (CENTER TIMER) <<<<<<<<<< -->
+                <div class="shrink-0 flex flex-col items-center mx-1 sm:mx-2 -mt-1">
+                    <!-- 回合徽章 -->
+                    <div class="bg-slate-900 border border-amber-400/70 px-2.5 py-0.5 rounded-t-md shadow-[0_0_10px_rgba(251,191,36,0.3)]">
+                        <span id="round-badge-text" class="font-cyber text-[10px] sm:text-xs font-extrabold tracking-widest text-amber-300 block">ROUND 1</span>
+                    </div>
+                    <!-- 計時器主框 -->
+                    <div class="relative bg-gradient-to-b from-slate-800 via-slate-950 to-black border-2 sm:border-4 border-amber-400 rounded-xl px-3 sm:px-5 py-1 sm:py-1.5 shadow-[0_0_25px_rgba(251,191,36,0.45)] flex items-center justify-center min-w-[68px] sm:min-w-[96px]">
+                        <span id="hud-timer" class="font-arcade text-3xl sm:text-5xl md:text-6xl leading-none bg-gradient-to-b from-white via-amber-200 to-amber-500 bg-clip-text text-transparent drop-shadow-[0_3px_5px_rgba(0,0,0,0.9)]">
+                            99
+                        </span>
+                    </div>
+                    <span class="text-[9px] font-cyber tracking-widest text-slate-400 mt-0.5">TIME</span>
+                </div>
+
+
+                <!-- >>>>>>>>>> P2 狀態欄 (右側 - 對稱鏡像設計) <<<<<<<<<< -->
+                <div class="flex-1 flex flex-row-reverse items-start gap-2 sm:gap-3">
+                    
+                    <!-- P2 角色頭像框 -->
+                    <div class="relative shrink-0 group">
+                        <div class="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gradient-to-bl from-rose-500 via-purple-800 to-slate-950 p-1 skew-p2 shadow-[0_0_20px_rgba(255,0,85,0.4)] border-2 border-rose-400 relative overflow-hidden">
+                            <div class="w-full h-full bg-slate-900 overflow-hidden flex items-center justify-center skew-p2-reverse scale-125">
+                                <!-- P2 頭像 SVG -->
+                                <svg viewBox="0 0 100 100" class="w-full h-full">
+                                    <rect width="100" height="100" fill="#0f172a"/>
+                                    <circle cx="50" cy="50" r="42" fill="#e11d48" opacity="0.25"/>
+                                    <!-- 角色臉部特寫 -->
+                                    <polygon points="22,20 50,12 76,22 68,78 28,78" fill="#1e1b4b" stroke="#ff0055" stroke-width="2.5"/>
+                                    <polygon points="32,45 46,50 34,54" fill="#ff0055"/>
+                                    <polygon points="68,45 54,50 66,54" fill="#ff0055"/>
+                                    <path d="M40 66 L60 66" stroke="#fda4af" stroke-width="2.5"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <span class="absolute -bottom-2 -right-1 bg-rose-500 text-white font-cyber font-black text-[10px] sm:text-xs px-2 py-0.5 skew-p2 shadow-md">
+                            2P
+                        </span>
+                    </div>
+
+                    <!-- P2 名稱、勝利燈號、血條、防禦條 -->
+                    <div class="flex-1 flex flex-col pt-0.5">
+                        
+                        <!-- 第一排：回合勝利指示燈 + 角色名稱 -->
+                        <div class="flex items-center justify-between mb-1 px-1">
+                            <!-- P2 勝利局數指示燈 -->
+                            <div class="flex items-center gap-1.5 sm:gap-2" title="勝利回合數 (Wins)">
+                                <div id="p2-win-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4 rotate-45 border-2 border-slate-500 bg-slate-900/90 transition-all duration-300"></div>
+                                <div id="p2-win-1" class="w-3.5 h-3.5 sm:w-4 sm:h-4 rotate-45 border-2 border-amber-300 bg-amber-400 shadow-[0_0_10px_#fbbf24] transition-all duration-300"></div>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <!-- 危險閃爍標籤 -->
+                                <span id="p2-danger-badge" class="hidden bg-red-600 text-white text-[10px] font-cyber font-black px-1.5 py-0.5 rounded animate-bounce shadow-[0_0_10px_#ef4444]">
+                                    DANGER
+                                </span>
+                                <h2 class="font-arcade text-base sm:text-xl md:text-2xl tracking-wider text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+                                    <span class="hidden md:inline-block text-xs font-cyber text-rose-400 font-bold mr-1">CRIMSON FANG</span> KAZAMA
+                                </h2>
+                            </div>
+                        </div>
+
+                        <!-- 第二排：P2 斜角雙層生命值條 (Health Bar + Damage Trail) -->
+                        <!-- 注意：P2 血條往中間(左邊)對齊扣血 -->
+                        <div id="p2-hp-frame" class="relative h-6 sm:h-8 md:h-9 w-full bg-slate-950/95 border-2 border-slate-300/90 skew-p2 p-0.5 shadow-[0_0_20px_rgba(0,0,0,0.85)] overflow-hidden">
+                            <!-- 背景格線底紋 -->
+                            <div class="absolute inset-0 opacity-20 bg-[repeating-linear-gradient(90deg,transparent,transparent_12px,#fff_12px,#fff_13px)]"></div>
+                            
+                            <!-- 延遲扣血殘影紅條 (Damage Trail Bar) - 靠左錨定 -->
+                            <div id="p2-hp-trail" class="hp-trail-bar absolute top-0.5 bottom-0.5 left-0.5 bg-gradient-to-l from-red-600 via-rose-500 to-orange-400" style="width: calc(100% - 4px);"></div>
+                            
+                            <!-- 主生命值條 (Main Health Bar) - 靠左錨定 -->
+                            <div id="p2-hp-main" class="hp-main-bar bar-gloss absolute top-0.5 bottom-0.5 left-0.5 bg-gradient-to-l from-emerald-500 via-green-400 to-lime-300 shadow-[0_0_12px_rgba(52,211,153,0.6)]" style="width: calc(100% - 4px);"></div>
+
+                            <!-- 血量百分比數字 -->
+                            <div class="relative z-10 w-full h-full flex items-center justify-between px-3 skew-p2-reverse pointer-events-none">
+                                <span class="text-[10px] font-cyber text-white/70 hidden sm:inline">VIT</span>
+                                <span id="p2-hp-text" class="font-cyber font-black text-xs sm:text-sm text-white drop-shadow-[0_1px_3px_rgba(0,0,0,1)]">1000 / 1000</span>
+                            </div>
+                        </div>
+
+                        <!-- 第三排：P2 防禦值/暈眩條 (Guard / Stun Gauge) -->
+                        <div class="mt-1.5 flex items-center justify-start gap-2 w-[88%] mr-auto">
+                            <div class="flex-1 h-2 sm:h-2.5 bg-slate-950/90 border border-slate-600 skew-p2 p-0.5 overflow-hidden">
+                                <div id="p2-stun-bar" class="h-full float-left bg-gradient-to-l from-amber-500 to-yellow-300 transition-all duration-150 shadow-[0_0_8px_#f59e0b]" style="width: 25%;"></div>
+                            </div>
+                            <span id="p2-stun-label" class="font-cyber text-[10px] font-bold text-amber-300 tracking-wider uppercase drop-shadow">STUN</span>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+
+        <!-- ==================== 2. 中央與兩側動態戰鬥回饋 (COMBAT FEEDBACK & ANNOUNCER) ==================== -->
+        <main class="relative z-30 flex-1 w-full max-w-[1440px] mx-auto flex items-center justify-between px-4 sm:px-10 pointer-events-none">
+
+            <!-- P1 左側連擊計數器 (P1 Combo Display) -->
+            <div id="p1-combo-box" class="opacity-0 transition-opacity duration-300 flex flex-col items-start">
+                <div id="p1-combo-rating" class="bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-cyber font-black text-xs sm:text-sm px-2.5 py-0.5 skew-p1 mb-1 shadow-[0_0_12px_#00f0ff]">
+                    GREAT!
+                </div>
+                <div id="p1-combo-num-wrap" class="flex items-baseline gap-2">
+                    <span id="p1-combo-hits" class="font-arcade text-5xl sm:text-7xl md:text-8xl italic bg-gradient-to-b from-white via-cyan-200 to-cyan-500 bg-clip-text text-transparent text-stroke-dark drop-shadow-[0_6px_12px_rgba(0,240,255,0.6)]">
+                        3
+                    </span>
+                    <div class="flex flex-col">
+                        <span class="font-arcade text-xl sm:text-3xl italic text-cyan-300 tracking-wider -mb-1 drop-shadow">HITS!</span>
+                        <span class="font-cyber text-[11px] sm:text-xs font-bold text-slate-300 bg-slate-900/80 px-2 py-0.5 rounded border border-cyan-500/40">
+                            <span id="p1-combo-dmg">240</span> DMG
+                        </span>
+                    </div>
+                </div>
+                <!-- 特殊狀態提示 (Counter / First Attack) -->
+                <div id="p1-Bonus-tag" class="mt-1 text-xs font-cyber font-extrabold text-amber-300 tracking-widest uppercase">
+                    ★ COUNTER HIT
+                </div>
+            </div>
+
+            <!-- 中央系統大字播報橫幅 (Center Announcer Banner) -->
+            <div id="announcer-overlay" class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-40">
+                <!-- 動態背景速度線橫幅 -->
+                <div id="announcer-stripe" class="w-full py-4 sm:py-7 bg-gradient-to-r from-transparent via-slate-950/90 to-transparent border-y-2 border-amber-400/60 flex flex-col items-center justify-center opacity-0 transition-opacity duration-200">
+                    <div id="announcer-sub" class="font-cyber text-xs sm:text-base font-black tracking-[0.4em] text-cyan-400 uppercase mb-1">
+                        BATTLE START
+                    </div>
+                    <h1 id="announcer-main" class="font-arcade text-5xl sm:text-7xl md:text-8xl lg:text-9xl italic tracking-wider text-center bg-gradient-to-b from-white via-amber-300 to-orange-600 bg-clip-text text-transparent text-stroke-heavy drop-shadow-[0_10px_25px_rgba(245,158,11,0.7)]">
+                        ROUND 1
+                    </h1>
+                </div>
+            </div>
+
+            <!-- P2 右側連擊計數器 (P2 Combo Display) -->
+            <div id="p2-combo-box" class="opacity-0 transition-opacity duration-300 flex flex-col items-end ml-auto">
+                <div id="p2-combo-rating" class="bg-gradient-to-l from-rose-500 to-purple-600 text-white font-cyber font-black text-xs sm:text-sm px-2.5 py-0.5 skew-p2 mb-1 shadow-[0_0_12px_#ff0055]">
+                    MARVELOUS!
+                </div>
+                <div id="p2-combo-num-wrap" class="flex flex-row-reverse items-baseline gap-2">
+                    <span id="p2-combo-hits" class="font-arcade text-5xl sm:text-7xl md:text-8xl italic bg-gradient-to-b from-white via-rose-200 to-rose-500 bg-clip-text text-transparent text-stroke-dark drop-shadow-[0_6px_12px_rgba(255,0,85,0.6)]">
+                        5
+                    </span>
+                    <div class="flex flex-col items-end">
+                        <span class="font-arcade text-xl sm:text-3xl italic text-rose-300 tracking-wider -mb-1 drop-shadow">HITS!</span>
+                        <span class="font-cyber text-[11px] sm:text-xs font-bold text-slate-300 bg-slate-900/80 px-2 py-0.5 rounded border border-rose-500/40">
+                            <span id="p2-combo-dmg">410</span> DMG
+                        </span>
+                    </div>
+                </div>
+                <div id="p2-bonus-tag" class="mt-1 text-xs font-cyber font-extrabold text-amber-300 tracking-widest uppercase">
+                    ★ PUNISH COUNTER
+                </div>
+            </div>
+
+        </main>
+
+
+        <!-- ==================== 3. 底部必殺技能量條 (BOTTOM SUPER / EX METER) ==================== -->
+        <footer class="relative z-30 w-full max-w-[1440px] mx-auto pb-3 sm:pb-6 px-3 sm:px-8">
+            <div class="flex items-end justify-between gap-4 sm:gap-12">
+
+                <!-- >>>>>>>>>> P1 底部三段式能量槽 (P1 Super Art Gauge) <<<<<<<<<< -->
+                <div class="flex-1 max-w-md sm:max-w-lg flex items-center gap-2 sm:gap-3">
+                    <!-- 能量等級大數字徽章 (0, 1, 2, MAX) -->
+                    <div id="p1-meter-badge" class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 bg-slate-950 border-2 border-cyan-400 skew-p1 flex flex-col items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.4)]">
+                        <div class="skew-p1-reverse flex flex-col items-center leading-none">
+                            <span class="text-[9px] font-cyber text-cyan-300 font-bold">LV</span>
+                            <span id="p1-meter-lv" class="font-arcade text-xl sm:text-2xl text-white">1</span>
+                        </div>
+                    </div>
+
+                    <!-- 三格分段式氣條容器 -->
+                    <div class="flex-1 flex flex-col">
+                        <div class="flex justify-between items-center mb-1 px-1">
+                            <span class="font-cyber text-[10px] sm:text-xs font-black tracking-widest text-cyan-300">SUPER ART GAUGE</span>
+                            <span id="p1-meter-pct" class="font-cyber text-[10px] sm:text-xs font-bold text-white/80">150 / 300</span>
+                        </div>
+                        <div id="p1-meter-container" class="grid grid-cols-3 gap-1.5 h-4 sm:h-5">
+                            <!-- 第 1 格 -->
+                            <div class="bg-slate-950/90 border border-cyan-500/60 skew-p1 p-0.5 overflow-hidden relative">
+                                <div id="p1-seg-1" class="h-full bg-gradient-to-r from-blue-600 via-cyan-400 to-white transition-all duration-150" style="width: 100%;"></div>
+                            </div>
+                            <!-- 第 2 格 -->
+                            <div class="bg-slate-950/90 border border-cyan-500/60 skew-p1 p-0.5 overflow-hidden relative">
+                                <div id="p1-seg-2" class="h-full bg-gradient-to-r from-blue-600 via-cyan-400 to-white transition-all duration-150" style="width: 50%;"></div>
+                            </div>
+                            <!-- 第 3 格 -->
+                            <div class="bg-slate-950/90 border border-cyan-500/60 skew-p1 p-0.5 overflow-hidden relative">
+                                <div id="p1-seg-3" class="h-full bg-gradient-to-r from-blue-600 via-cyan-400 to-white transition-all duration-150" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- >>>>>>>>>> P2 底部三段式能量槽 (P2 Super Art Gauge) <<<<<<<<<< -->
+                <div class="flex-1 max-w-md sm:max-w-lg flex flex-row-reverse items-center gap-2 sm:gap-3">
+                    <!-- 能量等級大數字徽章 -->
+                    <div id="p2-meter-badge" class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 bg-slate-950 border-2 border-rose-500 skew-p2 flex flex-col items-center justify-center shadow-[0_0_15px_rgba(255,0,85,0.4)]">
+                        <div class="skew-p2-reverse flex flex-col items-center leading-none">
+                            <span class="text-[9px] font-cyber text-rose-300 font-bold">LV</span>
+                            <span id="p2-meter-lv" class="font-arcade text-xl sm:text-2xl text-white">2</span>
+                        </div>
+                    </div>
+
+                    <!-- 三格分段式氣條容器 (由右向左填充) -->
+                    <div class="flex-1 flex flex-col">
+                        <div class="flex justify-between items-center mb-1 px-1">
+                            <span id="p2-meter-pct" class="font-cyber text-[10px] sm:text-xs font-bold text-white/80">220 / 300</span>
+                            <span class="font-cyber text-[10px] sm:text-xs font-black tracking-widest text-rose-300">OVERDRIVE METER</span>
+                        </div>
+                        <div id="p2-meter-container" class="grid grid-cols-3 gap-1.5 h-4 sm:h-5">
+                            <!-- 第 3 格 (最左邊，最後滿) -->
+                            <div class="bg-slate-950/90 border border-rose-500/60 skew-p2 p-0.5 overflow-hidden relative">
+                                <div id="p2-seg-3" class="h-full float-right bg-gradient-to-l from-purple-600 via-rose-500 to-amber-300 transition-all duration-150" style="width: 20%;"></div>
+                            </div>
+                            <!-- 第 2 格 -->
+                            <div class="bg-slate-950/90 border border-rose-500/60 skew-p2 p-0.5 overflow-hidden relative">
+                                <div id="p2-seg-2" class="h-full float-right bg-gradient-to-l from-purple-600 via-rose-500 to-amber-300 transition-all duration-150" style="width: 100%;"></div>
+                            </div>
+                            <!-- 第 1 格 (最右邊，最先滿) -->
+                            <div class="bg-slate-950/90 border border-rose-500/60 skew-p2 p-0.5 overflow-hidden relative">
+                                <div id="p2-seg-1" class="h-full float-right bg-gradient-to-l from-purple-600 via-rose-500 to-amber-300 transition-all duration-150" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </footer>
+
+    </div>
+
+
+    <!-- ==================== 4. 互動測試控制面板 (INTERACTIVE DEMO CONTROL PANEL) ==================== -->
+    <aside id="demo-panel-wrapper" class="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-3xl transition-all duration-300">
+        
+        <!-- 收合/展開切換按鈕列 -->
+        <div class="flex justify-center mb-1.5">
+            <button id="toggle-panel-btn" onclick="toggleControlPanel()" class="bg-slate-900/95 hover:bg-slate-800 text-cyan-300 border border-cyan-500/50 rounded-full px-4 py-1 text-xs font-cyber font-bold tracking-wider flex items-center gap-2 shadow-[0_0_15px_rgba(0,0,0,0.8)] backdrop-blur-md transition">
+                <i class="fa-solid fa-gamepad"></i>
+                <span id="toggle-panel-text">收合 UI 測試控制台 (HIDE CONTROLS)</span>
+                <i id="toggle-panel-icon" class="fa-solid fa-chevron-down transition-transform"></i>
+            </button>
+        </div>
+
+        <!-- 控制面板主體 -->
+        <div id="control-panel-body" class="bg-slate-950/90 backdrop-blur-xl border border-slate-700/90 rounded-2xl p-3 sm:p-4 shadow-[0_15px_40px_rgba(0,0,0,0.9)]">
+            
+            <!-- 頂部工具列：音效開關、計時器開關、鍵盤快捷鍵提示 -->
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-3 border-b border-slate-800 text-xs">
+                <div class="flex items-center gap-2">
+                    <span class="bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 px-2 py-0.5 rounded font-cyber font-bold">
+                        DEV SANDBOX
+                    </span>
+                    <span class="text-slate-400 hidden sm:inline">點擊下方按鈕或使用鍵盤 <kbd class="bg-slate-800 px-1.5 py-0.5 rounded text-slate-200 border border-slate-600">J</kbd> <kbd class="bg-slate-800 px-1.5 py-0.5 rounded text-slate-200 border border-slate-600">K</kbd> <kbd class="bg-slate-800 px-1.5 py-0.5 rounded text-slate-200 border border-slate-600">L</kbd> 測試 UI 回饋</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button id="btn-sound-toggle" onclick="toggleSound()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-600 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1.5 transition">
+                        <i id="sound-icon" class="fa-solid fa-volume-high"></i>
+                        <span id="sound-text">音效: 開啟</span>
+                    </button>
+                    <button id="btn-timer-toggle" onclick="toggleTimerPause()" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-slate-600 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1.5 transition">
+                        <i id="timer-icon" class="fa-solid fa-pause"></i>
+                        <span id="timer-btn-text">暫停倒數</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 三欄式控制按鈕網格 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+
+                <!-- 1. P1 動作與受擊測試 -->
+                <div class="bg-slate-900/90 border border-cyan-500/30 rounded-xl p-2.5 flex flex-col gap-2">
+                    <div class="flex items-center justify-between text-cyan-400 font-cyber font-bold border-b border-slate-800 pb-1">
+                        <span><i class="fa-solid fa-dragon mr-1"></i> P1 (RYUJI) 控制台</span>
+                        <span class="text-[10px] text-slate-400">快捷鍵</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button onclick="attackPlayer(1, 2, 'light')" class="bg-cyan-950/80 hover:bg-cyan-800/80 active:scale-95 text-cyan-200 border border-cyan-500/40 rounded-lg py-1.5 px-2 font-bold flex items-center justify-between transition">
+                            <span>P1 連擊攻擊</span>
+                            <kbd class="text-[10px] bg-black/50 px-1 rounded">J</kbd>
+                        </button>
+                        <button onclick="attackPlayer(1, 2, 'heavy')" class="bg-cyan-900/80 hover:bg-cyan-700 active:scale-95 text-white border border-cyan-400/50 rounded-lg py-1.5 px-2 font-bold flex items-center justify-between transition">
+                            <span>P1 重擊破防</span>
+                            <kbd class="text-[10px] bg-black/50 px-1 rounded">K</kbd>
+                        </button>
+                        <button onclick="addMeter(1, 100)" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-cyan-300 border border-slate-600 rounded-lg py-1.5 px-2 font-bold transition">
+                            +1 格氣 (MAX測試)
+                        </button>
+                        <button onclick="castSuperArt(1, 2)" class="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 active:scale-95 text-white rounded-lg py-1.5 px-2 font-bold shadow-[0_0_10px_rgba(0,240,255,0.4)] flex items-center justify-between transition">
+                            <span>🔥 P1 必殺技</span>
+                            <kbd class="text-[10px] bg-black/40 px-1 rounded">L</kbd>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. 系統大字播報與回合控制 -->
+                <div class="bg-slate-900/90 border border-amber-500/30 rounded-xl p-2.5 flex flex-col gap-2">
+                    <div class="flex items-center justify-between text-amber-400 font-cyber font-bold border-b border-slate-800 pb-1">
+                        <span><i class="fa-solid fa-bullhorn mr-1"></i> 播報與回合控制</span>
+                        <span class="text-[10px] text-slate-400">SYSTEM</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button onclick="triggerAnnouncement('ROUND 1', 'FIGHT!', 'amber')" class="bg-amber-950/70 hover:bg-amber-800/80 active:scale-95 text-amber-200 border border-amber-500/40 rounded-lg py-1.5 px-2 font-bold transition">
+                            📢 ROUND 1 FIGHT
+                        </button>
+                        <button onclick="triggerAnnouncement('COUNTER!', 'CRITICAL BONUS', 'cyan')" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-cyan-300 border border-slate-600 rounded-lg py-1.5 px-2 font-bold transition">
+                            ⚡ COUNTER HIT
+                        </button>
+                        <button onclick="forceKO()" class="bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 active:scale-95 text-white rounded-lg py-1.5 px-2 font-bold shadow-[0_0_12px_rgba(239,68,68,0.5)] transition">
+                            💀 觸發 K.O.
+                        </button>
+                        <button onclick="resetRound()" class="bg-emerald-950/80 hover:bg-emerald-800 active:scale-95 text-emerald-300 border border-emerald-500/40 rounded-lg py-1.5 px-2 font-bold transition">
+                            🔄 重置滿血回合
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3. P2 動作與受擊測試 -->
+                <div class="bg-slate-900/90 border border-rose-500/30 rounded-xl p-2.5 flex flex-col gap-2">
+                    <div class="flex items-center justify-between text-rose-400 font-cyber font-bold border-b border-slate-800 pb-1">
+                        <span><i class="fa-solid fa-fire-flame-curved mr-1"></i> P2 (KAZAMA) 控制台</span>
+                        <span class="text-[10px] text-slate-400">快捷鍵</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button onclick="attackPlayer(2, 1, 'light')" class="bg-rose-950/80 hover:bg-rose-800/80 active:scale-95 text-rose-200 border border-rose-500/40 rounded-lg py-1.5 px-2 font-bold flex items-center justify-between transition">
+                            <span>P2 連擊攻擊</span>
+                            <kbd class="text-[10px] bg-black/50 px-1 rounded">1</kbd>
+                        </button>
+                        <button onclick="attackPlayer(2, 1, 'heavy')" class="bg-rose-900/80 hover:bg-rose-700 active:scale-95 text-white border border-rose-400/50 rounded-lg py-1.5 px-2 font-bold flex items-center justify-between transition">
+                            <span>P2 重擊破防</span>
+                            <kbd class="text-[10px] bg-black/50 px-1 rounded">2</kbd>
+                        </button>
+                        <button onclick="addMeter(2, 100)" class="bg-slate-800 hover:bg-slate-700 active:scale-95 text-rose-300 border border-slate-600 rounded-lg py-1.5 px-2 font-bold transition">
+                            +1 格氣 (MAX測試)
+                        </button>
+                        <button onclick="castSuperArt(2, 1)" class="bg-gradient-to-r from-rose-600 to-purple-600 hover:from-rose-500 hover:to-purple-500 active:scale-95 text-white rounded-lg py-1.5 px-2 font-bold shadow-[0_0_10px_rgba(255,0,85,0.4)] flex items-center justify-between transition">
+                            <span>🔥 P2 必殺技</span>
+                            <kbd class="text-[10px] bg-black/40 px-1 rounded">3</kbd>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </aside>
+
+
+    <!-- ==================== JAVASCRIPT 遊戲 UI 狀態管理與音效引擎 ==================== -->
+    <script>
+        /**
+         * 1. Web Audio API 街機音效合成器 (無須外部音檔，開箱即用)
+         */
+        class ArcadeSoundEngine {
+            constructor() {
+                this.enabled = true;
+                this.ctx = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioCtx();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            playHit(type = 'light') {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = type === 'heavy' ? 'sawtooth' : 'triangle';
+                osc.frequency.setValueAtTime(type === 'heavy' ? 140 : 260, now);
+                osc.frequency.exponentialRampToValueAtTime(28, now + (type === 'heavy' ? 0.18 : 0.09));
+
+                gain.gain.setValueAtTime(type === 'heavy' ? 0.35 : 0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + (type === 'heavy' ? 0.18 : 0.09));
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + (type === 'heavy' ? 0.19 : 0.1));
+            }
+
+            playSuperFlash() {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.25);
+                osc.frequency.exponentialRampToValueAtTime(110, now + 0.65);
+
+                gain.gain.setValueAtTime(0.35, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.66);
+            }
+
+            playKO() {
+                if (!this.enabled) return;
+                this.init();
+                const now = this.ctx.currentTime;
+                [180, 90, 45].forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.06);
+                    osc.frequency.exponentialRampToValueAtTime(20, now + 0.8);
+
+                    gain.gain.setValueAtTime(0.25, now + idx * 0.06);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start(now + idx * 0.06);
+                    osc.stop(now + 0.82);
+                });
+            }
+        }
+
+        const sfx = new ArcadeSoundEngine();
+
+        /**
+         * 2. 格鬥遊戲 HUD 核心狀態資料 (State Management)
+         */
+        const gameState = {
+            round: 1,
+            timer: 99,
+            timerPaused: false,
+            isRoundOver: false,
+            players: {
+                1: {
+                    name: 'RYUJI',
+                    hp: 1000,
+                    maxHp: 1000,
+                    stun: 15,
+                    maxStun: 100,
+                    meter: 150, // 0 ~ 300 (3格氣)
+                    maxMeter: 300,
+                    wins: 1,
+                    comboHits: 0,
+                    comboDmg: 0,
+                    comboTimeout: null,
+                    trailTimeout: null
+                },
+                2: {
+                    name: 'KAZAMA',
+                    hp: 1000,
+                    maxHp: 1000,
+                    stun: 25,
+                    maxStun: 100,
+                    meter: 220, // 0 ~ 300 (3格氣)
+                    maxMeter: 300,
+                    wins: 1,
+                    comboHits: 0,
+                    comboDmg: 0,
+                    comboTimeout: null,
+                    trailTimeout: null
+                }
+            }
+        };
+
+        /**
+         * 3. 更新血條、延遲殘影血條、危險閃爍與防禦條
+         */
+        function updateHealthAndStunUI(playerNum, triggerTrailDelay = true) {
+            const p = gameState.players[playerNum];
+            const hpPct = Math.max(0, Math.min(100, (p.hp / p.maxHp) * 100));
+            const stunPct = Math.max(0, Math.min(100, (p.stun / p.maxStun) * 100));
+
+            const mainBar = document.getElementById(`p${playerNum}-hp-main`);
+            const trailBar = document.getElementById(`p${playerNum}-hp-trail`);
+            const hpFrame = document.getElementById(`p${playerNum}-hp-frame`);
+            const hpText = document.getElementById(`p${playerNum}-hp-text`);
+            const dangerBadge = document.getElementById(`p${playerNum}-danger-badge`);
+            const stunBar = document.getElementById(`p${playerNum}-stun-bar`);
+            const stunLabel = document.getElementById(`p${playerNum}-stun-label`);
+
+            // 1. 立即更新主血條寬度
+            mainBar.style.width = `calc(${hpPct}% - 4px)`;
+            if (hpPct <= 0) mainBar.style.width = '0%';
+            hpText.textContent = `${Math.ceil(p.hp)} / ${p.maxHp}`;
+
+            // 2. 延遲更新殘影紅條 (Damage Trail)
+            if (p.trailTimeout) clearTimeout(p.trailTimeout);
+            if (triggerTrailDelay) {
+                p.trailTimeout = setTimeout(() => {
+                    trailBar.style.width = hpPct <= 0 ? '0%' : `calc(${hpPct}% - 4px)`;
+                }, 480);
+            } else {
+                trailBar.style.width = hpPct <= 0 ? '0%' : `calc(${hpPct}% - 4px)`;
+            }
+
+            // 3. 根據血量比例切換血條漸層顏色與 DANGER 特效
+            const dir = playerNum === 1 ? 'bg-gradient-to-r' : 'bg-gradient-to-l';
+            mainBar.className = `hp-main-bar bar-gloss absolute top-0.5 bottom-0.5 ${playerNum === 1 ? 'right-0.5' : 'left-0.5'} `;
+
+            if (hpPct <= 25 && p.hp > 0) {
+                mainBar.classList.add(dir, 'from-red-600', 'via-orange-500', 'to-yellow-400');
+                hpFrame.classList.add('danger-state', 'border-red-500');
+                dangerBadge.classList.remove('hidden');
+            } else if (hpPct <= 55) {
+                mainBar.classList.add(dir, 'from-amber-500', 'via-yellow-400', 'to-lime-300');
+                hpFrame.classList.remove('danger-state', 'border-red-500');
+                dangerBadge.classList.add('hidden');
+            } else {
+                mainBar.classList.add(dir, 'from-emerald-500', 'via-green-400', 'to-lime-300');
+                hpFrame.classList.remove('danger-state', 'border-red-500');
+                dangerBadge.classList.add('hidden');
+            }
+
+            // 4. 更新防禦/暈眩條 (Stun Gauge)
+            stunBar.style.width = `${stunPct}%`;
+            if (stunPct >= 100) {
+                stunLabel.textContent = '💫 DIZZY!';
+                stunLabel.classList.add('text-red-400', 'animate-ping');
+            } else {
+                stunLabel.textContent = 'STUN';
+                stunLabel.classList.remove('text-red-400', 'animate-ping');
+            }
+        }
+
+        /**
+         * 4. 更新底部三段式必殺技能量槽 (Super Meter)
+         */
+        function updateSuperMeterUI(playerNum) {
+            const p = gameState.players[playerNum];
+            p.meter = Math.max(0, Math.min(p.maxMeter, p.meter));
+
+            const level = Math.floor(p.meter / 100);
+            const lvEl = document.getElementById(`p${playerNum}-meter-lv`);
+            const pctEl = document.getElementById(`p${playerNum}-meter-pct`);
+            const badgeEl = document.getElementById(`p${playerNum}-meter-badge`);
+            const containerEl = document.getElementById(`p${playerNum}-meter-container`);
+
+            lvEl.textContent = level === 3 ? 'MAX' : level;
+            pctEl.textContent = `${Math.floor(p.meter)} / ${p.maxMeter}`;
+
+            // 更新 3 個分段格
+            for (let i = 1; i <= 3; i++) {
+                const segEl = document.getElementById(`p${playerNum}-seg-${i}`);
+                const segMin = (i - 1) * 100;
+                const segFill = Math.max(0, Math.min(100, p.meter - segMin));
+                segEl.style.width = `${segFill}%`;
+            }
+
+            // 滿氣 MAX 特效
+            if (level === 3) {
+                badgeEl.classList.add('meter-max-active');
+                containerEl.classList.add('meter-max-active');
+            } else {
+                badgeEl.classList.remove('meter-max-active');
+                containerEl.classList.remove('meter-max-active');
+            }
+        }
+
+        /**
+         * 5. 更新回合勝利燈號 (Round Win Indicators)
+         */
+        function updateWinMarkersUI() {
+            [1, 2].forEach(playerNum => {
+                const wins = gameState.players[playerNum].wins;
+                for (let i = 1; i <= 2; i++) {
+                    const marker = document.getElementById(`p${playerNum}-win-${i}`);
+                    if (i <= wins) {
+                        marker.className = 'w-3.5 h-3.5 sm:w-4 sm:h-4 rotate-45 border-2 border-amber-200 bg-amber-400 shadow-[0_0_12px_#fbbf24] transition-all duration-300 scale-110';
+                    } else {
+                        marker.className = 'w-3.5 h-3.5 sm:w-4 sm:h-4 rotate-45 border-2 border-slate-500 bg-slate-900/90 transition-all duration-300';
+                    }
+                }
+            });
+        }
+
+        /**
+         * 6. 觸發連擊計數器動畫 (Combo Counter Feedback)
+         */
+        function triggerComboUI(attackerNum, damage, isCounter = false) {
+            const p = gameState.players[attackerNum];
+            p.comboHits += 1;
+            p.comboDmg += damage;
+
+            const box = document.getElementById(`p${attackerNum}-combo-box`);
+            const hitsEl = document.getElementById(`p${attackerNum}-combo-hits`);
+            const dmgEl = document.getElementById(`p${attackerNum}-combo-dmg`);
+            const ratingEl = document.getElementById(`p${attackerNum}-combo-rating`);
+            const numWrap = document.getElementById(`p${attackerNum}-combo-num-wrap`);
+
+            // 評價稱號隨連擊數升級
+            let rating = 'GOOD!';
+            if (p.comboHits >= 10) rating = 'GODLIKE!!';
+            else if (p.comboHits >= 7) rating = 'MARVELOUS!';
+            else if (p.comboHits >= 4) rating = 'AWESOME!';
+            else if (p.comboHits >= 2) rating = 'GREAT!';
+
+            hitsEl.textContent = p.comboHits;
+            dmgEl.textContent = p.comboDmg;
+            ratingEl.textContent = rating;
+
+            box.classList.remove('opacity-0');
+            box.classList.add('opacity-100');
+
+            // 重置彈跳動畫
+            numWrap.classList.remove('combo-pop');
+            void numWrap.offsetWidth;
+            numWrap.classList.add('combo-pop');
+
+            // 連擊中斷計時器 (2.2秒無攻擊則重置連擊)
+            if (p.comboTimeout) clearTimeout(p.comboTimeout);
+            p.comboTimeout = setTimeout(() => {
+                box.classList.remove('opacity-100');
+                box.classList.add('opacity-0');
+                p.comboHits = 0;
+                p.comboDmg = 0;
+            }, 2200);
+        }
+
+        /**
+         * 7. 中央系統大字播報動畫 (Announcer Banner)
+         */
+        let announcerTimer = null;
+        function triggerAnnouncement(mainText, subText = 'SYSTEM', theme = 'amber') {
+            const stripe = document.getElementById('announcer-stripe');
+            const mainEl = document.getElementById('announcer-main');
+            const subEl = document.getElementById('announcer-sub');
+
+            mainEl.textContent = mainText;
+            subEl.textContent = subText;
+
+            // 根據主題切換漸層色
+            mainEl.className = 'font-arcade text-5xl sm:text-7xl md:text-8xl lg:text-9xl italic tracking-wider text-center bg-clip-text text-transparent text-stroke-heavy ';
+            if (theme === 'red') {
+                mainEl.classList.add('bg-gradient-to-b', 'from-white', 'via-red-400', 'to-red-700', 'drop-shadow-[0_10px_25px_rgba(239,68,68,0.85)]');
+            } else if (theme === 'cyan') {
+                mainEl.classList.add('bg-gradient-to-b', 'from-white', 'via-cyan-300', 'to-blue-600', 'drop-shadow-[0_10px_25px_rgba(0,240,255,0.85)]');
+            } else {
+                mainEl.classList.add('bg-gradient-to-b', 'from-white', 'via-amber-300', 'to-orange-600', 'drop-shadow-[0_10px_25px_rgba(245,158,11,0.75)]');
+            }
+
+            stripe.classList.remove('opacity-0');
+            stripe.classList.add('opacity-100');
+
+            mainEl.classList.remove('animate-announcer');
+            void mainEl.offsetWidth;
+            mainEl.classList.add('animate-announcer');
+
+            if (announcerTimer) clearTimeout(announcerTimer);
+            announcerTimer = setTimeout(() => {
+                stripe.classList.remove('opacity-100');
+                stripe.classList.add('opacity-0');
+            }, 1750);
+        }
+
+        /**
+         * 8. 視覺打擊火花與畫面震動特效
+         */
+        function spawnHitSpark(targetPlayerNum, isHeavy = false) {
+            const layer = document.getElementById('hit-spark-layer');
+            const spark = document.createElement('div');
+            const isP1 = targetPlayerNum === 1;
+
+            // 定位於受擊角色附近
+            const leftPos = isP1 ? (22 + Math.random() * 8) : (68 + Math.random() * 8);
+            const bottomPos = 28 + Math.random() * 18;
+
+            spark.style.left = `${leftPos}%`;
+            spark.style.bottom = `${bottomPos}%`;
+            spark.className = 'absolute -translate-x-1/2 translate-y-1/2 pointer-events-none transition-all duration-300';
+
+            const size = isHeavy ? 'w-36 h-36' : 'w-24 h-24';
+            const color = isP1 ? '#ff0055' : '#00f0ff';
+
+            spark.innerHTML = `
+                <svg class="${size} animate-ping" viewBox="0 0 100 100">
+                    <polygon points="50,0 62,35 100,35 70,58 82,95 50,72 18,95 30,58 0,35 38,35" fill="${color}" opacity="0.85"/>
+                    <circle cx="50" cy="50" r="22" fill="#ffffff"/>
+                </svg>
+            `;
+
+            layer.appendChild(spark);
+            setTimeout(() => spark.remove(), 260);
+        }
+
+        function triggerScreenShake(intensity = 'light') {
+            const viewport = document.getElementById('game-viewport');
+            viewport.classList.remove('shake-light', 'shake-heavy');
+            void viewport.offsetWidth;
+            viewport.classList.add(intensity === 'heavy' ? 'shake-heavy' : 'shake-light');
+        }
+
+        /**
+         * 9. 戰鬥互動功能：攻擊、集氣、施放必殺技、K.O. 判定
+         */
+        function attackPlayer(attackerNum, defenderNum, type = 'light') {
+            if (gameState.isRoundOver) resetRound();
+
+            const attacker = gameState.players[attackerNum];
+            const defender = gameState.players[defenderNum];
+
+            const damage = type === 'heavy' ? Math.floor(115 + Math.random() * 45) : Math.floor(45 + Math.random() * 25);
+            const stunGain = type === 'heavy' ? 22 : 10;
+            const meterGain = type === 'heavy' ? 35 : 18;
+
+            // 扣血與加氣
+            defender.hp = Math.max(0, defender.hp - damage);
+            defender.stun = Math.min(100, defender.stun + stunGain);
+            attacker.meter = Math.min(300, attacker.meter + meterGain);
+            defender.meter = Math.min(300, defender.meter + Math.floor(meterGain * 0.4));
+
+            // 角色受擊與出招位移
+            const atkWrap = document.getElementById(`p${attackerNum}-fighter-wrap`);
+            const defWrap = document.getElementById(`p${defenderNum}-fighter-wrap`);
+
+            atkWrap.style.transform = attackerNum === 1 ? 'translateX(35px) scale(1.06)' : 'translateX(-35px) scale(1.06)';
+            setTimeout(() => { atkWrap.style.transform = 'translateX(0) scale(1)'; }, 160);
+
+            defWrap.classList.remove(`fighter-hit-p${defenderNum}`);
+            void defWrap.offsetWidth;
+            defWrap.classList.add(`fighter-hit-p${defenderNum}`);
+
+            // 播放音效與震動
+            sfx.playHit(type);
+            triggerScreenShake(type === 'heavy' ? 'heavy' : 'light');
+            spawnHitSpark(defenderNum, type === 'heavy');
+
+            // 更新 UI
+            triggerComboUI(attackerNum, damage, type === 'heavy');
+            updateHealthAndStunUI(defenderNum, true);
+            updateSuperMeterUI(1);
+            updateSuperMeterUI(2);
+
+            // 檢查是否 K.O.
+            if (defender.hp <= 0) {
+                handleKO(attackerNum);
+            }
+        }
+
+        function addMeter(playerNum, amount) {
+            gameState.players[playerNum].meter = Math.min(300, gameState.players[playerNum].meter + amount);
+            sfx.playHit('light');
+            updateSuperMeterUI(playerNum);
+        }
+
+        function castSuperArt(attackerNum, defenderNum) {
+            if (gameState.isRoundOver) resetRound();
+
+            const attacker = gameState.players[attackerNum];
+            const defender = gameState.players[defenderNum];
+
+            // 若氣不足 1 格，自動補滿 1 格方便展示
+            if (attacker.meter < 100) {
+                attacker.meter = 100;
+            }
+
+            // 消耗所有能量段數決定傷害
+            const barsUsed = Math.max(1, Math.floor(attacker.meter / 100));
+            attacker.meter -= barsUsed * 100;
+
+            const superDamage = barsUsed * 160;
+            defender.hp = Math.max(0, defender.hp - superDamage);
+            defender.stun = Math.min(100, defender.stun + 35);
+
+            // 必殺技背景暗場閃光特效
+            const bgFlash = document.getElementById('super-bg-flash');
+            bgFlash.classList.remove('super-darken');
+            void bgFlash.offsetWidth;
+            bgFlash.classList.add('super-darken');
+
+            sfx.playSuperFlash();
+            triggerAnnouncement(
+                barsUsed === 3 ? 'FINAL ART!!' : 'SUPER ART!',
+                `${attacker.name} LEVEL ${barsUsed} OVERDRIVE`,
+                attackerNum === 1 ? 'cyan' : 'red'
+            );
+
+            // 連續多段打擊感
+            let hits = barsUsed * 3;
+            let perHitDmg = Math.floor(superDamage / hits);
+            for (let i = 0; i < hits; i++) {
+                setTimeout(() => {
+                    sfx.playHit('heavy');
+                    spawnHitSpark(defenderNum, true);
+                    triggerComboUI(attackerNum, perHitDmg);
+                    if (i === hits - 1) {
+                        triggerScreenShake('heavy');
+                    }
+                }, i * 95);
+            }
+
+            updateSuperMeterUI(attackerNum);
+            updateHealthAndStunUI(defenderNum, true);
+
+            if (defender.hp <= 0) {
+                setTimeout(() => handleKO(attackerNum), hits * 95 + 100);
+            }
+        }
+
+        function handleKO(winnerNum) {
+            gameState.isRoundOver = true;
+            const winner = gameState.players[winnerNum];
+            winner.wins = Math.min(2, winner.wins + 1);
+
+            sfx.playKO();
+            triggerScreenShake('heavy');
+            updateWinMarkersUI();
+
+            const isPerfect = winner.hp === winner.maxHp;
+            triggerAnnouncement(
+                isPerfect ? 'PERFECT K.O.!' : 'K.O.!',
+                `${winner.name} WINS THE ROUND`,
+                'red'
+            );
+        }
+
+        function forceKO() {
+            const target = gameState.players[2].hp > 0 ? 2 : 1;
+            const attacker = target === 2 ? 1 : 2;
+            gameState.players[target].hp = 0;
+            updateHealthAndStunUI(target, true);
+            handleKO(attacker);
+        }
+
+        function resetRound() {
+            gameState.isRoundOver = false;
+            gameState.timer = 99;
+            document.getElementById('hud-timer').textContent = '99';
+
+            [1, 2].forEach(num => {
+                gameState.players[num].hp = 1000;
+                gameState.players[num].stun = 0;
+                gameState.players[num].comboHits = 0;
+                gameState.players[num].comboDmg = 0;
+                document.getElementById(`p${num}-combo-box`).classList.replace('opacity-100', 'opacity-0');
+                updateHealthAndStunUI(num, false);
+                updateSuperMeterUI(num);
+            });
+
+            triggerAnnouncement(`ROUND ${gameState.round}`, 'FIGHT!', 'amber');
+        }
+
+        /**
+         * 10. 中央計時器倒數與控制台互動
+         */
+        setInterval(() => {
+            if (gameState.timerPaused || gameState.isRoundOver) return;
+            if (gameState.timer > 0) {
+                gameState.timer--;
+                const timerEl = document.getElementById('hud-timer');
+                timerEl.textContent = String(gameState.timer).padStart(2, '0');
+                if (gameState.timer <= 10) {
+                    timerEl.classList.add('animate-pulse');
+                } else {
+                    timerEl.classList.remove('animate-pulse');
+                }
+            } else {
+                // 時間到判定勝負
+                gameState.isRoundOver = true;
+                const p1Hp = gameState.players[1].hp;
+                const p2Hp = gameState.players[2].hp;
+                const sub = p1Hp === p2Hp ? 'DRAW GAME' : (p1Hp > p2Hp ? 'P1 RYUJI WINS' : 'P2 KAZAMA WINS');
+                triggerAnnouncement('TIME OVER', sub, 'amber');
+            }
+        }, 1000);
+
+        // 切換控制台收合
+        let isPanelOpen = true;
+        function toggleControlPanel() {
+            isPanelOpen = !isPanelOpen;
+            const body = document.getElementById('control-panel-body');
+            const text = document.getElementById('toggle-panel-text');
+            const icon = document.getElementById('toggle-panel-icon');
+
+            if (isPanelOpen) {
+                body.classList.remove('hidden');
+                text.textContent = '收合 UI 測試控制台 (HIDE CONTROLS)';
+                icon.style.transform = 'rotate(0deg)';
+            } else {
+                body.classList.add('hidden');
+                text.textContent = '展開 UI 測試控制台 (SHOW CONTROLS)';
+                icon.style.transform = 'rotate(180deg)';
+            }
+        }
+
+        // 切換音效
+        function toggleSound() {
+            sfx.enabled = !sfx.enabled;
+            const icon = document.getElementById('sound-icon');
+            const text = document.getElementById('sound-text');
+            const btn = document.getElementById('btn-sound-toggle');
+
+            if (sfx.enabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                text.textContent = '音效: 開啟';
+                btn.classList.replace('text-slate-400', 'text-emerald-400');
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+                text.textContent = '音效: 靜音';
+                btn.classList.replace('text-emerald-400', 'text-slate-400');
+            }
+        }
+
+        // 切換計時器暫停
+        function toggleTimerPause() {
+            gameState.timerPaused = !gameState.timerPaused;
+            const icon = document.getElementById('timer-icon');
+            const text = document.getElementById('timer-btn-text');
+            if (gameState.timerPaused) {
+                icon.className = 'fa-solid fa-play';
+                text.textContent = '繼續倒數';
+            } else {
+                icon.className = 'fa-solid fa-pause';
+                text.textContent = '暫停倒數';
+            }
+        }
+
+        // 支援鍵盤快捷鍵測試
+        window.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (key === 'j') attackPlayer(1, 2, 'light');
+            else if (key === 'k') attackPlayer(1, 2, 'heavy');
+            else if (key === 'l') castSuperArt(1, 2);
+            else if (key === '1') attackPlayer(2, 1, 'light');
+            else if (key === '2') attackPlayer(2, 1, 'heavy');
+            else if (key === '3') castSuperArt(2, 1);
+            else if (key === 'r') resetRound();
+        });
+
+        // 頁面載入後初始化開場播報
+        window.onload = function () {
+            updateHealthAndStunUI(1, false);
+            updateHealthAndStunUI(2, false);
+            updateSuperMeterUI(1);
+            updateSuperMeterUI(2);
+            updateWinMarkersUI();
+            setTimeout(() => {
+                triggerAnnouncement('ROUND 1', 'FIGHT!', 'amber');
+            }, 300);
+        };
+    </script>
+</body>
+</html>
