@@ -16,6 +16,7 @@
 ## P2 — polish and growth
 - 8.9: phase-based skill keyframes, state-based jump/dash/hurt and hitstop holds implemented with existing atlases. Next: hand-drawn in-between/contact frames and animation review; licensed art audit and UI performance budgets.
 - 8.9.2: Azhi has 21 transparent video-referenced key poses and reproducible atlas packing. Next: add transition drawings between key poses and review animation in real matches.
+- 8.9.3: Gambler also has 21 transparent video-referenced key poses; shared packing preserves both imported fighters.
 - Private local stats, achievements, match replay export with privacy safeguards.
 - Spectator camera/timeline and safe anonymized display names.
 - Gamepad support, captions for effects, reduced motion and low-end device mode.

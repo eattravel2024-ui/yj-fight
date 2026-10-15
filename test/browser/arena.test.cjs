@@ -143,10 +143,10 @@ test('viewport fits health and stage with prominent selection and a fixed camera
  await team.screenshot({path:'coverage/team-viewport-fit.png'});
 });
 
-test('Azhi video-based transparent poses cover every action and render in both directions',async()=>{
+for(const fighter of ['azhi','gambler'])test(fighter+' video-based transparent poses cover every action and render in both directions',async()=>{
  const p=await page({viewport:{width:1366,height:768}});await p.goto(base);await p.waitForFunction(()=>window.AzhiDebug);
- const audit=await p.evaluate(async()=>{
-  const image=new Image();image.src='sprites/azhi.png';await image.decode();const a=window.AzhiAnimation,{width,height}=a.frameSize('azhi');
+ const audit=await p.evaluate(async fighter=>{
+  const image=new Image();image.src='sprites/'+fighter+'.png';await image.decode();const a=window.AzhiAnimation,{width,height}=a.frameSize(fighter);
   const canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;const ctx=canvas.getContext('2d'),ratios=[],edges=[];
   for(let row=0;row<a.ACTIONS.length;row++)for(let col=0;col<a.FRAMES;col++){
    ctx.clearRect(0,0,width,height);ctx.drawImage(image,col*width,row*height,width,height,0,0,width,height);
@@ -155,12 +155,12 @@ test('Azhi video-based transparent poses cover every action and render in both d
    ratios.push(opaque/(width*height));edges.push(edge);
   }
   return {width:image.naturalWidth,height:image.naturalHeight,min:Math.min(...ratios),max:Math.max(...ratios),edges:Math.max(...edges)};
- });
+ },fighter);
  assert.equal(audit.width,3840);assert.equal(audit.height,5100);assert.ok(audit.min>.05&&audit.max<.6);assert.equal(audit.edges,0,'no hands, feet or neighbour poses clipped at cell edges');
- await p.locator('[data-mode="practice"]').click();await p.locator('#characterList button').last().click();await p.locator('#mainAction').click();await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
+ await p.locator('[data-mode="practice"]').click();await p.locator('#characterList button').nth(fighter==='azhi'?3:2).click();await p.locator('#mainAction').click();await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
  for(const face of [1,-1]){
   await p.evaluate(face=>{const g=window.AzhiDebug.local,player=g.players[0];g.status='preview';g.hitstop=0;player.face=face;player.x=400;player.move={name:'kick',frame:window.AzhiDebug.core.moveFor(player,'kick').start+2};},face);
-  await p.waitForTimeout(80);await p.screenshot({path:`coverage/azhi-video-kick-${face}.png`});
+  await p.waitForTimeout(80);await p.screenshot({path:`coverage/${fighter}-video-kick-${face}.png`});
  }
  assert.deepEqual(p.errors,[]);
 });

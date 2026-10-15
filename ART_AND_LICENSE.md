@@ -48,3 +48,11 @@ python3 tools/import_legacy_atlas.py --fighter azhi \
 `assets/azhi/video-poses.json` 記錄姿勢裁切、角色根節點及 17 動作／10 時序影格的對應；`tools/build_azhi_video_atlas.py` 僅作 alpha 元件隔離、錨點正規化及圖集打包。遊戲中的阿志改為每格 384×300，其餘角色維持 240×300；共用相同 300px 高度、292px 腳底錨點與原世界比例。`make_sprites.py` 會沿用此來源重建，避免覆寫回舊角色素材。
 
 影片目前只有部分出招，這版使用 21 個關鍵姿勢安排播放，未宣稱具備 170 張不同的流暢手繪中間張。後續可針對跨姿勢的過渡補張，維持既有招式前搖／有效／收招與判定。
+
+## 8.9.3 金沙賭神影片參考動作
+
+使用者提供 `gemini_generated_video_2c4aa8a5.mp4` 並要求用於金沙賭神動作。影片 SHA-256 為 `3a91e5446d3f35e1b4156f237d7fcac5aec20695f8a2bb22b361fc1fc2bd811a`，原始影片保留於工作區附件，未作遊戲影片或音軌散布。
+
+`assets/gambler/video-poses.png` 是依影片眼鏡、黑色戰衣及青藍光條外觀和拳腳姿勢，用影像生成工具製作的 21 個透明關鍵姿勢；非原片逐格去背。跳躍、受擊、倒地等影片未完整呈現的姿勢為補製，未帶入影片背景、對手、文字或介面。
+
+`assets/gambler/video-poses.json` 記錄來源與姿勢錨點；沿用 `tools/build_azhi_video_atlas.py --fighter gambler` 打包 17 動作 × 10 時序格。阿志與金沙賭神共用 384×300 影格及 292px 腳底錨點，其他兩人維持 240×300。角色名稱、「膽大撐死膽小餓死」、霸體反擊與數值不受素材變更影響。此版為關鍵姿勢播放，後續仍可補製過渡影格。

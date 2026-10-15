@@ -1,6 +1,6 @@
 # 狠話擂台 — Big Talk / Real Fight
 
-> GitHub/Codex development baseline: **8.9.2**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.9.3**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,10 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.9.3 Gambler video-based animation
+
+Gambler now uses 21 transparent key poses based on the user's second supplied video: glasses, black tactical suit and cyan piping, including punches, kicks and a charged counter strike. Missing poses are supplementary generated art. His identity, signature name, counter armor and combat frame-data remain unchanged. Both Azhi and Gambler use 384×300 cells; rebuild Gambler with `python tools/build_azhi_video_atlas.py --fighter gambler`.
 
 ## 8.9.2 Azhi video-based animation
 

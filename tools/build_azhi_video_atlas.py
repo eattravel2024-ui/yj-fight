@@ -1,21 +1,24 @@
 #!/usr/bin/env python3
-"""Pack the image-generated, video-referenced Azhi poses into the runtime atlas.
+"""Pack the image-generated, video-referenced Azhi/Gambler poses into the runtime atlas.
 
 Art editing is performed with image generation; this script only isolates supplied
 pose components, normalizes their anchors and packs the existing 17 x 10 format.
 Requires Pillow (authoring only); the game has no Python/runtime dependency.
 """
+import argparse
 import json
 from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 ROOT = Path(__file__).resolve().parents[1]
-PROFILE = ROOT / 'assets/azhi/video-poses.json'
 
 
-def build(output=None):
-    profile = json.loads(PROFILE.read_text())
-    source = Image.open(PROFILE.parent / profile['sourceSheet']).convert('RGBA')
+def build(output=None, fighter='azhi'):
+    if fighter not in ('azhi', 'gambler'):
+        raise ValueError('Unsupported video fighter')
+    profile_path = ROOT / 'assets' / fighter / 'video-poses.json'
+    profile = json.loads(profile_path.read_text())
+    source = Image.open(profile_path.parent / profile['sourceSheet']).convert('RGBA')
     width, height = profile['frameWidth'], profile['frameHeight']
     scale, baseline = profile['scale'], profile['baseline']
     poses = []
@@ -45,11 +48,14 @@ def build(output=None):
             raise ValueError('Expected ten frames for '+name)
         for col, index in enumerate(indices):
             atlas.alpha_composite(poses[index], (col*width, row*height))
-    output = Path(output) if output else ROOT/'public/sprites/azhi.png'
+    output = Path(output) if output else ROOT/'public/sprites'/f'{fighter}.png'
     output.parent.mkdir(parents=True, exist_ok=True)
     atlas.save(output, optimize=True)
     return output
 
 
 if __name__ == '__main__':
-    print(build())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--fighter', choices=('azhi', 'gambler'), default='azhi')
+    args = parser.parse_args()
+    print(build(fighter=args.fighter))
