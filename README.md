@@ -1,6 +1,6 @@
 # 狠話擂台 — Big Talk / Real Fight
 
-> GitHub/Codex development baseline: **8.9.7**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.9.8**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,10 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.9.8 Winnie reference-based animation
+
+Winnie now uses 21 transparent key poses based on the user's eight-panel image: two idle poses, stepping, guarding, punches, kicking, charge and victory, with supplementary jump/dash/hurt/KO poses. The “不同意的請舉手” animation transitions from charge to a raised-hand palm release. The 17×10 atlas uses 384×300 cells and preserves fighter height, the 292px ground anchor, fixed camera and combat rules. Rebuild with `python tools/build_azhi_video_atlas.py --fighter winnie` (Pillow for authoring only). See [Winnie animation notes](docs/WINNIE_8.9.8.md).
 
 ## 8.9.7 live combo hints and visible super results
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pack the image-generated, video-referenced Azhi/Gambler poses into the runtime atlas.
+"""Pack the image-generated, reference-based fighter poses into the runtime atlas.
 
 Art editing is performed with image generation; this script only isolates supplied
 pose components, normalizes their anchors and packs the existing 17 x 10 format.
@@ -14,9 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def build(output=None, fighter='azhi'):
-    if fighter not in ('azhi', 'gambler'):
-        raise ValueError('Unsupported video fighter')
-    profile_path = ROOT / 'assets' / fighter / 'video-poses.json'
+    if fighter not in ('azhi', 'gambler', 'winnie'):
+        raise ValueError('Unsupported reference fighter')
+    profile_path = ROOT / 'assets' / fighter / ('reference-poses.json' if fighter == 'winnie' else 'video-poses.json')
     profile = json.loads(profile_path.read_text())
     source = Image.open(profile_path.parent / profile['sourceSheet']).convert('RGBA')
     width, height = profile['frameWidth'], profile['frameHeight']
@@ -56,6 +56,6 @@ def build(output=None, fighter='azhi'):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--fighter', choices=('azhi', 'gambler'), default='azhi')
+    parser.add_argument('--fighter', choices=('azhi', 'gambler', 'winnie'), default='azhi')
     args = parser.parse_args()
     print(build(fighter=args.fighter))

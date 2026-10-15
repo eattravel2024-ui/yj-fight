@@ -56,3 +56,11 @@ python3 tools/import_legacy_atlas.py --fighter azhi \
 `assets/gambler/video-poses.png` 是依影片眼鏡、黑色戰衣及青藍光條外觀和拳腳姿勢，用影像生成工具製作的 21 個透明關鍵姿勢；非原片逐格去背。跳躍、受擊、倒地等影片未完整呈現的姿勢為補製，未帶入影片背景、對手、文字或介面。
 
 `assets/gambler/video-poses.json` 記錄來源與姿勢錨點；沿用 `tools/build_azhi_video_atlas.py --fighter gambler` 打包 17 動作 × 10 時序格。阿志與金沙賭神共用 384×300 影格及 292px 腳底錨點，其他兩人維持 240×300。角色名稱、「膽大撐死膽小餓死」、霸體反擊與數值不受素材變更影響。此版為關鍵姿勢播放，後續仍可補製過渡影格。
+
+## 8.9.8 維尼圖片參考動作
+
+使用者在對話提供八格維尼姿勢圖，要求參考並加入對應動畫。`assets/winnie/reference-poses.png` 為依該圖的紅色短帽衫、黃色圓身與人物臉部、待機／步伐／防禦／拳腳／蓄力／勝利姿勢，用影像生成工具重新製作的 21 個透明關鍵姿勢；不是直接把原圖的灰底、分格、標籤或光效裁入遊戲。跳躍、衝刺、受擊、倒地及舉手推掌等缺少的動作為補製。
+
+`assets/winnie/reference-poses.json` 記錄裁切、根節點與 17 動作／10 時序格。`tools/build_azhi_video_atlas.py --fighter winnie` 只負責 alpha 元件隔離、統一比例與打包，`make_sprites.py` 也會保留此來源。維尼改用 384×300，每格高度、292px 腳底錨點及遊戲 0.76 比例不變；阿志、金沙賭神沿用各自的來源，塞子仍為 240×300。
+
+`public/art/moves/winnie.webp` 同步顯示這次的動作素材。維尼的名稱、「不同意的請舉手」、超必殺、數值與判定不變。此為 21 個關鍵姿勢的動畫編排，170 格時序中包含重複／停留，沒有宣稱 170 張獨立手繪中間張。

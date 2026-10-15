@@ -25,7 +25,11 @@
   "characters": {
     "winnie": {
       "name": "維尼",
-      "file": "sprites/winnie.png"
+      "file": "sprites/winnie.png",
+      "frameWidth": 384,
+      "frameHeight": 300,
+      "source": "User-provided image reference; 21 generated transparent key poses",
+      "profile": "assets/winnie/reference-poses.json"
     },
     "sezi": {
       "name": "塞子",

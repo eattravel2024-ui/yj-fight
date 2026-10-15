@@ -21,6 +21,7 @@
 - 8.9.5: animated in-game panels, fixed selection confirmation, keyboard focus/Escape, local menu pause, neutral online menu input and automatic room navigation after disconnect. Native fullscreen is optional; responsive viewport fit works without it.
 - 8.9.6: mode/fighter selection combined in the lobby, uniform photo crops and card states, one fixed primary action and no Fight Fund panel.
 - 8.9.7: compact live combat coach, authoritative online damage receipts and reduced 320ms super cut-ins; fixes low-damage super roulette and continuous multi-hit guard.
+- 8.9.8: Winnie uses 21 image-referenced transparent key poses and a reproducible 17×10 atlas, with charge/raised-hand release and shared 384×300 frame support. Next: more transition/contact drawings.
 - Private local stats, achievements, match replay export with privacy safeguards.
 - Spectator camera/timeline and safe anonymized display names.
 - Gamepad support, captions for effects, reduced motion and low-end device mode.

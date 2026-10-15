@@ -3,8 +3,8 @@
 'use strict';
 const ACTIONS=['idle','walk','jump','light','light2','light3','heavy','kick','low','upper','throw','dash','guard','hurt','special','ko','win'];
 const WIDTH=240,HEIGHT=300,FRAMES=10;
-const DEFAULT_SIZE=Object.freeze({width:WIDTH,height:HEIGHT}),VIDEO_SIZE=Object.freeze({width:384,height:HEIGHT});
-function frameSize(char){return char==='azhi'||char==='gambler'?VIDEO_SIZE:DEFAULT_SIZE;}
+const DEFAULT_SIZE=Object.freeze({width:WIDTH,height:HEIGHT}),REFERENCE_SIZE=Object.freeze({width:384,height:HEIGHT});
+function frameSize(char){return char==='azhi'||char==='gambler'||char==='winnie'?REFERENCE_SIZE:DEFAULT_SIZE;}
 const ENDING=new Set(['ko','win']);
 // Hold distinct anticipation/contact poses in the existing ten-frame skill atlases.
 const SKILL_POSES={
