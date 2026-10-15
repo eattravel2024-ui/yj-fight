@@ -1,0 +1,11 @@
+{
+  "description": "Example metadata only; no third-party artwork bundled. Rects match KOF-style [width,height,{x,y},frames].",
+  "rects": {
+    "stand": [120, 240, {"x": 0, "y": 0}, 10],
+    "J": [120, 240, {"x": 0, "y": 240}, 10],
+    "SI": [160, 260, {"x": 0, "y": 480}, 10]
+  },
+  "aliases": {
+    "idle": "stand", "light": "J", "light2": "J", "light3": "J", "special": "SI"
+  }
+}

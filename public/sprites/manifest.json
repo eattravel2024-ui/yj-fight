@@ -1,0 +1,47 @@
+{
+  "frameWidth": 240,
+  "frameHeight": 300,
+  "columns": 10,
+  "framesPerAction": 10,
+  "actions": [
+    "idle",
+    "walk",
+    "jump",
+    "light",
+    "light2",
+    "light3",
+    "heavy",
+    "kick",
+    "low",
+    "upper",
+    "throw",
+    "dash",
+    "guard",
+    "hurt",
+    "special",
+    "ko",
+    "win"
+  ],
+  "characters": {
+    "sam": {
+      "name": "Sam",
+      "file": "sprites/sam.png"
+    },
+    "winnie": {
+      "name": "維尼",
+      "file": "sprites/winnie.png"
+    },
+    "sezi": {
+      "name": "塞子",
+      "file": "sprites/sezi.png"
+    },
+    "gambler": {
+      "name": "金沙賭神",
+      "file": "sprites/gambler.png"
+    },
+    "azhi": {
+      "name": "阿志",
+      "file": "sprites/azhi.png"
+    }
+  }
+}

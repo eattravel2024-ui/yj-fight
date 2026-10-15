@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+# Update ONLY the existing /opt/azhi71 and azhi71.service. Preserve 6.9/7.0 and existing nginx sites.
+set -Eeuo pipefail
+APP=/opt/azhi71
+SERVICE=azhi71
+OWNER=azhi71
+SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+STAMP="$(date +%Y%m%d_%H%M%S)"
+BACKUP="/opt/azhi71.backup.$STAMP"
+STAGING="/opt/azhi71.next.$STAMP.$$"
+LOG="/var/log/azhi71-upgrade-$STAMP.log"
+exec > >(tee -a "$LOG") 2>&1
+say(){ printf '\n[8.6 %s] %s\n' "$(date +%H:%M:%S)" "$*"; }
+fail(){ printf '\n[STOP] %s\n' "$*" >&2; exit 1; }
+[[ ${EUID:-99} -eq 0 ]] || fail '請用 root 執行'
+command -v flock >/dev/null || fail '缺少 flock'
+exec 9>/run/lock/azhi71-upgrade.lock
+flock -n 9 || fail '另一個更新正在執行'
+[[ -d "$APP" && -f "$APP/server.js" && -f "$APP/package.json" ]] || fail '找不到原本的 /opt/azhi71；首次安裝需使用 install-ubuntu.sh'
+[[ -f "/etc/systemd/system/$SERVICE.service" ]] || fail '找不到 azhi71 專屬 systemd 服務，為安全起見不自動覆蓋'
+[[ -f "$SRC/server.js" && -f "$SRC/public/index.html" && -f "$SRC/public/team.html" && -f "$SRC/public/team-core.js" && -f "$SRC/public/team.js" && -f "$SRC/public/engine/frame-data.js" && -f "$SRC/public/rollback.js" && -f "$SRC/public/engine/commands.js" && -f "$SRC/public/engine/boxes.js" && -f "$SRC/public/sprites/manifest.json" ]] || fail '更新包缺少必要檔案'
+[[ $(node -p 'process.versions.node.split(".")[0]') -ge 20 ]] || fail '需要 Node.js 20+' 
+command -v systemctl >/dev/null || fail '找不到 systemctl'
+command -v curl >/dev/null || fail '找不到 curl'
+node --check "$SRC/server.js"
+node --check "$SRC/public/core.js"
+node --check "$SRC/public/game.js"
+node --check "$SRC/public/rollback.js"
+node --check "$SRC/public/team-core.js"
+node --check "$SRC/public/team.js"
+node --check "$SRC/public/vfx.js"
+for js in "$SRC"/public/engine/*.js;do node --check "$js";done
+(cd "$SRC" && node --test test/*.test.js) || fail '單元測試未通過，已停止；舊版尚未變更'
+if [[ ${1:-} == '--check' ]];then
+ say '檢查通過；--check 模式不會修改任何服務。';exit 0
+fi
+say '準備獨立暫存目錄，不碰 Nginx 或其他遊戲服務'
+mkdir -p "$STAGING"
+cp -a "$SRC/public" "$SRC/server.js" "$SRC/package.json" "$SRC/test" "$SRC/README.md" "$STAGING/"
+for doc in "$SRC"/README_8.6_*.md "$SRC"/AUDIT_8.6_*.md; do [[ ! -f "$doc" ]] || cp -a "$doc" "$STAGING/"; done
+[[ ! -d "$SRC/tools" ]] || cp -a "$SRC/tools" "$STAGING/"
+[[ ! -f "$SRC/ART_AND_LICENSE.md" ]] || cp -a "$SRC/ART_AND_LICENSE.md" "$STAGING/"
+if [[ -d "$APP/node_modules" ]];then
+ cp -a "$APP/node_modules" "$STAGING/"
+else
+ say '原專案缺少 node_modules，安裝專案依賴（不動系統 npm）'
+ command -v npm >/dev/null || fail '找不到 npm'
+ npm --prefix "$STAGING" install --omit=dev --ignore-scripts --no-audit --no-fund
+fi
+[[ -d "$STAGING/node_modules/ws" ]] || fail '缺少 ws WebSocket 套件。請先確認原始 7.1 已完整安裝。'
+chown -R "$OWNER:$OWNER" "$STAGING"
+active_before=0
+if systemctl is-active --quiet "$SERVICE";then active_before=1;fi
+say "停止 $SERVICE（只有這個服務會短暫中斷，線上對局需重新進房）"
+systemctl stop "$SERVICE"
+say "保存原版到 $BACKUP"
+mv "$APP" "$BACKUP"
+mv "$STAGING" "$APP"
+if ! systemctl start "$SERVICE";then
+ say '新版本啟動失敗，還原舊版'
+ systemctl stop "$SERVICE" || true
+ mv "$APP" "$APP.failed.$STAMP"
+ mv "$BACKUP" "$APP"
+ if [[ $active_before -eq 1 ]];then systemctl start "$SERVICE" || true;fi
+ fail '新版未啟動，舊版已嘗試復原。請查看 journalctl -u azhi71。'
+fi
+healthy=0
+for attempt in $(seq 1 12);do
+ if curl -fsS --max-time 3 http://127.0.0.1:31071/healthz | grep -q '"version":"8.6.0"';then healthy=1;break;fi
+ sleep 1
+done
+if [[ $healthy -ne 1 ]];then
+ say '新版健康檢查失敗，開始回滾'
+ systemctl stop "$SERVICE" || true
+ mv "$APP" "$APP.failed.$STAMP"
+ mv "$BACKUP" "$APP"
+ if [[ $active_before -eq 1 ]];then systemctl start "$SERVICE" || true;fi
+ fail '新版未通過健康檢查，已嘗試復原舊版。'
+fi
+say '更新成功！舊版完整備份仍在，未刪除。'
+echo "遊戲網址（須原本 Nginx 18071 正常）：http://YOUR_VPS_IP:18071/"
+echo "備份目錄：$BACKUP"
+echo '保持原有 Nginx、SSH、Docker、6.9 與 7.0 不變。'
+echo '若瀏覽器顯示舊圖，請按 Cmd + Shift + R 強制重新整理。'
+echo "記錄檔：$LOG"

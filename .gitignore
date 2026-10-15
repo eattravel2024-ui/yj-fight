@@ -1,0 +1,30 @@
+# Dependencies / transient output
+node_modules/
+coverage/
+dist/
+build/
+.tmp/
+tmp/
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+# Secrets, local configuration, keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+*.sqlite
+*.sqlite3
+.npmrc
+# VPS and packaged releases are NOT source code
+*.zip
+*.tar.gz
+*.backup.*
+*.pid
+.vscode/
+.idea/

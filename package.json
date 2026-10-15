@@ -1,0 +1,17 @@
+{
+  "name": "azhi-haixian-fighting",
+  "version": "8.6.0",
+  "private": true,
+  "description": "阿志向錢衝 8.6：四人與觀戰暱稱、房間命名、房主權限、選角與 HUD 同步；保留 1v1／2v2 Rollback",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check public/core.js && node --check public/game.js && node --check public/rollback.js && node --check public/team-core.js && node --check public/team.js && node --check public/vfx.js && node --check public/engine/frame-data.js && node --check public/engine/commands.js && node --check public/engine/boxes.js && node --check public/engine/animation.js && node --check public/engine/ai.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
