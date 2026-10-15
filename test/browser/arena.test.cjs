@@ -288,7 +288,7 @@ test('full-window viewport fits health and stage, in-game selection and a fixed 
  }
 });
 
-for(const fighter of ['azhi','gambler','winnie'])test(fighter+' reference-based transparent poses cover every action and render in both directions',async()=>{
+for(const fighter of ['azhi','gambler','winnie','sezi'])test(fighter+' reference-based transparent poses cover every action and render in both directions',async()=>{
  const p=await page({viewport:{width:1366,height:768}});await p.goto(base);await p.waitForFunction(()=>window.AzhiDebug);
  const audit=await p.evaluate(async fighter=>{
   const image=new Image();image.src='sprites/'+fighter+'.png';await image.decode();const a=window.AzhiAnimation,{width,height}=a.frameSize(fighter);
@@ -302,7 +302,7 @@ for(const fighter of ['azhi','gambler','winnie'])test(fighter+' reference-based 
   return {width:image.naturalWidth,height:image.naturalHeight,min:Math.min(...ratios),max:Math.max(...ratios),edges:Math.max(...edges)};
  },fighter);
  assert.equal(audit.width,3840);assert.equal(audit.height,5100);assert.ok(audit.min>.05&&audit.max<.6);assert.equal(audit.edges,0,'no hands, feet or neighbour poses clipped at cell edges');
- await chooseMode(p,'practice');await p.locator('#characterList button').nth(fighter==='azhi'?3:fighter==='gambler'?2:0).click();await p.locator('#mainAction').click();await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
+ await chooseMode(p,'practice');await p.locator('#characterList button').nth(fighter==='azhi'?3:fighter==='gambler'?2:fighter==='sezi'?1:0).click();await p.locator('#mainAction').click();await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
  for(const face of [1,-1]){
   await p.evaluate(face=>{const g=window.AzhiDebug.local,player=g.players[0];g.status='preview';g.hitstop=0;player.face=face;player.x=400;player.move={name:'kick',frame:window.AzhiDebug.core.moveFor(player,'kick').start+2};},face);
   await p.waitForTimeout(80);await p.screenshot({path:`coverage/${fighter}-video-kick-${face}.png`});

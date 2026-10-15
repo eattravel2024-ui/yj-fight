@@ -48,6 +48,8 @@ function spin(ctx,b,t){
   ctx.fillStyle=i%2?'#ffd26e':p.color;ctx.beginPath();ctx.ellipse(0,0,7,11,0,0,TAU);ctx.fill();ctx.stroke();ctx.restore();
  }
  for(let i=0;i<5;i++){ctx.fillStyle=i%2?'#edc577aa':'#f8e5b2aa';ctx.fillRect(-40+i*18,-20-i%3*17,12,50+i%3*17);}
+ // Blue wind ribbons follow the reference's wool vortex; coins retain the skill identity.
+ for(let i=0;i<3;i++){ctx.save();ctx.translate(0,30-i*28);ctx.scale(1,.35);arc(ctx,0,0,r-i*10,turn+i,turn+i+Math.PI*1.5,3,'#8eeaff');ctx.restore();}
  arc(ctx,0,0,r,-turn,Math.PI*1.4-turn,4,p.light);ctx.font='900 17px system-ui';ctx.fillStyle=p.light;ctx.fillText('發大財',-27,65);
 }
 function cards(ctx,b,t){

@@ -1,6 +1,6 @@
 # 狠話擂台 — Big Talk / Real Fight
 
-> GitHub/Codex development baseline: **8.9.8**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.9.9**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,10 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.9.9 Sezi reference-based animation
+
+Sezi now uses 21 transparent wool-ball poses based on the user’s action sheet and photographic head reference. Realistic head expressions, headbutts, rolling attacks, crouching, guarding, a wool vortex and victory replace the old humanoid animation. Blue wind ribbons accompany “高雄發大財”, alongside its existing coins. The 17×10 atlas uses 384×300 cells, the same 292px ground anchor and unchanged render scale/combat rules. Rebuild with `python tools/build_azhi_video_atlas.py --fighter sezi`. See [Sezi animation notes](docs/SEZI_8.9.9.md).
 
 ## 8.9.8 Winnie reference-based animation
 

@@ -176,10 +176,10 @@ def svg(cid,act,n):
 
 manifest={'frameWidth':W,'frameHeight':H,'columns':FR,'framesPerAction':FR,'actions':ACTS,'characters':{}}
 for cid,c in PAL.items():
- if cid=='winnie' and (Path(__file__).parent/'assets'/cid/'reference-poses.json').exists():
+ if cid in ('winnie','sezi') and (Path(__file__).parent/'assets'/cid/'reference-poses.json').exists():
   from tools.build_azhi_video_atlas import build
   build(fighter=cid)
-  manifest['characters'][cid]={'name':c['name'],'file':'sprites/'+cid+'.png','frameWidth':384,'frameHeight':300,'source':'User-provided image reference; 21 generated transparent key poses','profile':'assets/'+cid+'/reference-poses.json'}
+  manifest['characters'][cid]={'name':c['name'],'file':'sprites/'+cid+'.png','frameWidth':384,'frameHeight':300,'source':('User-provided action sheet and head photo; 21 generated transparent key poses' if cid=='sezi' else 'User-provided image reference; 21 generated transparent key poses'),'profile':'assets/'+cid+'/reference-poses.json'}
   continue
  if cid in ('azhi','gambler') and (Path(__file__).parent/'assets'/cid/'video-poses.json').exists():
   from tools.build_azhi_video_atlas import build

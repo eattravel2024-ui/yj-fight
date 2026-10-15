@@ -33,7 +33,11 @@
     },
     "sezi": {
       "name": "塞子",
-      "file": "sprites/sezi.png"
+      "file": "sprites/sezi.png",
+      "frameWidth": 384,
+      "frameHeight": 300,
+      "source": "User-provided action sheet and head photo; 21 generated transparent key poses",
+      "profile": "assets/sezi/reference-poses.json"
     },
     "gambler": {
       "name": "金沙賭神",

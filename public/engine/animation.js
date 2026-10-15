@@ -4,7 +4,7 @@
 const ACTIONS=['idle','walk','jump','light','light2','light3','heavy','kick','low','upper','throw','dash','guard','hurt','special','ko','win'];
 const WIDTH=240,HEIGHT=300,FRAMES=10;
 const DEFAULT_SIZE=Object.freeze({width:WIDTH,height:HEIGHT}),REFERENCE_SIZE=Object.freeze({width:384,height:HEIGHT});
-function frameSize(char){return char==='azhi'||char==='gambler'||char==='winnie'?REFERENCE_SIZE:DEFAULT_SIZE;}
+function frameSize(char){return char==='azhi'||char==='gambler'||char==='winnie'||char==='sezi'?REFERENCE_SIZE:DEFAULT_SIZE;}
 const ENDING=new Set(['ko','win']);
 // Hold distinct anticipation/contact poses in the existing ten-frame skill atlases.
 const SKILL_POSES={
@@ -22,6 +22,8 @@ function spriteFrame(p,action,clock,move){
   return Math.min(FRAMES-1,Math.floor(Math.max(0,time-start)*(action==='ko'?10:7)));
  }
  if(!move||!p?.move){
+  // The low row's anticipation pose is the wool-ball crouch, not a looping attack.
+  if(p?.char==='sezi'&&p.crouch&&action==='low')return 1;
   if(action==='jump')return p?.vy>1?sample([0,1,2,3],1-p.vy/9):p?.vy>=-1?4:sample([5,6,7,8,9],Math.abs(p?.vy||0)/9);
   if(action==='dash')return Math.min(9,Math.floor((12-Math.max(0,p?.dash||0))*10/12));
   if(action==='hurt')return p?.flash>0?Math.min(4,Math.floor((12-p.flash)*5/12)):8;

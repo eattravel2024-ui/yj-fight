@@ -64,3 +64,9 @@ python3 tools/import_legacy_atlas.py --fighter azhi \
 `assets/winnie/reference-poses.json` 記錄裁切、根節點與 17 動作／10 時序格。`tools/build_azhi_video_atlas.py --fighter winnie` 只負責 alpha 元件隔離、統一比例與打包，`make_sprites.py` 也會保留此來源。維尼改用 384×300，每格高度、292px 腳底錨點及遊戲 0.76 比例不變；阿志、金沙賭神沿用各自的來源，塞子仍為 240×300。
 
 `public/art/moves/winnie.webp` 同步顯示這次的動作素材。維尼的名稱、「不同意的請舉手」、超必殺、數值與判定不變。此為 21 個關鍵姿勢的動畫編排，170 格時序中包含重複／停留，沒有宣稱 170 張獨立手繪中間張。
+
+## 8.9.9 塞子毛球與照片參考頭部
+
+使用者在對話提供白色毛球八格動作圖及人物照片，授權作為此角色動畫與頭部替換參考。`assets/sezi/reference-poses.png` 是用影像生成工具依兩張參考製作的 21 個透明關鍵姿勢：毛球與金屬接頭保留圖一造型，頭部依圖二重新製作寫實五官、多角度及表情，並非原照片的逐格直接剪貼。未帶入參考圖的背景、標籤、衣服或真人身體；缺少的防禦、受擊、倒地及近身動作為補製。公開發行前仍需依專案既有規範確認素材及肖像權利。
+
+`assets/sezi/reference-poses.json` 記錄裁切、根節點與動作對應，`tools/build_azhi_video_atlas.py --fighter sezi` 僅隔離 alpha 元件、統一比例並打包。塞子改用 384×300，至此四位角色皆使用此尺寸，維持 292px 地面錨點與 0.76 顯示比例。170 格時序含停留／重複，並非 170 張獨立中間張；`public/art/moves/sezi.webp` 同步展示關鍵姿勢。藍色風帶以 Canvas 幾何繪製，保留「高雄發大財」金幣特效及原有招式數值。

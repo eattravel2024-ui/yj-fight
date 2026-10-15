@@ -22,6 +22,7 @@
 - 8.9.6: mode/fighter selection combined in the lobby, uniform photo crops and card states, one fixed primary action and no Fight Fund panel.
 - 8.9.7: compact live combat coach, authoritative online damage receipts and reduced 320ms super cut-ins; fixes low-damage super roulette and continuous multi-hit guard.
 - 8.9.8: Winnie uses 21 image-referenced transparent key poses and a reproducible 17×10 atlas, with charge/raised-hand release and shared 384×300 frame support. Next: more transition/contact drawings.
+- 8.9.9: Sezi uses 21 wool-ball poses with a photographic head reference, held crouch and blue vortex ribbons. All four fighters now use 384×300 cells; combat rules remain unchanged. Next: more transition/contact drawings.
 - Private local stats, achievements, match replay export with privacy safeguards.
 - Spectator camera/timeline and safe anonymized display names.
 - Gamepad support, captions for effects, reduced motion and low-end device mode.

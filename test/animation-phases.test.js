@@ -25,3 +25,11 @@ test('hitstop freezes every slot and resumes without idle animation time skippin
  assert.equal(playback.spriteFrame(p,'hurt',1.4,null,{hitstop:2}),f);
  assert.notEqual(playback.spriteFrame({...p,flash:12},'hurt',1.41,null,{hitstop:0}),f);
 });
+
+test('Sezi holds the crouch pose without replaying sweep attacks',()=>{
+ const p={char:'sezi',crouch:true};
+ for(const time of [0,1,500])assert.equal(A.spriteFrame(p,'low',time),1);
+ const move=C.moveFor('sezi','low');p.move={name:'low',frame:move.start+1};
+ const active=A.spriteFrame(p,'low',1,move);assert.ok(active>=3&&active<=7);
+ assert.equal(A.frameSize('sezi').width,384);
+});
