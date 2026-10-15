@@ -15,7 +15,7 @@ function create(options){
  }
  $('readyButton').onclick=()=>{if(me()&&!busy())send({type:'set_ready',ready:!me().ready});};
  $('startMatchButton').onclick=()=>send({type:'start_match',revision:roster?.revision});
- return {receive(message){roster=message;render();const player=me();if(player&&options.getRole()==='player')options.onCharacter?.(player.char);},reset(){roster=null;render();},select(char){if(me()&&!busy())send({type:'select_character',char});},get busy(){return busy();}};
+ return {receive(message){roster=message;render();const player=me();if(player&&options.getRole()==='player')options.onCharacter?.(player.char);},reset(){roster=null;render();},select(char){if(me()&&!busy())send({type:'select_character',char});},get roster(){return roster?{...roster,players:(roster.players||[]).map(p=>({...p}))}:null;},get busy(){return busy();}};
 }
 root.AzhiLobby={create};
 })(globalThis);

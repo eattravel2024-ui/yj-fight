@@ -49,10 +49,11 @@
   const main=$('teamPlay');for(const node of [...main.children])if(node!==battle&&!node.classList.contains('fighter-select-link'))move(node,panes.guide);
  }else{
   move(document.querySelector('.mode-bar'),$('appHomeModes'));
-  move($('progressPanel'),panes.fighters);$('mainAction').classList.add('app-confirm-action');move($('mainAction'),foot);
+  move($('progressPanel'),panes.guide);$('mainAction').classList.add('app-confirm-action');move($('mainAction'),foot);
   move($('onlinePanel'),panes.room);move(document.querySelector('.sub-panel'),panes.guide);move(document.querySelector('.training-panel'),panes.guide);
   const roomModes=document.createElement('p');roomModes.innerHTML='<a class="secondary" href="/team.html?panel=room">前往 2v2／觀戰大廳 ↗</a>';roomModes.querySelector('a').addEventListener('click',event=>{event.preventDefault();navigateMode('team')});panes.room.append(roomModes);
  }
+ const characterSelect=window.AzhiCharacterSelect.create({pane:panes.fighters,action:foot.querySelector('.app-confirm-action'),game:gameAPI,openRoom:()=>open('room'),playSound:menuSound});
  const settingsTitle=document.createElement('h3');settingsTitle.textContent='聲音與畫面';panes.settings.append(settingsTitle);
  const setting=(title,description,element)=>{if(!element)return;const row=document.createElement('div');row.className='app-setting-row';const info=document.createElement('div'),heading=document.createElement('strong'),detail=document.createElement('p');heading.textContent=title;detail.textContent=description;info.append(heading,detail);row.append(info,element);panes.settings.append(row);};
  setting('遊戲音效','切換打擊與介面音效。',$('soundToggle'));
@@ -98,6 +99,7 @@
   $('appResume').hidden=!state;$('appConfirmSummary').textContent=($('selectionSummary')?.textContent||'').replace(/^目前選擇：/,'');$('appConfirmMode').textContent=mode;
   const action=foot.querySelector('.app-confirm-action');if(action&&menu.open&&panel==='fighters')action.textContent=online?(gameAPI.mode==='spectator'?'加入觀戰 →':'前往對戰房間 →'):state?.status==='playing'?'重新開始戰鬥 →':'開始戰鬥 →';
   for(const button of bar.querySelectorAll('[data-panel]'))button.setAttribute('aria-expanded',String(menu.open&&button.dataset.panel===panel));
+  characterSelect.refresh();
  }
  function open(name='home'){
   const next=Object.hasOwn(panes,name)?name:'home';if(next!==panel)body.scrollTop=0;panel=next;flow.open(next);
@@ -107,8 +109,9 @@
   if(!menu.open)menu.showModal();document.body.classList.add('menu-open');
   window.dispatchEvent(new CustomEvent('azhi:menu',{detail:{open:true,panel}}));refresh();
   if(panel==='home')selectEntry(selectedEntry,{focus:true,sound:false});else tabs.querySelector('[data-panel="'+panel+'"]').focus({preventScroll:true});
+  if(panel==='fighters')characterSelect.open();else characterSelect.leave();
  }
- function close(){flow.close();if(menu.open)menu.close();document.body.classList.remove('menu-open');window.dispatchEvent(new CustomEvent('azhi:menu',{detail:{open:false,panel}}));refresh();canvas.focus({preventScroll:true});}
+ function close(){characterSelect.leave();flow.close();if(menu.open)menu.close();document.body.classList.remove('menu-open');window.dispatchEvent(new CustomEvent('azhi:menu',{detail:{open:false,panel}}));refresh();canvas.focus({preventScroll:true});}
  function onBattleStart(detail={}){flow.battleStarted(detail);document.body.dataset.battleMode=detail.mode||'playing';document.body.classList.add('is-playing');close();}
  window.AzhiShell={open,close,onBattleStart,isOpen:()=>menu.open,get currentPanel(){return panel;},get flow(){return flow.snapshot;}};
  for(const element of [bar,tabs])element.addEventListener('click',event=>{const trigger=event.target.closest('[data-panel]');if(trigger)open(trigger.dataset.panel);});

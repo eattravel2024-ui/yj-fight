@@ -1,6 +1,6 @@
 # 陪公子練武 — Spar With the Young Master
 
-> GitHub/Codex development baseline: **8.10.3**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.11.0**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -17,6 +17,10 @@ npm start
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
 
+## 8.11.0 — Phase 2 Character Select
+
+A dedicated manga selection screen shows your fullbody art, four portrait cards, real skills/stats and the actual CPU/online rival. Cards preview a draft; backing out leaves the confirmed selection unchanged. Explicit confirmation saves the local fighter and starts the existing mode, or waits for the server roster before returning to the online room. Ready/host-start remain separate. Keyboard, touch, reduced motion, spectator and match locks are preserved. Stats use real power, speed and air coefficients; no fictional defence or critical stats are presented as gameplay. See [Phase 2 delivery](docs/ARCADE_2_PHASE2.md).
+
 ## 8.10.3 — title, fixed home artwork and live supplied backgrounds
 
 The game is now 陪公子練武. The main menu always features 金沙賭神 and 阿志, independently of the saved or selected fighter. `stage-art.js` maps the unchanged simulation IDs `night`, `garage`, `harbor` to 嘴砲夜市, 金沙賭城, 天安門廣場 for both game clients, including online play and spectating. Backgrounds use proportional contain, an opaque underlay for source alpha, and a bounded old-SVG fallback. Old procedural floor light bars are removed so they do not obscure the new art. Combat geometry, stage IDs, camera and save progression remain unchanged; no new stage selector is added. See [8.10.3 delivery](docs/UPGRADE_8.10.3.md).
@@ -25,13 +29,13 @@ The game is now 陪公子練武. The main menu always features 金沙賭神 and 
 
 The user's twelve PNGs are preserved byte-for-byte under `assets/source-art/phase1_5/characters/`, with hashes/dimensions in the adjacent manifest. Optimized transparent WebP roles are fullbody 768×1024, portrait 512×512 and HUD 256×256. `character-art.js` is the single UI path registry, with same-character legacy fallback and a bounded terminal text state.
 
-The existing main menu, character cards and health-bar portraits use these assets; selection layout, fight sprites, collision, moves, skills and stage loading are unchanged. Sezi's new humanoid UI illustration deliberately coexists with the existing wool-ball battle animation. Three supplied scenes are preserved and optimized under `public/art/stages/` with `stages-manifest.json`; they were prepared in 8.10.2 and activated in 8.10.3. Night-market source alpha is preserved and composited over an opaque underlay. Phase 2/3 are not started. Rebuild derivatives with `python tools/build_character_ui_art.py` (Pillow for authoring only). See [Phase 1.5 art inventory and validation](docs/ARCADE_2_PHASE1_5.md).
+The existing main menu, character cards and health-bar portraits use these assets; selection layout, fight sprites, collision, moves, skills and stage loading are unchanged. Sezi's new humanoid UI illustration deliberately coexists with the existing wool-ball battle animation. Three supplied scenes are preserved and optimized under `public/art/stages/` with `stages-manifest.json`; they were prepared in 8.10.2 and activated in 8.10.3. Night-market source alpha is preserved and composited over an opaque underlay. Phase 2 was subsequently implemented in 8.11.0; full Phase 3 selection is not started. Rebuild derivatives with `python tools/build_character_ui_art.py` (Pillow for authoring only). See [Phase 1.5 art inventory and validation](docs/ARCADE_2_PHASE1_5.md).
 
 ## 8.10.0 Arcade 2.0 — Phase 1
 
 The full-window main menu now uses a manga arcade identity: dedicated original character key art, slanted numbered panels, halftone/speed-line backgrounds, local licensed display typography and a clear selected state. Six entries lead to existing arcade/practice character controls, online/team rooms, settings and move guides. Enter/Space confirms; arrows/WASD select; Escape returns through the menu. Menu selection never starts combat or disconnects an occupied room.
 
-A small `game-flow.js` coordinates UI navigation, while formal `AzhiGame` adapters keep combat and room authority in the existing clients. `save-state.js` validates the existing save before chapter/character lookup without removing valid progress, currency or purchases. Fight Fund remains absent from the main menu. Phase 2–5 features are not implemented in this release. See [Phase 1 delivery and verification](docs/ARCADE_2_PHASE1.md).
+A small `game-flow.js` coordinates UI navigation, while formal `AzhiGame` adapters keep combat and room authority in the existing clients. `save-state.js` validates the existing save before chapter/character lookup without removing valid progress, currency or purchases. Fight Fund remains absent from the main menu. This historical Phase 1 release does not include Phase 2–5 features. See [Phase 1 delivery and verification](docs/ARCADE_2_PHASE1.md).
 
 ## 8.9.9 Sezi reference-based animation
 

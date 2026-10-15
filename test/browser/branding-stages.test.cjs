@@ -24,7 +24,7 @@ test('renamed desktop and mobile main menu keeps gambler and Azhi regardless of 
 
 test('all three supplied maps are actually drawn by existing arcade chapters with matching labels',async()=>{
  for(const [chapter,id,asset,name] of [[0,'harbor','tiananmen-square','天安門廣場'],[1,'garage','golden-casino','金沙賭城'],[3,'night','night-market','嘴砲夜市']]){
-  const p=await page({viewport:{width:1366,height:768}});await trackStages(p);await p.addInitScript(chapter=>localStorage.setItem('azhi70_save',JSON.stringify({chapter,character:'azhi'})),chapter);await p.goto(base);await p.waitForFunction(()=>window.AzhiShell);await p.evaluate(()=>window.AzhiShell.open('fighters'));await p.locator('#mainAction').click();
+  const p=await page({viewport:{width:1366,height:768}});await trackStages(p);await p.addInitScript(chapter=>localStorage.setItem('azhi70_save',JSON.stringify({chapter,character:'azhi'})),chapter);await p.goto(base);await p.waitForFunction(()=>window.AzhiShell);await p.evaluate(()=>window.AzhiShell.open('fighters'));await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen()&&!!AzhiGame.game);
   await p.waitForFunction(asset=>window.stageDraws.some(d=>d.src.includes('/stages/'+asset+'/background.webp')),asset);
   assert.equal(await p.evaluate(()=>window.AzhiGame.game.stage),id);assert.match(await p.locator('#stageLabel').textContent(),new RegExp(name));
   const draw=await p.evaluate(()=>window.stageDraws.at(-1));assert.ok(Math.abs(draw.args[2]/draw.args[3]-1672/941)<.0001,'no stretched background');
@@ -34,5 +34,5 @@ test('all three supplied maps are actually drawn by existing arcade chapters wit
 });
 
 test('missing new map falls back once to the old background and keeps combat playable',async()=>{
- const p=await page();let requests=0;await trackStages(p);await p.route('**/art/stages/**/background.webp*',route=>{requests++;return route.abort();});await p.goto(base+'/?mode=practice');await p.waitForFunction(()=>window.AzhiShell);await p.evaluate(()=>window.AzhiShell.open('fighters'));await p.locator('#mainAction').click();await p.waitForFunction(()=>window.stageDraws.some(d=>d.src.endsWith('/art/night.svg')));await p.waitForFunction(()=>window.AzhiGame.game.tick>30);assert.equal(requests,3);assert.deepEqual(p.errors,[]);
+ const p=await page();let requests=0;await trackStages(p);await p.route('**/art/stages/**/background.webp*',route=>{requests++;return route.abort();});await p.goto(base+'/?mode=practice');await p.waitForFunction(()=>window.AzhiShell);await p.evaluate(()=>window.AzhiShell.open('fighters'));await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen()&&!!AzhiGame.game);await p.waitForFunction(()=>window.stageDraws.some(d=>d.src.endsWith('/art/port-arena.svg')));await p.waitForFunction(()=>window.AzhiGame.game.tick>30);assert.equal(requests,3);assert.deepEqual(p.errors,[]);
 });

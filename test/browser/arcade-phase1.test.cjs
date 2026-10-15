@@ -59,7 +59,7 @@ test('Phase 1 keyboard selection, back and resume preserve local battle and rele
  await p.locator('#characterList [data-char="gambler"]').click();await backHome(p);
  assert.equal(await p.locator('.arcade-option.is-selected').getAttribute('data-menu-entry'),'practice');
  await p.keyboard.press('Space');await waitPanel(p,'fighters');
- assert.equal(await p.locator('#characterList [aria-pressed="true"]').getAttribute('data-char'),'gambler');
+ assert.equal(await p.locator('#characterList [aria-pressed="true"]').getAttribute('data-char'),'azhi','return cancels an unconfirmed preview');await p.locator('#characterList [data-char="gambler"]').click();
  await p.locator('#mainAction').click();await p.waitForFunction(()=>window.AzhiGame.game?.introFrames===0);
  assert.equal(await p.evaluate(()=>window.AzhiGame.game.players[0].meter),100,'menu U was not queued into combat');
  await p.locator('#stage').focus();await p.keyboard.down('KeyD');
