@@ -1,0 +1,627 @@
+{
+  "sourceArchive": "User-provided 人物圖.zip",
+  "purpose": "UI only; never combat sprites",
+  "processing": "No crop/redraw; proportional Lanczos contain, transparent padding, WebP quality 92/alpha 100",
+  "characters": {
+    "winnie": {
+      "name": "維尼",
+      "assets": {
+        "fullbody": {
+          "source": {
+            "path": "assets/source-art/phase1_5/characters/winnie/維尼立體繪.png",
+            "originalFilename": "維尼立體繪.png",
+            "width": 1086,
+            "height": 1448,
+            "format": "PNG",
+            "bytes": 3099832,
+            "sha256": "9e8bebc9adb133bf0b792169a8b1ca0b5cc85c0dc3f05753091b7918483146df",
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.137052,
+            "boundsAbove16": [
+              2,
+              5,
+              1086,
+              1445
+            ]
+          },
+          "output": {
+            "path": "public/art/characters/winnie/fullbody.webp",
+            "width": 768,
+            "height": 1024,
+            "bytes": 394758,
+            "sha256": "ee8333902cbe3599addfd17bffedc916965b49b0ca507f740294abf260a03155",
+            "format": "WEBP",
+            "mode": "RGBA",
+            "containedSize": [
+              720,
+              960
+            ],
+            "offset": [
+              24,
+              32
+            ],
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.242874,
+            "boundsAbove16": [
+              25,
+              35,
+              744,
+              990
+            ]
+          }
+        },
+        "portrait": {
+          "source": {
+            "path": "assets/source-art/phase1_5/characters/winnie/維尼肖像圖.png",
+            "originalFilename": "維尼肖像圖.png",
+            "width": 1254,
+            "height": 1254,
+            "format": "PNG",
+            "bytes": 2670397,
+            "sha256": "e92113d9c78b1e838b26d1209ecec150e3c256168c2b7cb79ac9932744cf0bd6",
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.139336,
+            "boundsAbove16": [
+              0,
+              9,
+              1254,
+              1254
+            ]
+          },
+          "output": {
+            "path": "public/art/characters/winnie/portrait.webp",
+            "width": 512,
+            "height": 512,
+            "bytes": 103154,
+            "sha256": "6ca29b488df3065c19578cf2e85ed33d0a46cb6c27a086798ab77269ab8f7965",
+            "format": "WEBP",
+            "mode": "RGBA",
+            "containedSize": [
+              480,
+              480
+            ],
+            "offset": [
+              16,
+              16
+            ],
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.240456,
+            "boundsAbove16": [
+              16,
+              19,
+              496,
+              496
+            ]
+          }
+        },
+        "hud": {
+          "source": {
+            "path": "assets/source-art/phase1_5/characters/winnie/維尼HUD.png",
+            "originalFilename": "維尼HUD.png",
+            "width": 1254,
+            "height": 1254,
+            "format": "PNG",
+            "bytes": 2240968,
+            "sha256": "265ff0ca6576fabcdb022fd59eb5966276ef66b90ee6d29d260c3c3f8205ae00",
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.287335,
+            "boundsAbove16": [
+              16,
+              51,
+              1210,
+              1242
+            ]
+          },
+          "output": {
+            "path": "public/art/characters/winnie/hud.webp",
+            "width": 256,
+            "height": 256,
+            "bytes": 29482,
+            "sha256": "1366555efdba9a7a0f7546c53c3c8e7af6d6e8b5253225206059e813eebf73c5",
+            "format": "WEBP",
+            "mode": "RGBA",
+            "containedSize": [
+              240,
+              240
+            ],
+            "offset": [
+              8,
+              8
+            ],
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.358032,
+            "boundsAbove16": [
+              11,
+              17,
+              240,
+              246
+            ]
+          }
+        }
+      }
+    },
+    "sezi": {
+      "name": "塞子",
+      "assets": {
+        "fullbody": {
+          "source": {
+            "path": "assets/source-art/phase1_5/characters/sezi/塞子立體繪.png",
+            "originalFilename": "塞子立體繪.png",
+            "width": 1086,
+            "height": 1448,
+            "format": "PNG",
+            "bytes": 2584098,
+            "sha256": "5ee1ec225a780ee69535a80a5d4fd8e96e4ebe7a334d33908964d44cc00dd431",
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.294499,
+            "boundsAbove16": [
+              5,
+              5,
+              1086,
+              1440
+            ]
+          },
+          "output": {
+            "path": "public/art/characters/sezi/fullbody.webp",
+            "width": 768,
+            "height": 1024,
+            "bytes": 318074,
+            "sha256": "0aa0eb6c316e4db9c411ff37fc0bc794a62f1890d824e08dcf266dbdfcc837e7",
+            "format": "WEBP",
+            "mode": "RGBA",
+            "containedSize": [
+              720,
+              960
+            ],
+            "offset": [
+              24,
+              32
+            ],
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.380919,
+            "boundsAbove16": [
+              28,
+              35,
+              744,
+              987
+            ]
+          }
+        },
+        "portrait": {
+          "source": {
+            "path": "assets/source-art/phase1_5/characters/sezi/塞子肖像圖.png",
+            "originalFilename": "塞子肖像圖.png",
+            "width": 1254,
+            "height": 1254,
+            "format": "PNG",
+            "bytes": 2476856,
+            "sha256": "6902a0060227c2cc45cd077a89403a6deb840a94a17e356e853349772f8e22d0",
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.221682,
+            "boundsAbove16": [
+              0,
+              0,
+              1254,
+              1254
+            ]
+          },
+          "output": {
+            "path": "public/art/characters/sezi/portrait.webp",
+            "width": 512,
+            "height": 512,
+            "bytes": 85924,
+            "sha256": "53977a117c16bffff864f0c5cb2b59ab2ebf3d63a5c74ec8926391f3f0fb9fe3",
+            "format": "WEBP",
+            "mode": "RGBA",
+            "containedSize": [
+              480,
+              480
+            ],
+            "offset": [
+              16,
+              16
+            ],
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.315559,
+            "boundsAbove16": [
+              16,
+              16,
+              496,
+              496
+            ]
+          }
+        },
+        "hud": {
+          "source": {
+            "path": "assets/source-art/phase1_5/characters/sezi/塞子HUD.png",
+            "originalFilename": "塞子HUD.png",
+            "width": 1254,
+            "height": 1254,
+            "format": "PNG",
+            "bytes": 2216209,
+            "sha256": "fc8843c049c232791ab9ae35ad7e05d58fcf60c3caf911753c6aeed15019f830",
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.272369,
+            "boundsAbove16": [
+              10,
+              0,
+              1254,
+              1254
+            ]
+          },
+          "output": {
+            "path": "public/art/characters/sezi/hud.webp",
+            "width": 256,
+            "height": 256,
+            "bytes": 28580,
+            "sha256": "7717a305df997bf30f7fef3a08e7ce3e2081654b6acc576d3388cc50d5f284cb",
+            "format": "WEBP",
+            "mode": "RGBA",
+            "containedSize": [
+              240,
+              240
+            ],
+            "offset": [
+              8,
+              8
+            ],
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.350021,
+            "boundsAbove16": [
+              10,
+              8,
+              248,
+              248
+            ]
+          }
+        }
+      }
+    },
+    "gambler": {
+      "name": "金沙賭神",
+      "assets": {
+        "fullbody": {
+          "source": {
+            "path": "assets/source-art/phase1_5/characters/gambler/金沙賭神立體繪.png",
+            "originalFilename": "金沙賭神立體繪.png",
+            "width": 1086,
+            "height": 1448,
+            "format": "PNG",
+            "bytes": 1947587,
+            "sha256": "e5c40e73ab605da0197ed68bb4d402aded08ae052c98d9f3d473974a021ed19e",
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.459645,
+            "boundsAbove16": [
+              6,
+              0,
+              1082,
+              1443
+            ]
+          },
+          "output": {
+            "path": "public/art/characters/gambler/fullbody.webp",
+            "width": 768,
+            "height": 1024,
+            "bytes": 206176,
+            "sha256": "4f5318a46d4657f4fc141914733ffda19ef6c8e3ebb6436e8443e59dbe3da939",
+            "format": "WEBP",
+            "mode": "RGBA",
+            "containedSize": [
+              720,
+              960
+            ],
+            "offset": [
+              24,
+              32
+            ],
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.525504,
+            "boundsAbove16": [
+              28,
+              32,
+              742,
+              988
+            ]
+          }
+        },
+        "portrait": {
+          "source": {
+            "path": "assets/source-art/phase1_5/characters/gambler/金沙賭神肖像圖.png",
+            "originalFilename": "金沙賭神肖像圖.png",
+            "width": 1254,
+            "height": 1254,
+            "format": "PNG",
+            "bytes": 2153180,
+            "sha256": "f4199884a8b9644ab6b3eba41eae7c9f30bb947a902955774617ddb81a72486a",
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.332128,
+            "boundsAbove16": [
+              0,
+              0,
+              1254,
+              1254
+            ]
+          },
+          "output": {
+            "path": "public/art/characters/gambler/portrait.webp",
+            "width": 512,
+            "height": 512,
+            "bytes": 83432,
+            "sha256": "8e53673df4f6b1e02dc451a50ae62cc9c46a568293c3e95acb4ac5ea0068986f",
+            "format": "WEBP",
+            "mode": "RGBA",
+            "containedSize": [
+              480,
+              480
+            ],
+            "offset": [
+              16,
+              16
+            ],
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.411793,
+            "boundsAbove16": [
+              16,
+              16,
+              496,
+              496
+            ]
+          }
+        },
+        "hud": {
+          "source": {
+            "path": "assets/source-art/phase1_5/characters/gambler/金沙賭神HUD.png",
+            "originalFilename": "金沙賭神HUD.png",
+            "width": 1254,
+            "height": 1254,
+            "format": "PNG",
+            "bytes": 2584341,
+            "sha256": "5d7f2ada9ec35e0937c2fe8d01bda60db57ad13c48a089b7ae128981978b1aad",
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.315892,
+            "boundsAbove16": [
+              30,
+              2,
+              1215,
+              1237
+            ]
+          },
+          "output": {
+            "path": "public/art/characters/gambler/hud.webp",
+            "width": 256,
+            "height": 256,
+            "bytes": 32612,
+            "sha256": "22be8124bd656d3ad294e89db83263d15bda09e21fefa46f3a4924bf28d7103e",
+            "format": "WEBP",
+            "mode": "RGBA",
+            "containedSize": [
+              240,
+              240
+            ],
+            "offset": [
+              8,
+              8
+            ],
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.386124,
+            "boundsAbove16": [
+              13,
+              8,
+              241,
+              245
+            ]
+          }
+        }
+      }
+    },
+    "azhi": {
+      "name": "阿志",
+      "assets": {
+        "fullbody": {
+          "source": {
+            "path": "assets/source-art/phase1_5/characters/azhi/阿志立體繪.png",
+            "originalFilename": "阿志立體繪.png",
+            "width": 1086,
+            "height": 1448,
+            "format": "PNG",
+            "bytes": 2655587,
+            "sha256": "f4d2f410ce4dc3ac220c2c3306e5cff7173e6c8e44664a00788703161e108a1c",
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.313366,
+            "boundsAbove16": [
+              7,
+              2,
+              1080,
+              1437
+            ]
+          },
+          "output": {
+            "path": "public/art/characters/azhi/fullbody.webp",
+            "width": 768,
+            "height": 1024,
+            "bytes": 345642,
+            "sha256": "3bf470145f5ab692170a76463842e01743625f8a213513bf63ca9237ab5d11ce",
+            "format": "WEBP",
+            "mode": "RGBA",
+            "containedSize": [
+              720,
+              960
+            ],
+            "offset": [
+              24,
+              32
+            ],
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.39861,
+            "boundsAbove16": [
+              29,
+              34,
+              740,
+              985
+            ]
+          }
+        },
+        "portrait": {
+          "source": {
+            "path": "assets/source-art/phase1_5/characters/azhi/阿志肖像圖.png",
+            "originalFilename": "阿志肖像圖.png",
+            "width": 1254,
+            "height": 1254,
+            "format": "PNG",
+            "bytes": 2171419,
+            "sha256": "7e0d89969976a8d65deff91b2b73cc27043bc552de47c5b0dce4b9f802d5186d",
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.347228,
+            "boundsAbove16": [
+              0,
+              0,
+              1254,
+              1254
+            ]
+          },
+          "output": {
+            "path": "public/art/characters/azhi/portrait.webp",
+            "width": 512,
+            "height": 512,
+            "bytes": 74576,
+            "sha256": "957f09765349038afadadf1bc11b01a61fa5247951b75087f3bc77a4a4ce50c7",
+            "format": "WEBP",
+            "mode": "RGBA",
+            "containedSize": [
+              480,
+              480
+            ],
+            "offset": [
+              16,
+              16
+            ],
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.424442,
+            "boundsAbove16": [
+              16,
+              16,
+              496,
+              496
+            ]
+          }
+        },
+        "hud": {
+          "source": {
+            "path": "assets/source-art/phase1_5/characters/azhi/阿志HUD.png",
+            "originalFilename": "阿志HUD.png",
+            "width": 1254,
+            "height": 1254,
+            "format": "PNG",
+            "bytes": 2211576,
+            "sha256": "1543d8c78db60e6f8ad076c9759235903dea4954a5deb649fa14f03f92a040d4",
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.319561,
+            "boundsAbove16": [
+              0,
+              0,
+              1254,
+              1254
+            ]
+          },
+          "output": {
+            "path": "public/art/characters/azhi/hud.webp",
+            "width": 256,
+            "height": 256,
+            "bytes": 26074,
+            "sha256": "f1bc7747c98ea1d07746c0e29a1bcc326003a9a3c8dca53aba46b0e05c4e0063",
+            "format": "WEBP",
+            "mode": "RGBA",
+            "containedSize": [
+              240,
+              240
+            ],
+            "offset": [
+              8,
+              8
+            ],
+            "alphaRange": [
+              0,
+              255
+            ],
+            "transparentFraction": 0.393478,
+            "boundsAbove16": [
+              8,
+              8,
+              248,
+              248
+            ]
+          }
+        }
+      }
+    }
+  }
+}

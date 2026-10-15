@@ -76,3 +76,11 @@ python3 tools/import_legacy_atlas.py --fighter azhi \
 `assets/menu/arcade-heroes-source.png` 是用影像生成工具，以既有 `assets/azhi/video-poses.png` 與 `assets/winnie/reference-poses.png` 為角色造型／五官參考，另外製作的透明漫畫主視覺。只用於主選單，不覆蓋角色戰鬥、肖像或其他來源素材；`public/art/menu/arcade-heroes.webp` 為同圖的 WebP 格式版本。所有斜切面板、網點與速度線均以 CSS 原創繪製，未拷貝 KOF／Street Fighter 的角色、標誌或背景。
 
 英文字標與編號使用 Barlow Condensed Black Italic：Copyright 2017 The Barlow Project Authors (https://github.com/jpt/barlow)，SIL Open Font License 1.1。原始檔取自 Google Fonts 的 `ofl/barlowcondensed/BarlowCondensed-BlackItalic.ttf`，隨附 `public/fonts/OFL-BarlowCondensed.txt`；以本機檔案載入，無 CDN。繁體中文使用裝置的 Noto Sans CJK TC／PingFang TC／Microsoft JhengHei 等系統字體，沒有宣稱這個英文字型包含中文字形。
+
+## 8.10.1 Phase 1.5 使用者正式人物 UI 圖
+
+來源為使用者在對話上傳的 `人物圖.zip`：四角色各有「立體繪、肖像圖、HUD」三張 PNG。12 張原檔以原檔名保留在 `assets/source-art/phase1_5/characters/{id}/`，包含 SHA256、尺寸、Alpha 與輸出記錄的 manifest。這次沒有重新生成或替換人物身份，也沒有覆寫舊美術。
+
+`tools/build_character_ui_art.py` 只等比例 Lanczos 縮放、置中於透明邊界、輸出 WebP（quality 92／alpha 100），不重繪、不補畫、不旋轉、不拉伸、不裁掉原畫布。Fullbody 768×1024、Portrait 512×512、HUD 256×256，保留原圖中既有的描邊／特效／傾斜構圖。新圖只用在 UI：主選單、既有角色卡及 HUD；四張戰鬥圖集與招式動畫不變。塞子新 UI 是持毛球武器的人形，戰鬥仍是原毛球角色，這次不把兩種素材誤作相同動作圖。
+
+沒有提供新的場景圖，未建立虛構地圖資產或改動場景載入。新素材為使用者提供並指定整合，公開發行的素材／肖像授權仍依專案既有規範辦理。

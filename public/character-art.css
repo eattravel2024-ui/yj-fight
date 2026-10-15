@@ -1,0 +1,21 @@
+/* Phase 1.5 changes image treatment only; existing selection layout and battle HUD stay intact. */
+.app-menu #fighterSelect img[data-character-art],
+.hud-portrait[data-character-art],.mini-fighter img[data-character-art],.seat img[data-character-art]{object-fit:contain;object-position:center;background-color:transparent}
+.art-unavailable{display:inline-grid;place-items:center;min-height:44px;padding:6px;font-size:11px;line-height:1.5;color:#f5f1e8;background:#241b2b;border:1px solid #796373;text-align:center}
+.arcade-keyart > .art-unavailable{position:absolute;bottom:18%;left:28%;z-index:4;max-width:50%}
+.arcade-home .arcade-hero{inset:32% -6% 6% 24%;width:82%;height:62%;object-position:center bottom}
+.arcade-support-hero{position:absolute;z-index:1;inset:37% auto 6% -3%;display:block;width:65%;height:57%;max-width:none;object-fit:contain;object-position:center bottom;filter:drop-shadow(4px 5px 0 #09090f);pointer-events:none}
+@media(max-width:700px) and (orientation:portrait){
+ .arcade-home .arcade-hero{inset:auto -4% 0 auto;width:62%;height:265px}
+ .arcade-support-hero{inset:auto auto 0 12%;width:48%;height:210px}
+}
+@media(max-width:370px) and (orientation:portrait){.arcade-home .arcade-hero{height:237px}.arcade-support-hero{height:187px}}
+@media(max-height:550px) and (orientation:landscape){
+ .arcade-home .arcade-hero{inset:29% -8% 6% 23%;height:65%;width:85%}
+ .arcade-support-hero{inset:37% auto 6% -5%;height:57%;width:65%}
+}
+/* The previous photos needed per-character zoom/insets. New square portraits must not inherit that crop. */
+.app-menu #fighterSelect .fighter-portrait img[data-character-art]{width:100%;height:100%;max-width:100%;left:0;top:0;transform:none;object-fit:contain;object-position:center}
+.hud-person > .art-unavailable{flex:0 0 40px;width:40px;max-width:40px;min-height:44px;padding:2px;font-size:8px;overflow-wrap:anywhere}
+.mini-fighter > .art-unavailable{flex:0 0 28px;width:28px;max-width:28px;min-height:35px;padding:1px;font-size:7px;overflow-wrap:anywhere}
+@media(max-width:600px){.hud-person > .art-unavailable{flex-basis:27px;width:27px;max-width:27px;min-height:38px}}
