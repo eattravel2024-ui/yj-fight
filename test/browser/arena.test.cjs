@@ -1,4 +1,5 @@
 'use strict';
+const {enterLocalBattle}=require('./flow-helpers.cjs');
 const {test,before,after,afterEach}=require('node:test');
 const assert=require('node:assert/strict');
 const {spawn}=require('node:child_process');
@@ -64,7 +65,7 @@ test('main-menu navigation retains the chosen fighter across mode routes without
  assert.doesNotMatch(await p.locator('.arcade-home').textContent(),/FIGHT FUND|740\s*G/i);
  await chooseMode(p,'practice');await p.locator('#characterList [data-char="gambler"]').click();
  assert.equal(await p.locator('#characterList .fighter-portrait').count(),4);
- await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>!AzhiShell.isOpen()&&AzhiGame.character==='gambler');
+ await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>!AzhiShell.isOpen()&&AzhiGame.character==='gambler');
  await openPanel(p,'home');await p.locator('[data-menu-entry="online"]').click();
  assert.equal(new URL(p.url()).pathname,'/','choosing a mode does not navigate before confirmation');
  await p.locator('#arcadeEnter').click();await p.locator('[data-custom-mode="team"]').click();await p.waitForURL('**/team.html?**');
@@ -75,13 +76,13 @@ test('main-menu navigation retains the chosen fighter across mode routes without
  assert.equal(new URL(p.url()).pathname,'/team.html');await p.locator('#arcadeEnter').click();
  await p.waitForURL('**/?mode=practice**');await p.waitForFunction(()=>window.AzhiShell?.currentPanel==='fighters');
  assert.match(await p.locator('#appConfirmSummary').textContent(),/金沙賭神/);
- await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>window.AzhiDebug.local?.practice===true);
+ await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>window.AzhiDebug.local?.practice===true);
  assert.equal(await p.evaluate(()=>window.AzhiDebug.local.players[0].char),'gambler');
  for(const route of ['/?char=__proto__','/team.html?char=constructor']){await p.goto(base+route);await p.waitForFunction(()=>window.AzhiShell?.isOpen());assert.equal(await p.locator('#fighterSelect [aria-pressed=true]').count(),1);}
  assert.deepEqual(p.errors,[]);
 });
 test('local menu pauses combat and previews a character until explicit restart',async()=>{
- const p=await page();await p.goto(base);await chooseMode(p,'practice');await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());
+ const p=await page();await p.goto(base);await chooseMode(p,'practice');await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());
  await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0&&window.AzhiDebug.local.tick>2);
  assert.equal(await p.evaluate(()=>window.AzhiDebug.local.players[0].char),'azhi');
  await p.locator('#stage').focus();await p.keyboard.down('KeyD');
@@ -97,7 +98,7 @@ test('local menu pauses combat and previews a character until explicit restart',
  assert.equal(await p.evaluate(()=>window.AzhiDebug.local.players[0].meter),100,'menu key presses do not queue a skill');
  const still=await p.evaluate(()=>window.AzhiDebug.local.players[0].x);await p.waitForFunction(tick=>window.AzhiDebug.local.tick>tick+10,tick+10);
  assert.ok(Math.abs(await p.evaluate(()=>window.AzhiDebug.local.players[0].x)-still)<1,'menu opening releases held movement');
- await openPanel(p,'fighters');await p.locator('#characterList button').first().click();await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());
+ await openPanel(p,'fighters');await p.locator('#characterList button').first().click();await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());
  await p.waitForFunction(()=>window.AzhiDebug.local.players[0].char==='winnie'&&!window.AzhiShell.isOpen());
  assert.deepEqual(p.errors,[]);
 });
@@ -112,7 +113,7 @@ test('desktop practice: four fighters, easy skill and no classic entry',async()=
  const p=await page({viewport:{width:1440,height:1000}});await p.goto(base);await p.waitForFunction(()=>window.AzhiDebug);
  assert.equal(await p.locator('#characterList button').count(),4);
  assert.equal(await p.locator('a[href*="adventure-legacy"]').count(),0);
- await p.locator('[data-menu-entry="practice"]').focus();await p.keyboard.press('Space');await p.waitForFunction(()=>window.AzhiShell.currentPanel==='fighters');assert.equal(await p.evaluate(()=>window.AzhiDebug.mode),'practice');await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());
+ await p.locator('[data-menu-entry="practice"]').focus();await p.keyboard.press('Space');await p.waitForFunction(()=>window.AzhiShell.currentPanel==='fighters');assert.equal(await p.evaluate(()=>window.AzhiDebug.mode),'practice');await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());
  await p.waitForFunction(()=>window.AzhiDebug.local?.practice===true);
  await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);await p.locator('#stage').focus();await p.keyboard.press('KeyU');
  await p.waitForFunction(()=>window.AzhiDebug.local?.players[0].meter<100);
@@ -127,7 +128,7 @@ test('desktop practice: four fighters, easy skill and no classic entry',async()=
 test('each fighter has a named entrance and a matching one-button skill in the browser',async()=>{
  const p=await page({viewport:{width:1280,height:900}});await p.goto(base);await p.waitForFunction(()=>window.AzhiDebug);
  for(const [i,name] of ['不同意的請舉手','高雄發大財','膽大撐死膽小餓死','加油加300'].entries()){
-  await chooseMode(p,'practice');await p.locator('#characterList button').nth(i).click();await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());
+  await chooseMode(p,'practice');await p.locator('#characterList button').nth(i).click();await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());
   await p.waitForFunction(()=>window.AzhiDebug.local.introFrames>0);
   assert.equal(await p.locator('#specialName').textContent(),name);
   if(i===0)await p.screenshot({path:'coverage/entrance-8.8.png',fullPage:false});
@@ -138,7 +139,7 @@ test('each fighter has a named entrance and a matching one-button skill in the b
  assert.deepEqual(p.errors,[]);
 });
 test('live combat coaching follows real J K U cancels and reports actual signature damage',async()=>{
- const p=await page({viewport:{width:1366,height:768}});await p.goto(base);await chooseMode(p,'practice');await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());
+ const p=await page({viewport:{width:1366,height:768}});await p.goto(base);await chooseMode(p,'practice');await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());
  await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
  await p.evaluate(()=>{const g=window.AzhiDebug.local;g.players[0].x=300;g.players[1].x=375;});
  await p.locator('#stage').focus();await p.keyboard.press('KeyJ');
@@ -156,7 +157,7 @@ test('live combat coaching follows real J K U cancels and reports actual signatu
 test('all four one-button supers show real damage receipts; close-range misses are explained',async()=>{
  const p=await page({viewport:{width:1366,height:768}});await p.goto(base);
  for(const [i,id] of ['winnie','sezi','gambler','azhi'].entries()){
-  await chooseMode(p,'practice');await p.locator('#characterList button').nth(i).click();await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
+  await chooseMode(p,'practice');await p.locator('#characterList button').nth(i).click();await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
   await p.evaluate(()=>{const g=window.AzhiDebug.local;g.seed=1800;g.players[0].x=300;g.players[1].x=410;});
   await p.locator('#superTrigger').click();await p.waitForFunction(()=>document.querySelector('.combat-receipt').dataset.state==='hit');
   await p.waitForFunction(()=>!window.AzhiDebug.local.players[0].move&&!window.AzhiDebug.local.projectiles.length);
@@ -166,14 +167,14 @@ test('all four one-button supers show real damage receipts; close-range misses a
   if(id==='gambler')assert.ok(await p.evaluate(()=>window.AzhiDebug.local.players[0].armorTimer>0));
   if(id==='azhi')await p.screenshot({path:'coverage/super-actual-hit.png'});
  }
- await chooseMode(p,'practice');await p.locator('#characterList [data-char="gambler"]').click();await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
+ await chooseMode(p,'practice');await p.locator('#characterList [data-char="gambler"]').click();await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
  await p.locator('#superTrigger').click();await p.waitForFunction(()=>document.querySelector('.combat-receipt').dataset.state==='miss');
  assert.match(await p.locator('.combat-receipt span').textContent(),/靠近/);assert.equal(await p.evaluate(()=>window.AzhiDebug.local.players[1].hp),100);
  assert.deepEqual(p.errors,[]);
 });
 test('mobile touch skill, no horizontal page overflow and reduced motion',async()=>{
  const p=await page({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'});await p.goto(base);await p.waitForFunction(()=>window.AzhiDebug);
- await chooseMode(p,'practice');await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());
+ await chooseMode(p,'practice');await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());
  await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);await p.locator('[data-key="special"]').first().tap();await p.waitForFunction(()=>window.AzhiDebug.local.players[0].meter<100);
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  assert.deepEqual(p.errors,[]);await p.screenshot({path:'coverage/mobile-arena.png',fullPage:false});
@@ -260,7 +261,7 @@ test('full-window viewport fits health and stage, in-game selection and a fixed 
   assert.match(await p.locator('#selectPlayerName').textContent(),/維尼/);assert.match(await p.locator('#selectionSummary').textContent(),/阿志/);
   assert.equal(await p.locator('#characterList button[aria-pressed=true]').count(),1);
   assert.match(await p.locator('#characterList button').first().textContent(),/預覽/);
-  await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
+  await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
   assert.equal(await p.evaluate(()=>window.AzhiShell.isOpen()),false);
   await assertViewport(p,'#stage','.hud',viewport);
   await p.evaluate(()=>{window.spriteScales=[];window.AzhiDebug.previewHit('super');});
@@ -289,7 +290,7 @@ for(const fighter of ['azhi','gambler','winnie','sezi'])test(fighter+' reference
   return {width:image.naturalWidth,height:image.naturalHeight,min:Math.min(...ratios),max:Math.max(...ratios),edges:Math.max(...edges)};
  },fighter);
  assert.equal(audit.width,3840);assert.equal(audit.height,5100);assert.ok(audit.min>.05&&audit.max<.6);assert.equal(audit.edges,0,'no hands, feet or neighbour poses clipped at cell edges');
- await chooseMode(p,'practice');await p.locator('#characterList button').nth(fighter==='azhi'?3:fighter==='gambler'?2:fighter==='sezi'?1:0).click();await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
+ await chooseMode(p,'practice');await p.locator('#characterList button').nth(fighter==='azhi'?3:fighter==='gambler'?2:fighter==='sezi'?1:0).click();await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
  for(const face of [1,-1]){
   await p.evaluate(face=>{const g=window.AzhiDebug.local,player=g.players[0];g.status='preview';g.hitstop=0;player.face=face;player.x=400;player.move={name:'kick',frame:window.AzhiDebug.core.moveFor(player,'kick').start+2};},face);
   await p.waitForTimeout(80);await p.screenshot({path:`coverage/${fighter}-video-kick-${face}.png`});
@@ -300,7 +301,7 @@ for(const fighter of ['azhi','gambler','winnie','sezi'])test(fighter+' reference
 test('arcade UI displays real health, danger, energy thresholds and round wins without external UI dependencies',async()=>{
  const p=await page({viewport:{width:1366,height:768},reducedMotion:'reduce'}),external=[];
  p.on('request',request=>{if(!request.url().startsWith(base))external.push(request.url());});
- await p.goto(base);await chooseMode(p,'practice');await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
+ await p.goto(base);await chooseMode(p,'practice');await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
  await p.evaluate(()=>{const a=window.AzhiDebug.local.players[0];a.hp=20;a.meter=60;a.wins=1;});
  await p.waitForFunction(()=>document.querySelector('#p1Bar').parentElement.dataset.health==='danger');
  const rail=p.locator('#p1Bar').locator('..');assert.equal(await rail.getAttribute('aria-valuenow'),'20');assert.equal(await rail.locator('.health-readout').textContent(),'20 / 100');

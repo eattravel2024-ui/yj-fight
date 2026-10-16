@@ -1,6 +1,6 @@
 /* Phase 2 UI controller: drafts do not change combat, storage or server-owned Ready. */
 'use strict';
-window.AzhiCharacterSelect={create({pane,action,game,openRoom,playSound}){
+window.AzhiCharacterSelect={create({pane,action,game,openRoom,playSound,onLocalConfirm}){
  const C=window.AzhiCore,Art=window.AzhiCharacterArt,ids=Object.keys(C.CHAR),$=s=>pane.querySelector(s);
  const container=$('#fighterSelect'),grid=$('#characterList,#teamCharacters');
  let draft=game.character,active=false,pending=null,timer=null,serial=0,visualKey='',opponentKey='';
@@ -32,16 +32,16 @@ window.AzhiCharacterSelect={create({pane,action,game,openRoom,playSound}){
   if(!active)return;const context=game.selectionContext();text('#selectPlayerLabel',context.spectator?'角色資料 / READ ONLY':'01 / YOUR FIGHTER');text('#selectPlayerBadge',context.spectator?'VIEWER':'PLAYER');text('#selectOpponentBadge',context.spectator?'LIVE':'RIVAL');
   if(!context.canSelect&&!pending)draft=game.character;
   if(pending){
-   if(game.character===pending.id){const next=pending;pending=null;view.classList.add('is-confirming');text('#selectNotice','已確認：'+C.CHAR[next.id].name);playSound('confirm');timer=setTimeout(()=>{if(active&&next.serial===serial){action.disabled=false;if(context.online)openRoom();else action.onclick?.call(action,new Event('click'));}},matchMedia('(prefers-reduced-motion: reduce)').matches?0:180);}
+   if(game.character===pending.id){const next=pending;pending=null;view.classList.add('is-confirming');text('#selectNotice','已確認：'+C.CHAR[next.id].name);playSound('confirm');timer=setTimeout(()=>{if(active&&next.serial===serial){action.disabled=false;if(context.online)openRoom();else if(onLocalConfirm)onLocalConfirm();else action.onclick?.call(action,new Event('click'));}},matchMedia('(prefers-reduced-motion: reduce)').matches?0:180);}
    else if(performance.now()>pending.until){cancel();text('#selectNotice','尚未收到選角確認，請重試。');}
   }
   renderPlayer();renderOpponent(context);
   for(const b of grid.querySelectorAll('[data-char]')){const preview=b.dataset.char===draft;b.classList.toggle('is-preview',preview);b.classList.toggle('is-confirmed',b.dataset.char===game.character);b.setAttribute('aria-pressed',String(preview));b.tabIndex=preview&&!b.disabled?0:-1;const badge=b.querySelector('.char-number,.selection-badge');if(badge)badge.textContent=preview?'▶ 預覽':b.dataset.char===game.character?'✓ 已確認':'';}
   text('#selectDraftLabel',context.spectator?'觀戰模式':draft===game.character?'目前角色':'角色預覽');
   action.disabled=!!pending||view.classList.contains('is-confirming');
-  action.textContent=context.spectator?'返回觀戰房間 →':!context.canSelect?'返回對戰房間 →':context.online?'確認角色・前往房間 →':'確認角色・'+(game.game?'重新開始':'開始戰鬥')+' →';
+  action.textContent=context.spectator?'返回觀戰房間 →':!context.canSelect?'返回對戰房間 →':context.online?'確認角色・前往房間 →':'確認角色・'+(game.mode==='practice'?'選擇場景':'選擇關卡')+' →';
   const summary=document.getElementById('appConfirmSummary');if(summary)summary.textContent=context.spectator?'觀戰不需選角':C.CHAR[draft].name+' · '+C.CHAR[draft].special;
-  if(!pending&&!view.classList.contains('is-confirming')&&!$('#selectNotice').textContent.startsWith('尚未收到'))text('#selectNotice',context.spectator?'觀戰者只能查看角色與比賽名單。':!context.canSelect?'比賽進行中，選角已鎖定。':context.online?'確認選角後，請至房間按 Ready。':'切換卡片預覽，確認後上場。');
+  if(!pending&&!view.classList.contains('is-confirming')&&!$('#selectNotice').textContent.startsWith('尚未收到'))text('#selectNotice',context.spectator?'觀戰者只能查看角色與比賽名單。':!context.canSelect?'比賽進行中，選角已鎖定。':context.online?'確認選角後，請至房間按 Ready。':'切換卡片預覽，確認後選擇'+(game.mode==='practice'?'場景。':'街機關卡。'));
  }
  function preview(id,{focus=false}={}){if(!active||pending||view.classList.contains('is-confirming')||!game.selectionContext().canSelect||!Object.hasOwn(C.CHAR,id))return;const changed=id!==draft;draft=id;refresh();if(changed)playSound('move');if(focus)grid.querySelector('[data-char="'+id+'"]').focus({preventScroll:true});}
  function confirm(){

@@ -3,7 +3,8 @@
 (()=>{
  const $=id=>document.getElementById(id),team=document.body.classList.contains('team-page'),gameAPI=window.AzhiGame;
  const battle=document.querySelector(team?'.board':'.game-panel');if(!battle||!gameAPI||!window.AzhiGameFlow)return;
- const labels={home:'主選單',fighters:'選擇角色',room:'自訂對戰',settings:'遊戲設定',guide:'操作與招式'};
+ const labels={home:'主選單',fighters:'選擇角色',room:'自訂對戰',settings:'遊戲設定',guide:'操作與招式',missions:'街機關卡',stages:'選擇場景',versus:'VS / 對戰準備',results:'勝負結算'};
+ const primaryPanels=['home','fighters','room','settings','guide'];
  const flow=window.AzhiGameFlow.create({mode:gameAPI.mode});
  let panel='home',lastNotice='',noticeUntil=0,navigating=false,lastMenuSound=-Infinity;
  const entries=[
@@ -23,9 +24,9 @@
  const foot=document.createElement('footer');foot.className='app-menu-foot';foot.hidden=true;
  foot.innerHTML='<div class="app-confirm-info"><small id="appConfirmMode"></small><span class="app-selection-summary" id="appConfirmSummary"></span></div>';menu.querySelector('.app-menu-frame').append(foot);
  for(const [name,label] of Object.entries(labels)){
-  const button=document.createElement('button');button.type='button';button.dataset.panel=name;button.textContent=label;button.id='appTab-'+name;button.setAttribute('role','tab');button.setAttribute('aria-controls','appPane-'+name);tabs.append(button);
-  const pane=document.createElement('section');pane.className='app-pane';pane.dataset.pane=name;pane.id='appPane-'+name;pane.setAttribute('role','tabpanel');pane.setAttribute('aria-labelledby',button.id);panes[name]=pane;body.append(pane);
-  if(name!=='guide'){const action=document.createElement('button');action.type='button';action.dataset.panel=name;action.textContent=name==='home'?'主選單':name==='fighters'?'選角':name==='room'?'房間':'設定';bar.querySelector('.app-actions').append(action);}
+  const button=document.createElement('button');button.type='button';button.dataset.panel=name;button.textContent=label;button.id='appTab-'+name;button.setAttribute('role','tab');button.setAttribute('aria-controls','appPane-'+name);if(primaryPanels.includes(name))tabs.append(button);
+  const pane=document.createElement('section');pane.className='app-pane';pane.dataset.pane=name;pane.id='appPane-'+name;pane.setAttribute('role','tabpanel');pane.setAttribute('aria-labelledby',button.id);if(!primaryPanels.includes(name)){pane.removeAttribute('aria-labelledby');pane.setAttribute('aria-label',label);pane.setAttribute('role','region');}panes[name]=pane;body.append(pane);
+  if(primaryPanels.includes(name)&&name!=='guide'){const action=document.createElement('button');action.type='button';action.dataset.panel=name;action.textContent=name==='home'?'主選單':name==='fighters'?'選角':name==='room'?'房間':'設定';bar.querySelector('.app-actions').append(action);}
  }
  const fullButton=document.createElement('button');fullButton.type='button';fullButton.dataset.fullscreen='';fullButton.textContent='⛶';fullButton.setAttribute('aria-label','切換瀏覽器全螢幕');bar.querySelector('.app-actions').append(fullButton);
  panes.home.innerHTML='<div class="app-home arcade-home"><section class="arcade-keyart" aria-label="陪公子練武角色主視覺"><small class="arcade-edition">ARCADE FIGHTING GAME / 2.0</small><h1 class="arcade-wordmark"><span class="wordmark-big">陪公子</span><span class="wordmark-real">練武</span></h1><img class="arcade-support-hero" width="768" height="1024" alt="" aria-hidden="true"><img class="arcade-hero" width="768" height="1024" alt="" fetchpriority="high"><div class="arcade-hero-caption"><small>ALL TALK. ALL FIGHT.</small><strong>公子，該練武了。</strong></div><div class="arcade-stamp" aria-hidden="true">4 FIGHTERS<br>ONE ARENA</div><div class="arcade-ticker" aria-hidden="true">陪公子練武 / SPAR WITH THE YOUNG MASTER　／　陪公子練武 / SPAR WITH THE YOUNG MASTER　／　陪公子練武 / SPAR WITH THE YOUNG MASTER</div></section><section class="arcade-navigation" aria-labelledby="appModeTitle"><header class="arcade-nav-heading"><small>MAIN MENU / SELECT YOUR NEXT MOVE</small><h2 id="appModeTitle">選擇戰鬥模式</h2><p class="arcade-subtitle">有請公子，上擂台</p></header><div id="arcadeMenuOptions" class="arcade-options" aria-label="主選單"></div><p class="arcade-nav-note" id="arcadeMenuNote" aria-live="polite"></p><div class="arcade-controls"><div class="arcade-key-hints"><span><kbd>↑</kbd><kbd>↓</kbd> 選擇</span><span><kbd>Enter</kbd> 確認</span><span><kbd>Esc</kbd> 返回</span></div><button type="button" class="arcade-enter" id="arcadeEnter">進入街機闖關 <span>↗</span></button><button type="button" class="secondary" id="appResume" data-close hidden>繼續目前對戰 →</button></div><div id="appHomeModes" hidden aria-hidden="true"></div></section></div>';
@@ -52,7 +53,8 @@
   move($('onlinePanel'),panes.room);move(document.querySelector('.sub-panel'),panes.guide);move(document.querySelector('.training-panel'),panes.guide);
  }
  const customRoom=window.AzhiCustomRoom.create({pane:panes.room,game:gameAPI,team,open,changeMode:navigateMode});
- const characterSelect=window.AzhiCharacterSelect.create({pane:panes.fighters,action:foot.querySelector('.app-confirm-action'),game:gameAPI,openRoom:()=>open('room'),playSound:menuSound});
+ const journey=window.AzhiArcadeFlowFactory.create({panes,game:gameAPI,battle,open,playSound:menuSound});
+ const characterSelect=window.AzhiCharacterSelect.create({pane:panes.fighters,action:foot.querySelector('.app-confirm-action'),game:gameAPI,openRoom:()=>open('room'),playSound:menuSound,onLocalConfirm:()=>journey.onLocalConfirm()});
  window.AzhiAudioDirector.mountSettings(panes.settings);
  const settingsTitle=document.createElement('h3');settingsTitle.textContent='聲音與畫面';panes.settings.append(settingsTitle);
  const setting=(title,description,element)=>{if(!element)return;const row=document.createElement('div');row.className='app-setting-row';const info=document.createElement('div'),heading=document.createElement('strong'),detail=document.createElement('p');heading.textContent=title;detail.textContent=description;info.append(heading,detail);row.append(info,element);panes.settings.append(row);};
@@ -98,27 +100,27 @@
   $('appResume').hidden=!state;$('appConfirmSummary').textContent=($('selectionSummary')?.textContent||'').replace(/^目前選擇：/,'');$('appConfirmMode').textContent=mode;
   const action=foot.querySelector('.app-confirm-action');if(action&&menu.open&&panel==='fighters')action.textContent=online?(gameAPI.mode==='spectator'?'加入觀戰 →':'前往對戰房間 →'):state?.status==='playing'?'重新開始戰鬥 →':'開始戰鬥 →';
   for(const button of bar.querySelectorAll('[data-panel]'))button.setAttribute('aria-expanded',String(menu.open&&button.dataset.panel===panel));
-  characterSelect.refresh();customRoom.refresh();
+  characterSelect.refresh();customRoom.refresh();journey.refresh();
   window.AzhiAudioDirector.route({panel,open:menu.open,game:gameAPI.game,mode:gameAPI.mode});
  }
  function open(name='home'){
-  const next=Object.hasOwn(panes,name)?name:'home';if(next!==panel)body.scrollTop=0;panel=next;flow.open(next);
+  const next=Object.hasOwn(panes,name)?name:'home';if(next!==panel)body.scrollTop=0;panel=next;flow.open(next);journey.enter(next);
   for(const [key,pane] of Object.entries(panes))pane.hidden=key!==panel;foot.hidden=panel!=='fighters';menu.dataset.panel=panel;
   for(const button of tabs.querySelectorAll('[data-panel]')){const active=button.dataset.panel===panel;button.setAttribute('aria-selected',String(active));button.tabIndex=active?0:-1;}
   $('appMenuTitle').textContent=labels[panel];if(panel==='room'&&!team)$('onlinePanel').hidden=false;
   if(!menu.open)menu.showModal();document.body.classList.add('menu-open');
   window.dispatchEvent(new CustomEvent('azhi:menu',{detail:{open:true,panel}}));refresh();
-  if(panel==='home')selectEntry(selectedEntry,{focus:true,sound:false});else if(panel==='room')customRoom.focus();else tabs.querySelector('[data-panel="'+panel+'"]').focus({preventScroll:true});
+  if(panel==='home')selectEntry(selectedEntry,{focus:true,sound:false});else if(panel==='room')customRoom.focus();else if(!primaryPanels.includes(panel))journey.focus(panel);else tabs.querySelector('[data-panel="'+panel+'"]').focus({preventScroll:true});
   if(panel==='fighters')characterSelect.open();else characterSelect.leave();
  }
- function close(){characterSelect.leave();flow.close();if(menu.open)menu.close();document.body.classList.remove('menu-open');window.dispatchEvent(new CustomEvent('azhi:menu',{detail:{open:false,panel}}));refresh();canvas.focus({preventScroll:true});}
- function onBattleStart(detail={}){window.AzhiCombatHUD.begin(gameAPI.game,{mode:detail.mode||gameAPI.mode});flow.battleStarted(detail);document.body.dataset.battleMode=detail.mode||'playing';document.body.classList.add('is-playing');close();}
+ function close(){journey.cancel();characterSelect.leave();flow.close();if(menu.open)menu.close();document.body.classList.remove('menu-open');window.dispatchEvent(new CustomEvent('azhi:menu',{detail:{open:false,panel}}));refresh();canvas.focus({preventScroll:true});}
+ function onBattleStart(detail={}){journey.battleStart(detail);window.AzhiCombatHUD.begin(gameAPI.game,{mode:detail.mode||gameAPI.mode});flow.battleStarted(detail);document.body.dataset.battleMode=detail.mode||'playing';document.body.classList.add('is-playing');close();}
  window.AzhiShell={open,close,onBattleStart,isOpen:()=>menu.open,get currentPanel(){return panel;},get flow(){return flow.snapshot;}};
  for(const element of [bar,tabs])element.addEventListener('click',event=>{const trigger=event.target.closest('[data-panel]');if(trigger)open(trigger.dataset.panel);});
- tabs.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const list=Object.keys(labels),index=list.indexOf(panel),next=event.key==='Home'?0:event.key==='End'?list.length-1:(index+(event.key==='ArrowRight'?1:-1)+list.length)%list.length;open(list[next]);});
+ tabs.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const list=primaryPanels,index=list.indexOf(panel),next=event.key==='Home'?0:event.key==='End'?list.length-1:(index+(event.key==='ArrowRight'?1:-1)+list.length)%list.length;open(list[next]);});
  menu.addEventListener('keydown',event=>{
   // Handle Escape explicitly so repeated native dialog cancel events cannot close a new panel.
-  if(event.key==='Escape'){event.preventDefault();event.stopPropagation();if(!event.repeat){menuSound('back');if(panel==='home')close();else open('home');}return;}
+  if(event.key==='Escape'){event.preventDefault();event.stopPropagation();if(!event.repeat){menuSound('back');if(panel==='home')close();else if(!journey.back(panel))open('home');}return;}
   if(event.isComposing||event.ctrlKey||event.altKey||event.metaKey)return;
   if(event.key==='Tab'){const focusable=[...menu.querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href]')].filter(el=>el.tabIndex>=0&&el.getClientRects().length);const first=focusable[0],last=focusable.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus()}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus()}return;}
   if(panel!=='home'||event.target.closest('input,textarea,select,[contenteditable="true"]'))return;
@@ -128,7 +130,7 @@
   if(next!==undefined){event.preventDefault();selectEntry(entries[next].id,{focus:true});return;}
   if(['Enter','Space'].includes(event.code)&&event.target.closest('.arcade-option,.arcade-enter')){event.preventDefault();if(!event.repeat)activateEntry();}
  });
- menu.addEventListener('cancel',event=>{event.preventDefault();menuSound('back');if(panel==='home')close();else open('home');});
+ menu.addEventListener('cancel',event=>{event.preventDefault();menuSound('back');if(panel==='home')close();else if(!journey.back(panel))open('home');});
  menu.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',close));menu.querySelector('[data-home]').addEventListener('click',()=>{menuSound('back');open('home')});
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!event.repeat&&!event.defaultPrevented&&!menu.open){event.preventDefault();open('home');}});
  document.querySelectorAll('[data-fullscreen]').forEach(button=>button.addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else throw Error('unsupported');}catch{lastNotice='已使用滿版遊戲；此瀏覽器無法進入全螢幕。';noticeUntil=performance.now()+4000;refresh();}}));

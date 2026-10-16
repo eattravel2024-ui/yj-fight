@@ -1,7 +1,7 @@
 /* Menu navigation only. Combat, room membership and starts remain owned by the clients. */
 (function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;root.AzhiGameFlow=api;})(typeof globalThis==='object'?globalThis:this,function(){
 'use strict';
-const PANELS=Object.freeze(['home','fighters','room','settings','guide']);
+const PANELS=Object.freeze(['home','fighters','room','settings','guide','missions','stages','versus','results']);
 const SCREENS=Object.freeze([...PANELS,'battle']);
 const MODES=Object.freeze(['arcade','practice','online','team','spectator']);
 function create(options={}){

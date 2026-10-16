@@ -1,6 +1,26 @@
 # 手動發佈與回滾
 
-目前版本 **8.11.3**：自訂對戰、首頁人物遮擋修正與場景內街機 HUD、背景降噪、能量／技能提示與真實回合演出；依要求移除獨立的經典冒險 6.8。街機、練習、1v1、2v2、觀戰及存檔保留。本次未連線或部署正式 VPS。
+目前版本 **8.12.0／Phase 3**：選角 → 選關／選圖 → VS → 真實戰鬥 → 結算 → 重試／下一關／全通關。保留 HUD、OST、自訂對戰與舊存檔；絨毛禁區仍待正式美術。本次未連線或部署正式 VPS。
+
+## 8.12.0：Phase 3 Git 固定檢查點
+
+自行登入原 VPS 後執行（需 Node.js 20+、既有 azhi71 安裝）：
+
+```bash
+set -euo pipefail
+cd ~/azhi-update.lvccoe
+git fetch origin tag checkpoint-phase3-8.12.0
+git switch --detach checkpoint-phase3-8.12.0
+npm ci --ignore-scripts --no-fund
+sudo bash deploy/upgrade-ubuntu.sh
+curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+```
+
+健康版本應為 **8.12.0**。完成後強制重新整理。沒有新增執行期套件或資料庫；VPS 不需圖片／音訊轉檔工具。更新腳本會短暫中斷對局並保留完整備份，沿用 Nginx、SSH、Docker 與既有網址；回退可使用輸出的備份，或前版 `checkpoint-custom-8.11.3`。正式主機由使用者手動更新。
+
+亦提供 `dist/azhi-fighting-8.12.0.tar.gz` 來源包；下方歷史來源包流程可換用本版檔名與版本。
+
+以下為前版歷史流程。
 
 ## 8.11.3：自訂對戰與首頁修正
 

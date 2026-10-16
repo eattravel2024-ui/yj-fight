@@ -24,8 +24,8 @@
 - [x] Phase 2 (8.11.0): independent player/roster/rival Character Select with real skills/stats, consistent art, cancelable drafts, explicit confirmation, server acknowledgement and keyboard/touch support.
 - [x] 8.11.1 user-requested audio: 21 original OST tracks, shared manager, independent levels, gesture unlock, real battle events and future scene hooks. Fourth stage music is ready; fourth map is not implemented.
 - [x] 8.11.2 separately requested combat readability/HUD: background-only variants, in-scene HP/timer/energy, real announcer events and classic 6.8 retirement. No stage selector or combat-rule change.
-- [ ] Phase 3: mission registry/progress migration, true stage selection and server-owned online stage settings.
-- [ ] Phase 4: resource preparation, VS, pause/results and confirmed next/retry flow.
+- [x] Phase 3 (8.12.0, expanded user scope): central stage/mission data, progress migration, arcade missions/practice stage selection, resource-ready VS, real results/retry/next/full clear. Online stages remain server-assigned; host-selectable stage settings remain future work.
+- [ ] Phase 4 remaining scope: deeper pause/resource options and further polish; VS/results/confirmed next/retry were explicitly delivered within Phase 3.
 - [ ] Phase 5: unified audio/input, gamepads, responsive/performance polish.
 - Stop after each phase for user review; do not silently start the next phase.
 

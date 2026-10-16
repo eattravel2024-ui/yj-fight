@@ -1,11 +1,7 @@
 /* Visual mapping only: existing simulation stage IDs and geometry remain unchanged. */
-(function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;root.AzhiStageArt=api;})(typeof globalThis==='object'?globalThis:this,function(){
+(function(root,factory){const api=factory(typeof module==='object'&&module.exports?require('./stage-registry.js'):root.AzhiStages);if(typeof module==='object'&&module.exports)module.exports=api;root.AzhiStageArt=api;})(typeof globalThis==='object'?globalThis:this,function(Registry){
 'use strict';
-const STAGES=Object.freeze({
- night:Object.freeze({name:'嘴砲夜市',img:'art/stages/night-market/background.webp?v=8103',fallback:'art/night.svg'}),
- garage:Object.freeze({name:'金沙賭城',img:'art/stages/golden-casino/background.webp?v=8103',fallback:'art/garage.svg'}),
- harbor:Object.freeze({name:'天安門廣場',img:'art/stages/tiananmen-square/background.webp?v=8103',fallback:'art/port-arena.svg'})
-});
+const STAGES=Object.freeze(Object.fromEntries(Registry.PLAYABLE.map(id=>{const s=Registry.get(id);return [id,Object.freeze({name:s.name,img:s.backgroundAsset,fallback:s.fallbackAsset})];})));
 // Preprocessed once at authoring time: no per-frame filter touches fighters or HUD.
 const VISUALS=Object.freeze({
  night:Object.freeze({saturation:.80,brightness:.91,contrast:.93,combat:'art/stages/night-market/combat.webp?v=8112'}),
@@ -13,14 +9,16 @@ const VISUALS=Object.freeze({
  harbor:Object.freeze({saturation:.78,brightness:.91,contrast:.94,combat:'art/stages/tiananmen-square/combat.webp?v=8112'})
 });
 function create(){
- const images={};
+ const images={},promises={},reloaders={};
  for(const [id,stage] of Object.entries(STAGES)){
-  const image=new Image();let attempt=0;
+  const image=new Image();let attempt=0,resolve;
   const sources=[VISUALS[id].combat,stage.img,stage.fallback];
-  image.addEventListener('error',()=>{if(++attempt<sources.length)image.src=sources[attempt];});
-  image.src=sources[0];images[id]=image;
+  image.addEventListener('load',()=>resolve?.(true));
+  image.addEventListener('error',()=>{if(++attempt<sources.length)image.src=sources[attempt];else resolve?.(false);});
+  const load=(retry=false)=>{attempt=0;promises[id]=new Promise(done=>resolve=done);image.src=sources[0]+(retry?'&retry='+Date.now():'');return promises[id];};
+  reloaders[id]=load;images[id]=image;load();
  }
- return {draw(ctx,id,width=960,height=540){
+ return {ready:(id,{retry=false}={})=>!Registry.playable(id)?Promise.resolve(false):retry&&images[id].complete&&!images[id].naturalWidth?reloaders[id](true):promises[id],draw(ctx,id,width=960,height=540){
   const image=images[Object.hasOwn(STAGES,id)?id:'night'];
   // An opaque underlay makes the supplied night-market alpha deterministic on every background.
   ctx.fillStyle='#101522';ctx.fillRect(0,0,width,height);

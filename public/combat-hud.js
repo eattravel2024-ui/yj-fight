@@ -51,7 +51,7 @@
   if(introducing)announce('round','ROUND '+round,'選手就位 · READY',0);
  }
  function update(game,opts={}){
-  if(!arena||!game?.players?.length)return;options={...options,...opts};
+  if(!arena||!game?.players?.length)return;window.AzhiVersusPresentation?.update(game);options={...options,...opts};
   timer.dataset.urgent=String(game.time<=10&&game.time>0&&game.status==='playing'&&!game.introFrames);
   const nr=game.round||1;
   if(!finished&&nr>round&&game.introFrames>0){round=nr;introducing=true;lastIntro=game.introFrames;announce('round','ROUND '+round,'下一回合 · READY',0);}

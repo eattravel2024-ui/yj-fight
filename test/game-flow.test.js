@@ -6,9 +6,9 @@ test('menu navigation reaches every Phase 1 panel and returns without starting a
  const flow=Flow.create();
  assert.equal(flow.screen,'home');assert.equal(flow.isOpen(),true);
  for(const panel of Flow.PANELS){flow.open(panel);assert.equal(flow.screen,panel);assert.equal(flow.currentPanel,panel);}
- flow.close();assert.equal(flow.screen,'battle');assert.equal(flow.currentPanel,'guide');assert.equal(flow.isOpen(),false);
+ flow.close();assert.equal(flow.screen,'battle');assert.equal(flow.currentPanel,Flow.PANELS.at(-1));assert.equal(flow.isOpen(),false);
  flow.open('fighters');assert.equal(flow.screen,'fighters');
- assert.equal(flow.open('missions'),false);assert.equal(flow.open('stage-select'),false);assert.equal(flow.screen,'fighters');
+ assert.equal(flow.open('missions'),true);assert.equal(flow.open('stages'),true);assert.equal(flow.open('stage-select'),false);assert.equal(flow.screen,'stages');
 });
 
 test('mode drafts and cancelled navigation have no gameplay authority',()=>{

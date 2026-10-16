@@ -1,6 +1,6 @@
 # 陪公子練武 — Spar With the Young Master
 
-> GitHub/Codex development baseline: **8.11.3**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.12.0**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,10 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.12.0 — Phase 3 complete arcade flow
+
+Choose a fighter, select an unlocked arcade mission or practice stage, watch VS, fight using the existing engine, then retry, continue or finish the five-mission campaign. `stage-registry.js` owns the three playable stage mappings, previews, BGM and shared geometry; the fourth fur-lab stage remains planned without borrowed art. `campaign.js` owns missions, CPU difficulty, rewards and stable progress IDs. Existing chapter saves migrate without losing currency/purchases. Results use real engine outcomes, award once per match and preserve highest progress when replaying older missions. VS preloads required battle assets, supports cancellation/retry, and reuses the Audio Manager; online VS is presentation during the existing authoritative countdown. HUD, background readability, sprites, combat and Rollback remain intact. See [Phase 3 delivery](docs/ARCADE_2_PHASE3.md) and [Git deployment](docs/MANUAL_RELEASE.md).
 
 ## 8.11.3 — Custom Match and unobstructed home artwork
 

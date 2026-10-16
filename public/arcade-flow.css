@@ -1,0 +1,90 @@
+/* Phase 3 arcade screens. Existing combat HUD and fighter animation are reused. */
+.app-menu[data-panel=missions],.app-menu[data-panel=stages],.app-menu[data-panel=results]{width:min(1440px,calc(100vw - 24px));height:min(880px,calc(100dvh - 24px));max-height:calc(100dvh - 24px)}
+.app-menu[data-panel=missions] .app-tabs,.app-menu[data-panel=stages] .app-tabs,.app-menu[data-panel=results] .app-tabs{display:none}
+.app-menu[data-panel=missions] .app-menu-head,.app-menu[data-panel=stages] .app-menu-head,.app-menu[data-panel=results] .app-menu-head{padding:12px 24px}
+.app-menu[data-panel=missions] .app-menu-body,.app-menu[data-panel=stages] .app-menu-body,.app-menu[data-panel=results] .app-menu-body{padding:18px 24px;background:radial-gradient(ellipse at 80% 20%,#25445338,transparent 65%),repeating-linear-gradient(120deg,#ffffff03 0 1px,transparent 1px 36px),#100e17}
+.journey-pane{max-width:1400px;margin:auto;color:#eee9e0}
+.journey-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:0 0 18px;padding-bottom:12px;border-bottom:1px solid #6b5061}
+.journey-heading small{font:800 10px ui-monospace,monospace;color:#ffe04c;letter-spacing:.2em}
+.journey-heading h2{font-size:clamp(23px,2.5vw,36px);margin:5px 0 0;line-height:1.3;font-weight:1000;letter-spacing:-.03em}
+.journey-heading>span{font:700 10px/1.8 ui-monospace,monospace;color:#9c899b;white-space:nowrap}.journey-heading .active{color:#87f3f3}
+.journey-layout{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(0,1.3fr);gap:26px;align-items:start}
+.journey-choices{display:grid;gap:11px;padding:4px 8px 8px 0}
+.journey-pane .journey-choice{position:relative;display:flex;align-items:center;gap:15px;min-height:78px;padding:12px 16px;text-align:left;box-shadow:4px 4px #05040a;background:#211c28;border:1px solid #615061;color:#c4b8c6;border-radius:0;clip-path:polygon(3% 0,100% 0,97% 100%,0 100%)}
+.journey-choice>b{font:italic 900 32px 'Arcade Display',Impact,sans-serif;color:#706075;flex-shrink:0;line-height:1}
+.journey-choice>div{flex:1;min-width:0}.journey-choice strong{display:block;font-size:clamp(15px,1.5vw,21px);font-weight:900;line-height:1.3}
+.journey-choice span{display:block;font-size:10px;color:#a792a9;margin-top:5px;line-height:1.5}
+.journey-choice>small{font:800 9px/1.4 ui-monospace,monospace;color:#a1dcc5;white-space:nowrap;flex-shrink:0}
+.journey-pane .journey-choice.is-selected{background:#ffe041;border-color:#fff1ad;color:#15101b;transform:translateX(5px);box-shadow:4px 4px #eb2d61}
+.journey-choice.is-selected>b,.journey-choice.is-selected span,.journey-choice.is-selected>small{color:#302234}
+.journey-pane .journey-choice:disabled{opacity:.45;cursor:not-allowed}
+.journey-preview{min-width:0}
+.journey-stage-image{position:relative;aspect-ratio:16/9;background:#121825;overflow:hidden;border:1px solid #6b5168;box-shadow:6px 6px #07060c;isolation:isolate}
+.journey-stage-image>img{width:100%;height:100%;object-fit:contain;background:#101522;display:block}
+.journey-stage-image::after{content:'';position:absolute;inset:50% 0 0;background:linear-gradient(transparent,#090d17ef);z-index:0}
+.journey-stage-number{position:absolute;top:12px;left:14px;padding:5px 8px;color:#10121b;background:#ffe34b;font:900 10px ui-monospace,monospace;transform:skew(-7deg)}
+.journey-stage-image>div{position:absolute;left:18px;bottom:14px;z-index:1}.journey-stage-image small{font:800 9px ui-monospace,monospace;color:#97eded;letter-spacing:.15em}.journey-stage-image h3{font-size:clamp(22px,3vw,38px);font-weight:1000;line-height:1.2;margin:6px 0 0;color:#fff4d1;text-shadow:2px 3px #080b13}
+.journey-opponent{display:flex;align-items:center;gap:16px;margin-top:19px;padding:12px 16px;background:linear-gradient(110deg,#23313d,#241c2d);border-left:3px solid #ff547c}
+.journey-opponent>img{width:72px;height:80px;object-fit:contain;background:#141720;border-bottom:2px solid #a1f1f4}
+.journey-opponent small{font:800 9px ui-monospace,monospace;color:#9ff1f3;letter-spacing:.1em}.journey-opponent h3{font-size:24px;margin:3px 0;font-weight:950}.journey-opponent p{font-size:11px;color:#d6b3cc;margin:3px 0}
+.journey-description{font-size:13px;color:#bfaebf;line-height:1.8;margin:14px 0 10px}
+.journey-meta{font:700 10px/1.8 ui-monospace,monospace;color:#d6be8e;border-top:1px solid #4e3b4b;padding-top:10px}
+.journey-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:20px;padding-top:14px;border-top:1px solid #68495a}
+.journey-actions>span{font:700 10px/1.6 ui-monospace,monospace;color:#a293a8}.journey-actions>div{display:flex;gap:10px}
+.journey-actions button{font-size:13px;min-height:44px;padding:9px 18px;font-weight:850;box-shadow:none}
+.journey-actions .primary{background:#ffe14a;color:#14101a;border-color:#fff0a0;box-shadow:3px 3px #ef2f62}
+.app-menu[data-panel=versus]{width:100vw;height:100dvh;max-width:100vw;max-height:100dvh;margin:0;border:0}
+.app-menu[data-panel=versus] .app-menu-head,.app-menu[data-panel=versus] .app-tabs{display:none}
+.app-menu[data-panel=versus] .app-menu-body{padding:0;overflow:hidden;background:#070e1b}
+.journey-versus{height:100%;position:relative}
+.versus-screen{position:relative;width:100%;height:100%;overflow:hidden;isolation:isolate;background:#0b1324}
+.versus-background{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.19;z-index:-3}
+.versus-screen::before,.versus-screen::after{content:'';position:absolute;inset:0;z-index:-2;pointer-events:none}
+.versus-screen::before{background:repeating-linear-gradient(155deg,transparent 0 26px,#a6fcff13 27px 29px,transparent 30px 55px),linear-gradient(110deg,#033c509e 0 45%,#0b1026cc 45% 56%,#6d0d4199 56%);clip-path:polygon(0 0,100% 0,100% 92%,0 100%)}
+.versus-screen::after{inset:43% -5% 20%;background:repeating-linear-gradient(-7deg,transparent 0 7px,#ffffff0b 8px 9px);border-block:3px solid #ffe37c88;transform:rotate(-4deg)}
+.versus-fighters{display:grid;grid-template-columns:1fr 1fr;height:100%;padding:6vh 4vw 13vh;gap:10vw}
+.versus-side{display:flex;align-items:stretch;justify-content:center;min-width:0;position:relative}
+.versus-fighter{position:relative;flex:1;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;text-align:center}
+.versus-fighter>img{width:100%;height:calc(100% - 70px);min-height:0;object-fit:contain;object-position:center bottom;filter:drop-shadow(5px 7px #02060ac4)}
+.versus-fighter small{color:#7df3ff;font:800 clamp(9px,1vw,15px)/1.5 ui-monospace,monospace;margin-top:10px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.versus-side.side-1 small{color:#ffa1c9}.versus-fighter h3{font-size:clamp(23px,3.6vw,60px);font-weight:1000;color:#f4f0e3;text-shadow:4px 4px #040916;margin:3px 0;line-height:1.2;white-space:nowrap}
+.versus-word{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%) rotate(-8deg);font:italic 900 clamp(60px,16vw,260px)/1 'Arcade Display',Impact,sans-serif;color:#ffe078;text-shadow:5px 6px #8b3a37,10px 10px #050b13;-webkit-text-stroke:2px #100b20;z-index:3}
+.versus-stage{position:absolute;bottom:8%;left:15%;right:15%;text-align:center;font:900 clamp(10px,1.3vw,20px)/1.5 ui-monospace,monospace;letter-spacing:.12em;color:#fff0bf;background:#06101bdb;border-block:1px solid #ffe48c77;padding:9px}
+.versus-foot{position:absolute;z-index:4;bottom:1.5%;left:4%;right:4%;display:flex;align-items:center;justify-content:space-between;gap:10px;color:#9cc8d7;font:700 11px/1.5 ui-monospace,monospace}
+.versus-foot button{font-size:11px;min-height:36px;padding:6px 14px;background:#0b1925;border-color:#568296;color:#d0e7ec}
+.battle-versus{position:absolute;inset:0;z-index:12;pointer-events:none;container-type:inline-size}
+.battle-versus .versus-fighters{padding:3% 4% 11%;gap:9%}
+.battle-versus .versus-word{font-size:16cqw}
+.battle-versus .versus-fighter>img{height:calc(100% - 40px)}
+.battle-versus .versus-fighter h3{font-size:3.3cqw;margin:0}
+.battle-versus .versus-fighter small{font-size:1cqw;margin:0}
+.battle-versus .versus-stage{font-size:1.1cqw;bottom:2%;padding:.6cqw}
+.journey-result{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);min-height:500px;gap:30px;align-items:center}
+.journey-result-art{height:min(65vh,650px);position:relative;isolation:isolate;overflow:hidden}
+.journey-result-art::before{content:'';position:absolute;inset:15% 0 0;z-index:-1;background:radial-gradient(#fcdf5933 1px,transparent 2px),linear-gradient(135deg,#21313f,#5c2037);background-size:7px 7px,100% 100%;clip-path:polygon(0 16%,100% 0,90% 90%,10% 100%)}
+.journey-result-art img{width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(5px 6px #080b10)}
+.journey-result small{font:900 13px ui-monospace,monospace;color:#ffe04d;letter-spacing:.18em}.journey-result h2{font-size:clamp(27px,3vw,46px);font-weight:1000;line-height:1.3;margin:12px 0;color:#f4eee0;text-shadow:3px 4px #6a253f}
+.journey-result h3{font-size:20px;color:#8ef2f4;margin:6px 0 18px}.result-mission{font-size:13px;color:#c5b1c7;line-height:1.8}
+.result-score{font:italic 900 clamp(50px,6vw,92px)/1 'Arcade Display',Impact,sans-serif;color:#ffe49b;margin:12px 0}
+.result-reward{font-size:15px;font-weight:850;color:#a1e4c2}.result-detail{font-size:13px;line-height:1.8;color:#b9a9bc}
+.result-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:24px}.result-actions button{min-height:44px;font-size:12px;padding:10px 18px;font-weight:850;box-shadow:none}
+.result-actions .primary{color:#110e1a;background:#ffe04d;border-color:#ffefae;box-shadow:3px 3px #ec335e}
+@media(prefers-reduced-motion:no-preference){.journey-stage-image>img{animation:stage-reveal .28s ease-out}.versus-word{animation:vs-slam .35s ease-out}.versus-side{animation:vs-side .4s ease-out}@keyframes stage-reveal{from{opacity:.45;transform:scale(1.02)}to{opacity:1;transform:none}}@keyframes vs-slam{from{opacity:0;transform:translate(-50%,-50%) rotate(-8deg) scale(1.6)}to{opacity:1;transform:translate(-50%,-50%) rotate(-8deg) scale(1)}}@keyframes vs-side{from{opacity:0;translate:0 20px}to{opacity:1;translate:0 0}}}
+@media(max-width:850px){.journey-layout{grid-template-columns:minmax(210px,.9fr) minmax(0,1.1fr);gap:16px}.journey-choice strong{font-size:14px}.journey-choice>b{font-size:27px}.journey-pane .journey-choice{gap:10px;padding:10px 12px;min-height:72px}.journey-heading>span{display:none}.journey-opponent{padding:9px;gap:9px}.journey-opponent h3{font-size:20px}.journey-opponent>img{width:55px;height:64px}.journey-actions>span{display:none}}
+@media(max-width:600px){.app-menu[data-panel=missions],.app-menu[data-panel=stages],.app-menu[data-panel=results]{width:calc(100vw - 12px);height:calc(100dvh - 12px);max-height:calc(100dvh - 12px)}.app-menu[data-panel=missions] .app-menu-body,.app-menu[data-panel=stages] .app-menu-body,.app-menu[data-panel=results] .app-menu-body{padding:14px}.journey-heading{margin-bottom:14px}.journey-heading h2{font-size:22px}.journey-layout{display:flex;flex-direction:column-reverse;gap:14px}.journey-preview,.journey-choices{width:100%}.journey-opponent{margin-top:12px}.journey-opponent>img{width:46px;height:49px}.journey-opponent h3{font-size:18px}.journey-description{font-size:11px;line-height:1.65;margin-block:10px}.journey-meta{font-size:9px}.journey-pane .journey-choice{min-height:65px}.journey-choice span{font-size:9px}.journey-choices{gap:8px}.journey-actions{position:sticky;bottom:-14px;z-index:3;background:#110e19ed;padding:12px 0;margin-top:12px}.journey-actions>div{width:100%;justify-content:space-between}.journey-actions button{font-size:12px;padding-inline:14px}.versus-fighters{padding:9vh 1vw 18vh;gap:8vw}.versus-fighter>img{height:calc(100% - 70px)}.versus-fighter h3{font-size:22px;white-space:normal}.versus-fighter small{font-size:8px}.versus-word{font-size:24vw}.versus-stage{left:5%;right:5%;font-size:10px;bottom:11%;padding:8px}.versus-foot{flex-wrap:wrap;justify-content:center;font-size:10px}.journey-result{grid-template-columns:1fr;gap:16px;min-height:0}.journey-result-art{height:230px}.journey-result>section{text-align:center}.journey-result h2{font-size:28px;margin-top:8px}.journey-result h3{font-size:17px}.result-actions{justify-content:center}.result-actions button{font-size:11px;padding-inline:12px}}
+@media(max-height:550px) and (orientation:landscape){.journey-result{min-height:0;grid-template-columns:1fr 1.3fr;gap:20px}.journey-result-art{height:300px}.journey-result h2{font-size:24px}.journey-result h3{font-size:16px;margin-bottom:8px}.journey-result small{font-size:10px}.result-score{font-size:48px;margin:6px 0}.result-actions{margin-top:12px}.versus-fighters{padding:2vh 6vw 17vh}.versus-fighter>img{height:calc(100% - 45px)}.versus-fighter h3{font-size:25px}.versus-word{font-size:20vh}.versus-stage{font-size:11px;bottom:9%;padding:5px}.versus-foot{font-size:9px;bottom:1%}}
+
+/* Bound intrinsic art sizes so names/actions stay inside the viewport. */
+.journey-stage-image{height:clamp(180px,33vh,320px);aspect-ratio:auto}
+.journey-actions{position:sticky;bottom:-18px;z-index:4;background:#100e17ed;padding-bottom:6px}
+.versus-fighters,.versus-side,.versus-fighter{min-height:0}
+.versus-fighter>img,.battle-versus .versus-fighter>img{height:0;flex:1 1 0;min-height:0}
+.versus-fighter small,.versus-fighter h3{flex:0 0 auto}
+@media(max-width:600px){.journey-stage-image{height:auto;aspect-ratio:16/9}.journey-actions{bottom:-14px}}
+
+.versus-fighters{padding-bottom:19vh}
+.journey-choice[data-stage]>img{width:76px;height:48px;object-fit:cover;flex:0 0 auto;border:1px solid #777083;box-shadow:2px 2px #0006}
+.journey-choice[data-stage] strong,.journey-choice[data-stage] span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:600px){.journey-choice[data-stage]>img{width:64px;height:40px}.journey-choice[data-stage]{gap:8px}.journey-choice[data-stage]>b{font-size:23px}.journey-choice[data-stage]>small{font-size:7px}}
+
+@media(max-height:800px) and (min-width:851px){.journey-heading{margin-bottom:12px;padding-bottom:10px}.journey-pane .journey-choice{min-height:68px;padding-block:10px}.journey-stage-image{height:30vh;min-height:180px}.journey-opponent{margin-top:12px;padding:10px 12px}.journey-opponent>img{width:58px;height:64px}.journey-description{margin:10px 0 8px;font-size:12px;line-height:1.6}.journey-actions{margin-top:14px}}

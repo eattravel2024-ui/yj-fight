@@ -1,4 +1,5 @@
 'use strict';
+const {enterLocalBattle}=require('./flow-helpers.cjs');
 const {test,before,after,afterEach}=require('node:test');
 const assert=require('node:assert/strict'),{spawn}=require('node:child_process'),{once}=require('node:events'),{existsSync,mkdirSync}=require('node:fs');
 const {chromium}=require('playwright');let browser,server,base;const contexts=[];
@@ -12,7 +13,7 @@ after(async()=>{await browser?.close();if(server&&server.exitCode===null){server
 async function page(options={}){const c=await browser.newContext(options);contexts.push(c);const p=await c.newPage();p.errors=[];p.on('pageerror',e=>p.errors.push(e.message));return p;}
 async function decoded(locator){await locator.evaluateAll(images=>Promise.all(images.map(i=>i.decode())));}
 
-async function practice(p){await p.goto(base+'/?mode=practice&panel=fighters');await p.locator('#mainAction').click();await p.waitForFunction(()=>AzhiGame.game?.introFrames===0&&!AzhiShell.isOpen());await p.waitForTimeout(500);}
+async function practice(p){await p.goto(base+'/?mode=practice&panel=fighters');await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>AzhiGame.game?.introFrames===0&&!AzhiShell.isOpen());await p.waitForTimeout(500);}
 async function geometry(p){
  return p.evaluate(()=>{const arena=document.querySelector('.arena').getBoundingClientRect(),hud=document.querySelector('.combat-top').getBoundingClientRect(),canvas=document.querySelector('canvas').getBoundingClientRect();return {arena:{x:arena.x,y:arena.y,width:arena.width,height:arena.height},inside:hud.x>=arena.x-1&&hud.right<=arena.right+1&&hud.top>=arena.top-1&&hud.bottom<=arena.bottom+1,ratio:canvas.width/canvas.height,scroll:document.documentElement.scrollWidth>innerWidth+1||document.documentElement.scrollHeight>innerHeight+1};});
 }
@@ -29,7 +30,7 @@ test('in-scene combat HUD, real HP/energy, skill input, viewport fit and retry w
  await p.evaluate(()=>{AzhiGame.requestMode('arcade');AzhiGame.startLocal();});await p.waitForFunction(()=>AzhiGame.game.introFrames===0);
  await p.evaluate(()=>{const g=AzhiGame.game;g.practice=false;g.players[0].wins=1;g.players[1].hp=0;g.hitstop=0;});await p.waitForFunction(()=>AzhiGame.game.status==='finished');await p.waitForFunction(()=>document.querySelector('.combat-announcement').dataset.kind==='winner'&&!document.querySelector('.combat-announcement').hidden);
  assert.match(await p.locator('.combat-announcement').textContent(),/WINNER.*阿志/);assert.equal(await p.locator('#p2HP').textContent(),'0');await p.waitForFunction(()=>parseFloat(document.querySelector('#p2Bar').parentElement.querySelector('.health-trail').style.width)===0);await p.locator('.combat-announcement img').evaluate(i=>i.decode());await p.screenshot({path:'coverage/combat-winner-8112.png'});
- await p.locator('#overlayStart').click();await p.waitForFunction(()=>AzhiGame.game.status==='playing'&&!document.querySelector('.app-battle').dataset.result);await p.locator('.combat-menu-toggle').click();await p.waitForFunction(()=>AzhiShell.isOpen());assert.deepEqual(p.errors,[]);
+ await p.locator('#overlayStart').click();await p.waitForFunction(()=>AzhiShell.currentPanel==='results');await p.locator('#resultContinue').click();await p.waitForFunction(()=>AzhiGame.game.status==='playing'&&!document.querySelector('.app-battle').dataset.result);await p.locator('.combat-menu-toggle').click();await p.waitForFunction(()=>AzhiShell.isOpen());assert.deepEqual(p.errors,[]);
 });
 test('real timeout/round transition, stage variants and reduced-motion mobile controls work',async()=>{
  const p=await page({viewport:{width:844,height:390},isMobile:true,hasTouch:true,reducedMotion:'reduce'});await practice(p);
