@@ -10,7 +10,7 @@ class FakeSocket extends EventEmitter{
  ping(){this.emit('pong')}
  close(){if(this.readyState!==1)return;this.readyState=3;this.emit('close')}
  terminate(){this.close()}
- incoming(message){this.emit('message',Buffer.from(JSON.stringify(message)))}
+ incoming(message){this.emit('message',Buffer.from(JSON.stringify(message)));return this.messageChain;}
  get(type){return this.sent.filter(m=>m.type===type)}
 }
 class FakeWSS extends EventEmitter{
@@ -30,16 +30,16 @@ test('four fighters + spectators + readonly late join + no side effects on spect
  try{
   const actors=[connect(),connect(),connect(),connect()];
   const roster=['azhi','winnie','sezi','gambler'];
-  for(let i=0;i<4;i++)actors[i].incoming({type:'join',mode:'team',room:'HAIXIAN',char:roster[i]});
-  for(const player of actors)player.incoming({type:'set_ready',ready:true});
-  actors[0].incoming({type:'start_match',revision:actors[0].get('roster').at(-1).revision});
+  for(let i=0;i<4;i++)await actors[i].incoming({type:'join',mode:'team',room:'HAIXIAN',char:roster[i]});
+  for(const player of actors)await player.incoming({type:'set_ready',ready:true});
+  await actors[0].incoming({type:'start_match',revision:actors[0].get('roster').at(-1).revision});
   assert.deepEqual(actors.map(ws=>ws.get('joined')[0].slot),[0,1,2,3]);
   assert.equal(actors[0].get('start').length,1);assert.equal(actors[3].get('start')[0].game.players.length,4);
   assert.equal(actors[0].get('start')[0].game.ruleset,'team');
-  const spectator=connect();spectator.incoming({type:'watch',room:'HAIXIAN'});
+  const spectator=connect();await spectator.incoming({type:'watch',room:'HAIXIAN'});
   assert.equal(spectator.get('joined')[0].role,'spectator');assert.equal(spectator.get('joined')[0].slot,-1);
   assert.equal(spectator.get('watch_start')[0].game.players.length,4);
-  const full=connect();full.incoming({type:'join',mode:'team',room:'HAIXIAN',char:'azhi'});
+  const full=connect();await full.incoming({type:'join',mode:'team',room:'HAIXIAN',char:'azhi'});
   assert.match(full.get('error')[0].message,/已滿/);
   const start=actors[0].get('start')[0];const matchId=start.matchId;
   await wait(520);
@@ -47,10 +47,10 @@ test('four fighters + spectators + readonly late join + no side effects on spect
   assert.equal(spectator.get('frames').length,0,'spectator must not get player rollback input rows');
   const live=spectator.get('watch_frame').at(-1);assert.ok(live.serverFrame>10);
   assert.equal(live.game.players.length,4);
-  spectator.incoming({type:'input',matchId,frame:live.serverFrame+2,keys:{heavy:true},pulses:['super']});
-  spectator.incoming({type:'rematch'});
+  await spectator.incoming({type:'input',matchId,frame:live.serverFrame+2,keys:{heavy:true},pulses:['super']});
+  await spectator.incoming({type:'rematch'});
   assert.equal(spectator.get('rematch_status').length,0,'spectator cannot vote');
-  const outsider=connect();outsider.incoming({type:'watch',room:'INVALID1'});assert.ok(outsider.get('error').length);
+  const outsider=connect();await outsider.incoming({type:'watch',room:'INVALID1'});assert.ok(outsider.get('error').length);
   const before=actors[0].get('frames').length;
   spectator.close();await wait(170);
   assert.ok(actors[0].get('frames').length>before,'spectator leaving must not interrupt active 2v2 game');
@@ -62,14 +62,14 @@ test('four fighters + spectators + readonly late join + no side effects on spect
   const liveRoom=rooms.get('HAIXIAN');assert.ok(liveRoom.session);
   liveRoom.session.game.status='finished';liveRoom.session.game.winnerTeam=0;
   await wait(700);assert.equal(liveRoom.completed,true);assert.equal(actors[0].get('match_complete').length,1);
-  const watching=connect();watching.incoming({type:'watch',room:'HAIXIAN'});
+  const watching=connect();await watching.incoming({type:'watch',room:'HAIXIAN'});
   assert.equal(watching.get('watch_wait').length,1,'joining after a completed match waits for rematch');
-  actors[0].incoming({type:'rematch'});assert.equal(actors[0].get('rematch_status').at(-1).votes,1);
-  watching.incoming({type:'rematch'});assert.equal(actors[0].get('rematch_status').at(-1).votes,1,'observer cannot vote');
-  actors[1].incoming({type:'rematch'});actors[2].incoming({type:'rematch'});
+  await actors[0].incoming({type:'rematch'});assert.equal(actors[0].get('rematch_status').at(-1).votes,1);
+  await watching.incoming({type:'rematch'});assert.equal(actors[0].get('rematch_status').at(-1).votes,1,'observer cannot vote');
+  await actors[1].incoming({type:'rematch'});await actors[2].incoming({type:'rematch'});
   assert.equal(actors[0].get('start').length,1,'only three out of four votes cannot restart');
-  actors[3].incoming({type:'rematch'});assert.equal(actors[0].get('start').length,1,'all ready still needs host start');
-  actors[0].incoming({type:'start_match',revision:actors[0].get('roster').at(-1).revision});assert.equal(actors[0].get('start').length,2,'host starts ready rematch');
+  await actors[3].incoming({type:'rematch'});assert.equal(actors[0].get('start').length,1,'all ready still needs host start');
+  await actors[0].incoming({type:'start_match',revision:actors[0].get('roster').at(-1).revision});assert.equal(actors[0].get('start').length,2,'host starts ready rematch');
   assert.equal(watching.get('watch_start').length,1,'spectator is carried into the next match');
   actors[2].close();assert.ok(actors[0].get('peer_left').length);assert.equal(actors[0].get('start').length,2);
  }finally{await stop()}

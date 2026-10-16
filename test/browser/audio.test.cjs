@@ -1,5 +1,5 @@
 'use strict';
-const {enterLocalBattle}=require('./flow-helpers.cjs');
+const {enterLocalBattle,openRoomForm}=require('./flow-helpers.cjs');
 const {test,before,after,afterEach}=require('node:test');
 const assert=require('node:assert/strict'),{spawn}=require('node:child_process'),{once}=require('node:events'),{existsSync,mkdirSync}=require('node:fs');
 const {chromium}=require('playwright');let browser,server,base;const contexts=[];
@@ -41,7 +41,7 @@ test('four character entrances, real round start, KO and win/loss are one-shot e
 });
 test('four real online players hear their own intro and shared server stage; late spectators do not replay old events',async()=>{
  const players=[];for(const [i,id] of ['azhi','sezi','gambler','winnie'].entries()){
-  const p=await page();players.push(p);await p.goto(base+'/team.html?panel=fighters');await p.locator('#teamCharacters button[data-char="'+id+'"]').click();await p.locator('.app-confirm-action').click();await p.waitForFunction(()=>AzhiShell.currentPanel==='room');await p.locator('#roomCode').fill('OSTTEAM');await p.locator('#playerNickname').fill('OST Player '+i);await p.locator('#joinButton').evaluate(button=>button.click());await p.waitForFunction(()=>!document.querySelector('#readyButton').disabled);
+  const p=await page();players.push(p);await p.goto(base+'/team.html?panel=fighters');await p.locator('#teamCharacters button[data-char="'+id+'"]').click();await p.locator('.app-confirm-action').click();await p.waitForFunction(()=>AzhiShell.currentPanel==='room');await openRoomForm(p);await p.locator('#roomCode').fill('OSTTEAM');await p.locator('#playerNickname').fill('OST Player '+i);await p.locator('#joinButton').evaluate(button=>button.click());await p.waitForFunction(()=>!document.querySelector('#readyButton').disabled);
  }
  for(const p of players)await p.locator('#readyButton').click();await players[0].waitForFunction(()=>!document.querySelector('#startMatchButton').disabled);await players[0].locator('#startMatchButton').click();
  for(const [i,p] of players.entries()){await p.waitForFunction(()=>AzhiGame.game?.introFrames===0);const expected=await p.evaluate(()=>AzhiAudioDirector.musicFor(AzhiGame.game,'team'));await current(p,expected);const intro=['intro_azhi','intro_saizi','intro_gambler','intro_winnie'][i];await p.waitForFunction(intro=>AzhiAudio.snapshot.played.some(e=>e.id===intro),intro);assert.deepEqual(p.errors,[]);}

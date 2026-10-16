@@ -1,0 +1,4 @@
+# Manual systemd drop-in: /etc/systemd/system/azhi71.service.d/online.conf
+# The leading '-' keeps existing guest-only deployments usable without this file.
+[Service]
+EnvironmentFile=-/etc/azhi71.env

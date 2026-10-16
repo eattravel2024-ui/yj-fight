@@ -50,11 +50,11 @@ window.AzhiArcadeFlowFactory={create({panes,game,battle,open,playSound}){
   text(pane.querySelector('.journey-stage-image small'),stage.theme);text(pane.querySelector('.journey-stage-image h3'),stage.name);
   const opponent=pane.querySelector('.journey-opponent'),char=kind==='missions'?mission.enemy:game.character;Art.bindImage(opponent.querySelector('img'),char,'portrait');text(opponent.querySelector('small'),kind==='missions'?'CPU / 本關對手':'PLAYER / 你的選手');text(opponent.querySelector('h3'),C.CHAR[char].name);text(opponent.querySelector('p'),C.CHAR[char].special);
   text(pane.querySelector('.journey-description'),kind==='missions'?mission.detail:stage.description);
-  text(pane.querySelector('.journey-meta'),kind==='missions'?'CPU 強度 '+mission.difficulty+' / 3　·　勝利獎勵 '+mission.reward+' G　·　三戰兩勝':'自由練習　·　木樁：維尼　·　獨立地圖 BGM　·　16:9');
+  text(pane.querySelector('.journey-meta'),kind==='missions'?'CPU 強度 '+mission.difficulty+' / 3　·　勝利獎勵 '+mission.reward+' G　·　三戰兩勝':'自由練習　·　木樁：維尼　·　BGM '+(A.snapshot.tracks.find(track=>track.id===stage.bgm)?.title_zh||stage.name)+'　·　16:9');
  }
  function refresh(){
   if(!local)return;const panel=window.AzhiShell?.currentPanel;if(!['missions','stages'].includes(panel))return;
-  const key=JSON.stringify([panel,game.character,game.campaignProgress,missionId,stageId]);if(key===renderKey)return;renderKey=key;renderSelection(panel);
+  const key=JSON.stringify([panel,game.character,game.campaignProgress,missionId,stageId,A.snapshot.tracks.length]);if(key===renderKey)return;renderKey=key;renderSelection(panel);
  }
  function confirmChoice(kind){
   if(!local||game.busy||window.AzhiShell?.currentPanel!==kind||(kind==='missions'?game.mode!=='arcade':game.mode!=='practice'))return;const plan=game.planLocal(kind==='missions'?{missionId}:{stage:stageId});if(plan)showVersus(plan);

@@ -1,5 +1,5 @@
 'use strict';
-const {enterLocalBattle}=require('./flow-helpers.cjs');
+const {enterLocalBattle,openRoomForm}=require('./flow-helpers.cjs');
 const {test,before,after,afterEach}=require('node:test');
 const assert=require('node:assert/strict');
 const {spawn}=require('node:child_process');
@@ -161,10 +161,10 @@ test('all four one-button supers show real damage receipts; close-range misses a
   await p.evaluate(()=>{const g=window.AzhiDebug.local;g.seed=1800;g.players[0].x=300;g.players[1].x=410;});
   await p.locator('#superTrigger').click();await p.waitForFunction(()=>document.querySelector('.combat-receipt').dataset.state==='hit');
   await p.waitForFunction(()=>!window.AzhiDebug.local.players[0].move&&!window.AzhiDebug.local.projectiles.length);
-  const damage=await p.evaluate(()=>100-window.AzhiDebug.local.players[1].hp);assert.ok(damage>=28&&damage<=36,id);
+  const damage=await p.evaluate(()=>100-window.AzhiDebug.local.players[1].hp);assert.equal(damage,({winnie:38,sezi:38,gambler:42,azhi:25})[id],id+' Phase 4 baseline');
   assert.match(await p.locator('.combat-receipt strong').textContent(),new RegExp('−'+damage+' HP'));
   if(id==='sezi')assert.match(await p.locator('.combat-receipt span').textContent(),/3 段/);
-  if(id==='gambler')assert.ok(await p.evaluate(()=>window.AzhiDebug.local.players[0].armorTimer>0));
+  if(id==='gambler')assert.equal(await p.evaluate(()=>window.AzhiDebug.local.players[0].armorTimer),0,'Phase 4 armor is limited to startup and expires before recovery ends');
   if(id==='azhi')await p.screenshot({path:'coverage/super-actual-hit.png'});
  }
  await chooseMode(p,'practice');await p.locator('#characterList [data-char="gambler"]').click();await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);
@@ -184,7 +184,7 @@ test('retired classic adventure and script are no longer served',async()=>{
 });
 test('two real browser clients play 1v1 and spectator stays read only',async()=>{
  const a=await page(),b=await page();
- for(const [p,n] of [[a,'Browser Alpha'],[b,'Browser Bravo']]){await p.goto(base+'/?room=E2EDUEL');await p.locator('#onlineNickname').fill(n);await p.locator('#joinRoom').evaluate(button=>button.click());}
+ for(const [p,n] of [[a,'Browser Alpha'],[b,'Browser Bravo']]){await p.goto(base+'/?room=E2EDUEL');await openRoomForm(p);await p.locator('#onlineNickname').fill(n);await p.locator('#joinRoom').evaluate(button=>button.click());}
  assert.equal(await a.locator('#startMatchButton').isDisabled(),true);
  for(const p of [a,b])await p.locator('#readyButton').click();
  await a.locator('#onlinePanel').screenshot({path:'coverage/ready-lobby-8.9.png'});
@@ -196,12 +196,12 @@ test('two real browser clients play 1v1 and spectator stays read only',async()=>
  await a.waitForFunction(x=>window.AzhiDebug.rollback.game.players[0].x>x+5,initialX);await openPanel(a,'room');
  const openFrame=await a.evaluate(()=>window.AzhiDebug.rollback.frame);await a.waitForFunction(frame=>window.AzhiDebug.rollback.frame>frame+20,openFrame);
  const menuState=await a.evaluate(()=>{const s=window.AzhiDebug.rollback;return {frame:s.frame,x:s.game.players[0].x,meter:s.game.players[0].meter};});
- await a.locator('#onlineNickname').focus();await a.keyboard.press('KeyU');
+ await openRoomForm(a);await a.locator('#onlineNickname').focus();await a.keyboard.press('KeyU');
  await a.waitForFunction(frame=>window.AzhiDebug.rollback.frame>frame+12,menuState.frame);
  const afterMenu=await a.evaluate(()=>{const s=window.AzhiDebug.rollback;return {x:s.game.players[0].x,meter:s.game.players[0].meter,input:s.used.get(s.frame).inputs[0]};});
  assert.ok(Math.abs(afterMenu.x-menuState.x)<1,'online menu releases held movement while the match continues');
  assert.equal(afterMenu.meter,menuState.meter,'typing U in a menu does not trigger combat');assert.deepEqual(afterMenu.input,{keys:{},pulses:[]},'online menu sends neutral input without pausing rollback');
- await a.keyboard.up('KeyD');await a.keyboard.press('Escape');await a.keyboard.press('Escape');await a.locator('#stage').focus();await a.keyboard.press('KeyU');
+ await a.keyboard.up('KeyD');if(await a.locator('.room-entry').evaluate(e=>e.open)){await a.keyboard.press('Escape');await a.waitForFunction(()=>!document.querySelector('.room-entry').open);}for(let i=0;i<2&&await a.evaluate(()=>AzhiShell.isOpen());i++){await a.keyboard.press('Escape');}await a.waitForFunction(()=>!AzhiShell.isOpen());await a.locator('#stage').focus();await a.keyboard.press('KeyU');
  await a.waitForFunction(()=>window.AzhiDebug.rollback.game.players[0].meter<25);
  await a.waitForFunction(()=>document.querySelector('.combat-receipt').dataset.state==='hit');assert.match(await a.locator('.combat-receipt strong').textContent(),/加油加300.*HP/);
  const watch=await page();await watch.goto(base+'/team.html?room=E2EDUEL&watch=1');
@@ -213,7 +213,7 @@ test('real socket loss opens the room menu and permits manual rejoining in both 
  for(const team of [false,true]){
   const p=await page();await p.addInitScript(()=>{const NativeWebSocket=window.WebSocket;window.WebSocket=class extends NativeWebSocket{constructor(...args){super(...args);window.testSocket=this;}};});
   const ids=team?{nickname:'playerNickname',join:'joinButton',room:'roomCode',copies:['copyPlayerLink','copyWatchLink'],rematch:'rematch'}:{nickname:'onlineNickname',join:'joinRoom',room:'roomInput',copies:['copyRoom','copySpectatorLink'],rematch:'rematchButton'},room=team?'REJOIN2':'REJOIN1';
-  await p.goto(base+(team?'/team.html':'/')+'?room='+room);await p.locator('#'+ids.nickname).fill(team?'Reconnect Team':'Reconnect Duel');await p.locator('#'+ids.join).evaluate(button=>button.click());
+  await p.goto(base+(team?'/team.html':'/')+'?room='+room);await openRoomForm(p);await p.locator('#'+ids.nickname).fill(team?'Reconnect Team':'Reconnect Duel');await p.locator('#'+ids.join).evaluate(button=>button.click());
   await p.waitForFunction(team=>window.testSocket?.readyState===WebSocket.OPEN&&(team?window.AzhiTeamDebug.slot>=0:!document.querySelector('#leaveRoom').disabled),team);
   assert.equal(await p.locator('#readyButton').isDisabled(),false);for(const id of ids.copies)assert.equal(await p.locator('#'+id).isDisabled(),false);
   await p.evaluate(()=>window.AzhiShell.close());await p.evaluate(()=>window.testSocket.close(4001,'test disconnect'));
@@ -229,7 +229,7 @@ test('four real browser clients start 2v2 with four retained characters',async()
  const players=[];
  for(const [i,char] of ['winnie','sezi','gambler','azhi'].entries()){
   const p=await page();players.push(p);await p.goto(base+'/team.html');await openPanel(p,'fighters');
-  await p.locator('#teamCharacters button').nth(i).click();await p.locator('.app-confirm-action').click();await p.waitForFunction(()=>AzhiShell.currentPanel==='room');await p.locator('#roomCode').fill('E2ETEAM');await p.locator('#playerNickname').fill('Team Player '+i);await p.locator('#joinButton').evaluate(button=>button.click());
+  await p.locator('#teamCharacters button').nth(i).click();await p.locator('.app-confirm-action').click();await p.waitForFunction(()=>AzhiShell.currentPanel==='room');await openRoomForm(p);await p.locator('#roomCode').fill('E2ETEAM');await openRoomForm(p);await p.locator('#playerNickname').fill('Team Player '+i);await p.locator('#joinButton').evaluate(button=>button.click());
  }
  assert.equal(await players[0].locator('#startMatchButton').isDisabled(),true);
  for(const p of players)await p.locator('#readyButton').click();
@@ -256,7 +256,7 @@ test('full-window viewport fits health and stage, in-game selection and a fixed 
   });
   await p.goto(base);await chooseMode(p,'practice');
   assert.equal(await p.locator('dialog[open] #fighterSelect').count(),1,'selection lives inside the in-game menu');
-  const confirm=await p.locator('#mainAction').boundingBox();assert.ok(confirm.height>=44&&confirm.y>=0&&confirm.y+confirm.height<=viewport.height,'the character confirmation button stays visible and touchable');
+  const confirm=await p.locator('#mainAction').boundingBox();assert.ok(confirm.height>=44&&confirm.y>=0&&confirm.y+confirm.height<=viewport.height,JSON.stringify({viewport,confirm}));
   await p.locator('#characterList button').first().click();
   assert.match(await p.locator('#selectPlayerName').textContent(),/維尼/);assert.match(await p.locator('#selectionSummary').textContent(),/阿志/);
   assert.equal(await p.locator('#characterList button[aria-pressed=true]').count(),1);
@@ -273,6 +273,8 @@ test('full-window viewport fits health and stage, in-game selection and a fixed 
   await team.locator('#teamCharacters button').first().click();assert.match(await team.locator('#selectPlayerName').textContent(),/維尼/);await team.locator('.app-confirm-action').click();await team.waitForFunction(()=>AzhiShell.currentPanel==='room'&&AzhiGame.character==='winnie');
   await team.evaluate(()=>window.AzhiShell.close());await assertViewport(team,'#arenaCanvas','.score',viewport);
   assert.deepEqual(team.errors,[]);await team.screenshot({path:`coverage/team-viewport-${viewport.width}.png`,fullPage:false});
+  // Each viewport is independent; do not keep eight live 60Hz arenas rendering.
+  for(const current of [p,team]){const context=current.context();const index=contexts.indexOf(context);if(index>=0)contexts.splice(index,1);await context.close();}
  }
 });
 

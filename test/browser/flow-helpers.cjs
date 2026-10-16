@@ -10,4 +10,10 @@ async function enterLocalBattle(page){
  if(panel==='stages')await page.locator('#stageConfirm').click();
  if(['missions','stages'].includes(panel))await page.waitForFunction(()=>!AzhiShell.isOpen()&&!!AzhiGame.game);
 }
-module.exports={enterLocalBattle};
+async function openRoomForm(page,intent='join'){
+ if(await page.locator('.room-entry').evaluate(el=>el.open))return;
+ const connected=await page.evaluate(()=>!!AzhiGame.room);
+ await page.locator(connected?'#customEditRoom':intent==='create'?'#customCreateRoom':'#customJoinRoom').click();
+ await page.waitForFunction(()=>document.querySelector('.room-entry').open);
+}
+module.exports={enterLocalBattle,openRoomForm};

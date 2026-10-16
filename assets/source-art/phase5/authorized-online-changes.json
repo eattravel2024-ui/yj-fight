@@ -1,0 +1,9 @@
+{
+  "scope": "User-authorized Phase 5/6 accounts, matchmaking, authoritative settlement and reconnect. Combat/rollback/sprites remain byte-identical to 8.13.0.",
+  "changed": {
+    "server.js": {
+      "before": "a51bc973cc7be25c992d07ce68223e2a22221701a805388d521e46aa22b849cb",
+      "after": "097c5fa1f906e5c6c002e75b6da36c9a81ae5fb697b5c7d5f6355a82629ad781"
+    }
+  }
+}

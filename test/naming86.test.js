@@ -9,7 +9,7 @@ class FakeSocket extends EventEmitter{
  ping(){this.emit('pong')}
  close(){if(this.readyState!==1)return;this.readyState=3;this.emit('close')}
  terminate(){this.close()}
- incoming(obj){this.emit('message',Buffer.from(JSON.stringify(obj)))}
+ incoming(obj){this.emit('message',Buffer.from(JSON.stringify(obj)));return this.messageChain;}
  last(type){return this.sent.filter(x=>x.type===type).at(-1)}
 }
 class FakeWSS extends EventEmitter{constructor(){super();this.clients=new Set();FakeWSS.instance=this}handleUpgrade(){}}
@@ -26,33 +26,33 @@ test('8.6 player names, room title, spectator identity and XSS protection', asyn
   assert.equal(cleanLabel(' 海線 王  '),'海線 王');assert.equal(cleanLabel('<script>'),null);
   assert.equal(cleanLabel('系統'),null);assert.equal(cleanLabel('a'),null);assert.equal(cleanLabel('a'.repeat(17)),null);
   assert.equal(cleanLabel('逢甲格鬥賽',24),'逢甲格鬥賽');
-  const bad=connect();bad.incoming({type:'join',mode:'team',room:'BADNAME1',name:'<svg/onload=1>'});
+  const bad=connect();await bad.incoming({type:'join',mode:'team',room:'BADNAME1',name:'<svg/onload=1>'});
   assert.match(bad.last('error').message,/暱稱/);assert.equal(rooms.has('BADNAME1'),false,'malformed name does not allocate room');
-  const a=connect();a.incoming({type:'join',mode:'team',room:'NAMETEST',name:'海線 王者',title:'逢甲冠軍賽',char:'gambler'});
+  const a=connect();await a.incoming({type:'join',mode:'team',room:'NAMETEST',name:'海線 王者',title:'逢甲冠軍賽',char:'gambler'});
   assert.equal(a.last('joined').name,'海線 王者');assert.equal(a.last('joined').host,true);
   assert.equal(a.last('roster').title,'逢甲冠軍賽');assert.equal(a.last('roster').players[0].name,'海線 王者');
-  const b=connect();b.incoming({type:'join',mode:'team',room:'NAMETEST',name:'海線 王者',char:'azhi'});
+  const b=connect();await b.incoming({type:'join',mode:'team',room:'NAMETEST',name:'海線 王者',char:'azhi'});
   assert.match(b.last('error').message,/已被使用/);assert.equal(rooms.get('NAMETEST').players.length,1);
-  b.incoming({type:'join',mode:'team',room:'NAMETEST',name:'第二位選手',char:'azhi'});
+  await b.incoming({type:'join',mode:'team',room:'NAMETEST',name:'第二位選手',char:'azhi'});
   assert.equal(b.last('joined').slot,1);
-  b.incoming({type:'set_title',title:'我來接管'});assert.match(b.last('error').message,/房主/);
-  a.incoming({type:'set_title',title:'決戰台中港'});assert.equal(b.last('roster').title,'決戰台中港');
-  b.incoming({type:'set_name',name:'新的拳王'});assert.equal(a.last('roster').players[1].name,'新的拳王');
-  const old=connect();old.incoming({type:'join',mode:'team',room:'NAMETEST',char:'sezi'});
+  await b.incoming({type:'set_title',title:'我來接管'});assert.match(b.last('error').message,/房主/);
+  await a.incoming({type:'set_title',title:'決戰台中港'});assert.equal(b.last('roster').title,'決戰台中港');
+  await b.incoming({type:'set_name',name:'新的拳王'});assert.equal(a.last('roster').players[1].name,'新的拳王');
+  const old=connect();await old.incoming({type:'join',mode:'team',room:'NAMETEST',char:'sezi'});
   assert.equal(old.last('joined').name,'選手3','legacy clients without a name receive a safe fallback');
-  const d=connect();d.incoming({type:'join',mode:'team',room:'NAMETEST',char:'winnie',name:'第四名選手'});
-  for(const player of [a,b,old,d])player.incoming({type:'set_ready',ready:true});
-  a.incoming({type:'start_match',revision:a.last('roster').revision});
+  const d=connect();await d.incoming({type:'join',mode:'team',room:'NAMETEST',char:'winnie',name:'第四名選手'});
+  for(const player of [a,b,old,d])await player.incoming({type:'set_ready',ready:true});
+  await a.incoming({type:'start_match',revision:a.last('roster').revision});
   assert.equal(d.last('start').game.players.length,4,'names never change rollback player count');
   assert.equal(JSON.stringify(d.last('start').game).includes('第四名選手'),false,'identity not embedded in deterministic gameplay snapshots');
-  const v=connect();v.incoming({type:'watch',room:'NAMETEST',name:'觀戰小王'});
+  const v=connect();await v.incoming({type:'watch',room:'NAMETEST',name:'觀戰小王'});
   assert.equal(v.last('joined').name,'觀戰小王');assert.deepEqual(a.last('roster').spectators,[{name:'觀戰小王'}]);
-  v.incoming({type:'set_name',name:'觀眾王'});assert.deepEqual(a.last('roster').spectators,[{name:'觀眾王'}]);
-  v.incoming({type:'set_title',title:'非法改名'});assert.match(v.last('error').message,/房主/);
+  await v.incoming({type:'set_name',name:'觀眾王'});assert.deepEqual(a.last('roster').spectators,[{name:'觀眾王'}]);
+  await v.incoming({type:'set_title',title:'非法改名'});assert.match(v.last('error').message,/房主/);
   v.close();assert.equal(a.last('roster').spectators.length,0);
   a.close();assert.equal(b.last('roster').players.find(x=>x.slot===1).host,true,'room ownership transfers on disconnect');
-  const duel=connect();duel.incoming({type:'join',mode:'duel',room:'DUEL86',name:'單挑大師',title:'單挑冠軍房'});
-  assert.equal(duel.last('joined').title,'單挑冠軍房');duel.incoming({type:'set_title',title:'夜市挑戰室'});
+  const duel=connect();await duel.incoming({type:'join',mode:'duel',room:'DUEL86',name:'單挑大師',title:'單挑冠軍房'});
+  assert.equal(duel.last('joined').title,'單挑冠軍房');await duel.incoming({type:'set_title',title:'夜市挑戰室'});
   assert.equal(duel.last('roster').title,'夜市挑戰室');
  }finally{await done()}
 });

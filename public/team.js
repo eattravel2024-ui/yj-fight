@@ -25,7 +25,7 @@
  const TEAM_CHARACTER_KEY='azhi_team_character_v1';
  function rememberCharacter(id){try{localStorage.setItem(TEAM_CHARACTER_KEY,id)}catch{}}
  function selectCharacter(id){if(!Object.hasOwn(C.CHAR,id)||role==='spectator'||lobby.busy)return false;if(id===selected){rememberCharacter(id);return true}if(slot>=0){lobby.select(id);return true}selected=id;rememberCharacter(id);renderChars();return true;}
- function selectionContext(){const r=lobby.roster,players=r?.players||[],opponent=players.find(p=>slot<0||p.slot%2!==slot%2);return {canSelect:role!=='spectator'&&!lobby.busy,online:true,spectator:role==='spectator',selfSlot:slot,players,phase:r?.phase,opponent,needed:r?.needed||(serverMode==='team'?4:2),opponentLabel:role==='spectator'?'LIVE / 觀戰名單':'RIVAL TEAM / 對手隊伍'};}
+ function selectionContext(){const r=lobby.roster,players=r?.players||[],opponent=players.find(p=>slot<0||p.slot%2!==slot%2);return {canSelect:role!=='spectator'&&!lobby.busy,online:true,spectator:role==='spectator',selfSlot:slot,players,private:!!r?.private,spectatorsAllowed:r?.spectatorsAllowed!==false,phase:r?.phase,opponent,needed:r?.needed||(serverMode==='team'?4:2),opponentLabel:role==='spectator'?'LIVE / 觀戰名單':'RIVAL TEAM / 對手隊伍'};}
  function renderChars(){$('selectionSummary').textContent=role==='spectator'?'觀戰模式 · 不需選擇角色':'目前選擇：'+C.CHAR[selected].name+' · '+C.CHAR[selected].special;$('teamCharacters').textContent='';for(const [id,c] of Object.entries(C.CHAR)){let b=document.createElement('button');b.type='button';b.dataset.char=id;b.className=id===selected?'on':'';b.setAttribute('aria-pressed',String(id===selected));b.disabled=role==='spectator'||lobby.busy;b.innerHTML='<span class="fighter-portrait"><img loading="lazy" alt=""></span><span class="data"></span>';Art.bindImage(b.querySelector('img'),id,'portrait');b.querySelector('.data').textContent=c.name;const skill=document.createElement('small');skill.textContent=c.special;b.querySelector('.data').append(skill);const badge=document.createElement('b');badge.className='selection-badge';badge.textContent=id===selected?'✓ 已選擇':'';b.append(badge);b.title=c.skillDescription;b.onclick=()=>selectCharacter(id);$('teamCharacters').append(b)}$('teamCharacterInfo').textContent=`${C.CHAR[selected].name}｜${C.CHAR[selected].title}：${C.CHAR[selected].desc}`;updateSkillUI()}
  function updateSkillUI(player){
   coach.update(networkComplete?null:state,role==='spectator'?-1:slot);
@@ -71,6 +71,8 @@
  function finish(game){if(!game||matchDone)return;D.finish(game);window.AzhiCombatHUD?.finish(game);matchDone=true;waiting=false;networkComplete=true;const team=game.winnerTeam??game.winner;const who=team===null||team===undefined?'平手':team===0?'紅隊勝利！':'藍隊勝利！';
  overlay('比賽結束 · '+who,role==='spectator'?'可留在房間觀看下一場。':'按再戰或準備，等待全員確認後由房主開賽。');$('rematch').disabled=role!=='player';status(who+' 等待是否再戰。')}
  function onMessage(m){switch(m.type){
+  case 'match_paused':if(role==='spectator'){status(m.message);overlay('對戰暫停',m.message||'等候玩家重新連線');}break;
+  case 'match_resumed':if(role==='spectator'){lastPacket=performance.now();hideOverlay();status('對戰已恢復');}break;
   case 'seat_updated':slot=m.slot;break;
   case 'joined':role=m.role==='spectator'?'spectator':'player';setRole(role==='spectator');slot=m.slot;room=m.room;serverMode=m.mode||'duel';watching=m.role==='spectator';waiting=true;isHost=role==='player'&&!!m.host;roomTitle=m.title||roomTitle;onlineName=m.name||onlineName;
    $('roomTitleDisplay').textContent='房間：'+roomTitle+'｜'+room;$('roomTitleInput').value=roomTitle;$('applyNickname').disabled=false;$('applyRoomTitle').disabled=!isHost;$('roomTitleInput').disabled=!isHost;
@@ -105,7 +107,7 @@
  function titleChange(){if(!isHost||!ws||ws.readyState!==WebSocket.OPEN){status('只有房主能更改房名');return}const title=checkTitle($('roomTitleInput').value);if(!title){status('房名需 2–24 字，不可包含特殊字元');return}ws.send(JSON.stringify({type:'set_title',title}));status('正在更新房間名稱…')}
  function connect(request){const intent=['join','create'].includes(request)?request:undefined;window.AzhiShell?.open('room');if(location.protocol==='file:'){status('線上模式需要從 VPS 網址開啟，不能用 file://');return}
   if(ws){status('已連線，如需重新加入請先離開房間。');return}
-  const requested=$('roomCode').value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+  const requested=$('roomCode').value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,32);
   if(role==='spectator'&&!requested){status('觀戰需要輸入既有房號。');return}
   const displayName=checkNickname($('playerNickname').value);if(!displayName){status('請設定 2–16 字有效暱稱（中英文字、數字、空格、_ . -）');$('playerNickname').focus();return}
   onlineName=displayName;rememberNickname(onlineName);
@@ -114,7 +116,7 @@
   const url=(location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws';let socket;
   try{socket=new WebSocket(url)}catch(e){status('WebSocket 失敗：'+e.message);return}
   ws=socket;$('joinButton').disabled=true;status('正在連線到 60Hz 格鬥伺服器…');
-  socket.onopen=()=>{if(socket!==ws)return;socket.send(JSON.stringify(role==='spectator'?{type:'watch',room:requested,name:onlineName}:{type:'join',mode:'team',room:requested,char:selected,name:onlineName,title,...(intent?{intent}:{})}));status('已連線，等待房間回應。')};
+  socket.onopen=()=>{if(socket!==ws)return;socket.send(JSON.stringify(role==='spectator'?{type:'watch',room:requested,name:onlineName}:{type:'join',mode:'team',room:requested,char:selected,name:onlineName,title,private:!!document.getElementById('customPrivate')?.checked,spectatorsAllowed:document.getElementById('customSpectators')?.checked!==false,...(intent?{intent}:{})}));status('已連線，等待房間回應。')};
   socket.onmessage=e=>{if(socket!==ws)return;let m;try{m=JSON.parse(e.data)}catch{return}onMessage(m)};
   socket.onerror=()=>{if(socket!==ws)return;status('連線錯誤：請檢查 VPS /ws 反向代理。')};
   socket.onclose=()=>{if(socket!==ws)return;ws=null;leave();clearHeld();networkComplete=true;status('連線已中斷。可使用原房號重新加入。');overlay('連線已中斷','檢查網路連線後重新連接。');window.AzhiShell?.open('room')};
@@ -186,8 +188,8 @@
  try{onlineName=localStorage.getItem(NAME_KEY)||''}catch{}if(!checkNickname(onlineName))onlineName='旅人'+String(Math.floor(Math.random()*9000)+1000);
  $('playerNickname').value=onlineName;$('roomTitleInput').value='海線格鬥房';
  try{const stored=localStorage.getItem(TEAM_CHARACTER_KEY);if(Object.hasOwn(C.CHAR,stored))selected=stored;}catch{}
- const qs=new URLSearchParams(location.search);if(Object.hasOwn(C.CHAR,qs.get('char')))selected=qs.get('char');const watch=qs.get('watch')==='1';$('roomCode').value=(qs.get('room')||'').replace(/[^0-9a-zA-Z]/g,'').slice(0,8);setRole(watch);renderRoster();renderNetwork();requestAnimationFrame(loop);if(watch&&$('roomCode').value)setTimeout(connect,100);
+ const qs=new URLSearchParams(location.search);if(Object.hasOwn(C.CHAR,qs.get('char')))selected=qs.get('char');const watch=qs.get('watch')==='1';$('roomCode').value=(qs.get('room')||'').replace(/[^0-9a-zA-Z]/g,'').slice(0,32);setRole(watch);renderRoster();renderNetwork();requestAnimationFrame(loop);if(watch&&$('roomCode').value)setTimeout(connect,100);
  Audio.subscribe(s=>{audioOn=s.enabled;$('soundToggle').textContent='音效：'+(audioOn?'開':'關')});
- window.AzhiGame=Object.freeze({get mode(){return role==='spectator'?'spectator':'team';},get game(){return state;},get room(){return room;},get connected(){return !!ws&&ws.readyState===WebSocket.OPEN;},get busy(){return !!ws&&ws.readyState!==WebSocket.CLOSED;},get character(){return selected;},get soundEnabled(){return Audio.enabled;},requestMode,selectCharacter,selectionContext,connectRoom(intent){if(ws)return false;connect(intent);return true;},playMenuSound(type){soundEnabled=true;audioHit(type==='confirm'?'heavy':'menu');}});
+ window.AzhiGame=Object.freeze({get mode(){return role==='spectator'?'spectator':'team';},get game(){return state;},get room(){return room;},get connected(){return !!ws&&ws.readyState===WebSocket.OPEN;},get busy(){return !!ws&&ws.readyState!==WebSocket.CLOSED;},get character(){return selected;},get soundEnabled(){return Audio.enabled;},requestMode,selectCharacter,selectionContext,setRoomAccess(access){if(ws?.readyState===WebSocket.OPEN)ws.send(JSON.stringify({type:'set_access',...access}));},connectRoom(intent){if(ws)return false;connect(intent);return true;},playMenuSound(type){soundEnabled=true;audioHit(type==='confirm'?'heavy':'menu');}});
  window.AzhiTeamDebug={get session(){return session},get game(){return state},get role(){return role},get room(){return room},get slot(){return slot},get frame(){return serverFrame},get skillFX(){return skillFX}};
 })();

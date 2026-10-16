@@ -1,5 +1,5 @@
 'use strict';
-const {enterLocalBattle}=require('./flow-helpers.cjs');
+const {enterLocalBattle,openRoomForm}=require('./flow-helpers.cjs');
 const {test,before,after,afterEach}=require('node:test');
 const assert=require('node:assert/strict'),{spawn}=require('node:child_process'),{once}=require('node:events'),{existsSync,mkdirSync}=require('node:fs');
 const {chromium}=require('playwright');let browser,server,base;const contexts=[];
@@ -45,7 +45,7 @@ test('real timeout/round transition, stage variants and reduced-motion mobile co
 });
 test('two real clients and late spectator retain Ready authority, in-scene team HUD and real energy',async()=>{
  const players=[];
- for(let i=0;i<2;i++){const p=await page({viewport:{width:1280,height:720}});players.push(p);await p.goto(base+'/?mode=online&panel=room');await p.locator('#roomInput').fill('HUDTEST');await p.locator('#joinRoom').evaluate(button=>button.click());await p.waitForFunction(()=>!document.querySelector('#readyButton').disabled);}
+ for(let i=0;i<2;i++){const p=await page({viewport:{width:1280,height:720}});players.push(p);await p.goto(base+'/?mode=online&panel=room');await openRoomForm(p);await p.locator('#roomInput').fill('HUDTEST');await p.locator('#joinRoom').evaluate(button=>button.click());await p.waitForFunction(()=>!document.querySelector('#readyButton').disabled);}
  for(const p of players)await p.locator('#readyButton').click();await players[0].waitForFunction(()=>!document.querySelector('#startMatchButton').disabled);await players[0].locator('#startMatchButton').click();
  for(const p of players){await p.waitForFunction(()=>AzhiGame.game?.introFrames===0&&!AzhiShell.isOpen());assert.ok((await geometry(p)).inside);}
  const watch=await page({viewport:{width:1366,height:768}});await watch.goto(base+'/team.html?watch=1&room=HUDTEST');await watch.waitForFunction(()=>AzhiGame.game?.introFrames===0&&!AzhiShell.isOpen());assert.equal(await watch.locator('.arena .score').count(),1);await watch.waitForFunction(()=>document.querySelectorAll('.team-energy-list [data-slot]').length===2);assert.equal(await watch.locator('.team-energy-list [data-slot]').count(),2);assert.ok((await geometry(watch)).inside);assert.equal(await watch.locator('#specialTrigger').isDisabled(),true);await watch.screenshot({path:'coverage/combat-spectator-8112.png'});

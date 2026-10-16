@@ -1,3 +1,34 @@
+# 8.14.0 — GitHub 更新與原始碼包
+
+使用者已授權發佈至 `feat/arcade-phase1`。在既有 VPS 原始碼目錄執行：
+
+```bash
+cd ~/azhi-update.lvccoe
+git fetch origin
+git switch feat/arcade-phase1
+git pull --ff-only
+npm ci --ignore-scripts --no-fund
+sudo bash deploy/upgrade-ubuntu.sh
+curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+```
+
+若有本機修改導致 Git 拒絕切換或更新，先保存修改，不要強制重置。也可以下載 `azhi-fighting-8.14.0.tar.gz` 上傳至 VPS 家目錄，使用下列流程。
+
+既有 `/opt/azhi71` 可先更新遊戲 UI，不設定資料庫也能使用訪客模式。上傳原始碼包後，由使用者在 VPS 執行：
+
+```bash
+AZHI_UPDATE_DIR="$(mktemp -d "$HOME/azhi-update-8.14.0.XXXXXX")"
+tar -xzf ~/azhi-fighting-8.14.0.tar.gz -C "$AZHI_UPDATE_DIR"
+cd "$AZHI_UPDATE_DIR"
+npm ci --ignore-scripts --no-fund
+sudo bash deploy/upgrade-ubuntu.sh
+curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+```
+
+健康版本應為 **8.14.0**。會員／快速匹配／排位需額外設定 PostgreSQL、Migration、SMTP、HTTPS／WSS 及具日期的賽季；請依 [ONLINE_DEPLOYMENT.md](ONLINE_DEPLOYMENT.md) 操作，勿直接將未配置的功能當成已上線。[完整交付與驗證結果](DELIVERY_8.14.0.md)。
+
+以下是歷史版本的固定檢查點，**不會包含 8.14.0**。
+
 # 8.13.0 — Phase 4 GitHub 更新
 
 使用者已授權推送此版本。包含戰鬥手感與四角色定位調整；**立法院尚未取得可讀取原始 PNG，維持停用**。既有三張場景、街機／練習／自訂對戰與觀戰保留。

@@ -17,6 +17,8 @@ const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=u
 const ROOM_LIMIT=200,CLIENT_LIMIT=500,SPECTATOR_LIMIT=24,SNAPSHOT_DIVISOR=process.env.AZHI_SNAPSHOT_HZ==='60'?1:2;
 const FRAME_NS=BigInt(Math.round(1e9/Combat.FPS));
 const rooms=new Map();
+const services=require('./server/services').createServices();
+const online=require('./server/online').createOnline({services,rooms,send,all,begin,finalize,roster:roomRoster});
 let connections=0;
 // Presentation-only identity: never place names/titles inside rollback simulation snapshots.
 const LABEL=/^[\p{L}\p{N} _.-]+$/u;
@@ -28,29 +30,30 @@ function cleanLabel(value,max=16){
  return size>=2&&size<=max&&LABEL.test(name)&&!RESERVED.test(name)?name:null;
 }
 function nameTaken(room,name,self){return [...room.players,...[...room.spectators].map(ws=>({name:ws.displayName,ws}))].some(p=>p.ws!==self&&p.name.toLocaleLowerCase()===name.toLocaleLowerCase())}
-function roomSummary(room){return {title:room.title,revision:room.revision||0,phase:room.session?'playing':room.completed?'finished':'waiting',players:room.players.map(p=>({slot:p.slot,team:p.slot%2,char:p.char,name:p.name,ready:!!p.ready,host:p.ws===room.hostWs})),spectators:[...room.spectators].map(ws=>({name:ws.displayName}))}}
+function roomSummary(room){return {title:room.title,revision:room.revision||0,phase:room.session?'playing':room.completed?'finished':'waiting',private:!!room.private,spectatorsAllowed:room.spectatorsAllowed!==false,players:room.players.map(p=>({slot:p.slot,team:p.slot%2,char:p.char,name:p.name,ready:!!p.ready,host:p.ws===room.hostWs,connected:!!p.ws})),spectators:[...room.spectators].map(ws=>({name:ws.displayName}))}}
 
-function send(ws,msg){if(ws.readyState!==WebSocket.OPEN)return; if(ws.bufferedAmount>1024*1024){ws.terminate();return}ws.send(JSON.stringify(msg))}
+function send(ws,msg){if(!ws||ws.readyState!==WebSocket.OPEN)return; if(ws.bufferedAmount>1024*1024){ws.terminate();return}ws.send(JSON.stringify(msg))}
 function group(room,msg){for(const p of room.players)send(p.ws,msg)}
 function audience(room,msg){for(const ws of room.spectators||[])send(ws,msg)}
 function all(room,msg){group(room,msg);audience(room,msg)}
 function compactGame(room){const engine=room.mode==='team'?Team:Combat;return engine.serialize(Rollback.clone(room.session.game))}
-function newCode(){let s;do{s=crypto.randomBytes(4).toString('hex').toUpperCase()}while(rooms.has(s));return s}
+function newCode(bytes=4){let s;do{s=crypto.randomBytes(bytes).toString('hex').toUpperCase()}while(rooms.has(s));return s}
 function roomRoster(room){all(room,{type:'roster',mode:room.mode,needed:room.maxPlayers,...roomSummary(room)})}
 function resetReady(room){for(const p of room.players)p.ready=false;room.revision=(room.revision||0)+1;room.rematchVotes=new Set();}
 function canStart(room){return !room.session&&room.players.length===room.maxPlayers&&room.players.every(p=>p.ready);}
 function begin(room){
  resetReady(room);
  const sorted=[...room.players].sort((a,b)=>a.slot-b.slot);room.rematchVotes=new Set();room.completed=false;
- room.matchId=crypto.randomBytes(8).toString('hex');room.finishingSince=null;room.playerEventBuffer=[];room.watchEventBuffer=[];
- const opts={introFrames:90,stage:Stages.PLAYABLE[crypto.randomInt(Stages.PLAYABLE.length)],seed:crypto.randomInt(1,2**31)};
+ room.matchId=room.persisted?room.matchId:crypto.randomBytes(8).toString('hex');room.paused=false;room.settling=false;room.finishingSince=null;room.playerEventBuffer=[];room.watchEventBuffer=[];
+ const opts={introFrames:90,stage:room.stage||Stages.PLAYABLE[crypto.randomInt(Stages.PLAYABLE.length)],seed:room.seed||crypto.randomInt(1,2**31)};
  room.session=new Rollback.Session(room.mode==='team'?Team.create(sorted.map(p=>p.char),opts):Combat.create(sorted[0].char,sorted[1].char,opts));
  room.game=room.session.game;
  roomRoster(room);
  group(room,{type:'start',mode:room.mode,matchId:room.matchId,frame:0,game:Rollback.clone(room.session.game),inputDelay:Rollback.INPUT_DELAY,rollbackWindow:Rollback.WINDOW,serverHz:60});
  audience(room,{type:'watch_start',mode:room.mode,matchId:room.matchId,frame:0,game:compactGame(room)});
 }
-function leave(ws){
+function leave(ws,options={}){
+ if(online.detach(ws,options))return;
  const record=ws.record;ws.record=null;if(!record)return;
  const room=rooms.get(record.room);if(!room)return;
  room.lastActive=Date.now();
@@ -67,10 +70,11 @@ function leave(ws){
  roomRoster(room);
  if(!room.players.length&&!room.spectators.size)rooms.delete(room.id);
 }
-const server=http.createServer((req,res)=>{
+const server=http.createServer(async(req,res)=>{
+ try{if(await services.handle(req,res))return;}catch{res.writeHead(503,{'Content-Type':'application/json'}).end(JSON.stringify({error:{code:'SERVICE_UNAVAILABLE',message:'服務暫時無法使用'}}));return;}
  if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405,{'Allow':'GET, HEAD'}).end();return}
  let u;try{u=new URL(req.url,'http://localhost')}catch{res.writeHead(400).end();return}
- if(u.pathname==='/healthz'){res.writeHead(200,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}).end(JSON.stringify({ok:true,version:VERSION,serverHz:Combat.FPS,snapshotHz:Combat.FPS/SNAPSHOT_DIVISOR,netcode:'rollback-authoritative',rollbackWindow:Rollback.WINDOW,inputDelay:Rollback.INPUT_DELAY,rooms:rooms.size,clients:connections,teamRooms:[...rooms.values()].filter(r=>r.mode==='team').length,spectators:[...rooms.values()].reduce((n,r)=>n+(r.spectators?.size||0),0)}));return}
+ if(u.pathname==='/healthz'){await services.ready;res.writeHead(services.healthy?200:503,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}).end(JSON.stringify({ok:services.healthy,accounts:!!services.db&&services.healthy,version:VERSION,serverHz:Combat.FPS,snapshotHz:Combat.FPS/SNAPSHOT_DIVISOR,netcode:'rollback-authoritative',rollbackWindow:Rollback.WINDOW,inputDelay:Rollback.INPUT_DELAY,rooms:rooms.size,clients:connections,teamRooms:[...rooms.values()].filter(r=>r.mode==='team').length,spectators:[...rooms.values()].reduce((n,r)=>n+(r.spectators?.size||0),0)}));return}
  let decoded;try{decoded=decodeURIComponent(u.pathname)}catch{res.writeHead(400).end();return}
  if(decoded.includes('\0')||decoded.includes('\\')){res.writeHead(400).end();return}
  const file=path.resolve(ROOT,'.'+(decoded==='/'?'/index.html':decoded));
@@ -79,19 +83,23 @@ const server=http.createServer((req,res)=>{
  const headers={'Content-Type':MIME[path.extname(file).toLowerCase()]||'application/octet-stream','X-Content-Type-Options':'nosniff','Referrer-Policy':'same-origin','X-Frame-Options':'DENY','Cache-Control':file.endsWith('.png')||file.endsWith('.webp')?'public, max-age=3600':'no-cache','Content-Security-Policy':"default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self'; connect-src 'self' ws: wss:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"};
  res.writeHead(200,headers);if(req.method==='HEAD')return res.end();fs.createReadStream(file).on('error',()=>{if(!res.headersSent)res.writeHead(500);res.end()}).pipe(res)});
 });
+server.requestTimeout=15000;server.headersTimeout=10000;server.keepAliveTimeout=5000;server.maxHeadersCount=64;
 const wss=new WebSocketServer({noServer:true,maxPayload:4096,perMessageDeflate:false});
 server.on('upgrade',(req,socket,head)=>{let pathname;try{pathname=new URL(req.url,'http://localhost').pathname}catch{socket.destroy();return}if(pathname!=='/ws'||connections>=CLIENT_LIMIT){socket.write('HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n');socket.destroy();return}
  const origin=req.headers.origin;
+ if(process.env.NODE_ENV==='production'&&req.headers.cookie&&(!origin||origin!==process.env.APP_ORIGIN?.replace(/\/$/,''))){socket.write('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');socket.destroy();return}
  if(origin){try{const host=new URL(origin).host;if(host!==req.headers.host){socket.write('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');socket.destroy();return}}catch{socket.destroy();return}}
  wss.handleUpgrade(req,socket,head,ws=>wss.emit('connection',ws,req))});
-wss.on('connection',ws=>{
+wss.on('connection',(ws,req)=>{
+ online.attach(ws,req);ws.messageChain=Promise.resolve();
  connections++;ws.isAlive=true;ws.joinedAt=Date.now();ws.msgCount=0;ws.lastSecond=Date.now();
- ws.on('pong',()=>{ws.isAlive=true});
- ws.on('message',raw=>{const now=Date.now();if(now-ws.lastSecond>1000){ws.lastSecond=now;ws.msgCount=0}if(++ws.msgCount>160){ws.close(1008,'Rate limit');return}
+ ws.on('pong',data=>{ws.isAlive=true;online.pong(ws,data)});
+ ws.on('message',raw=>{try{if(JSON.parse(raw.toString())?.type==='leave')ws.explicitLeave=true;}catch{}if((ws.pendingMessages||0)>=200){ws.close(1008,'Message backlog');return;}ws.pendingMessages=(ws.pendingMessages||0)+1;ws.messageChain=ws.messageChain.then(async()=>{const now=Date.now();if(now-ws.lastSecond>1000){ws.lastSecond=now;ws.msgCount=0}if(++ws.msgCount>160){ws.close(1008,'Rate limit');return}
   let msg;try{msg=JSON.parse(raw.toString())}catch{return}if(!msg||typeof msg!=='object'||Array.isArray(msg))return;
+  if(await online.handle(ws,msg))return;
   if(msg.type==='watch'){
    if(typeof msg.room!=='string'){send(ws,{type:'error',message:'請提供有效房號'});return}
-   const id=msg.room.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8);
+   const id=msg.room.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,32);
    const room=rooms.get(id);
    if(!room){send(ws,{type:'error',message:'找不到房間，請確認房號後再觀戰'});return}
    if(room.spectators.size-(room.spectators.has(ws)?1:0)>=SPECTATOR_LIMIT){send(ws,{type:'error',message:'觀戰席已滿，請稍候'});return}
@@ -116,17 +124,22 @@ wss.on('connection',ws=>{
    if(msg.room!==undefined&&typeof msg.room!=='string'){send(ws,{type:'error',message:'請提供有效房號'});return}
    if(msg.mode!==undefined&&!['duel','team'].includes(msg.mode)){send(ws,{type:'error',message:'房間模式必須是 1v1 或 2v2'});return}
    if(msg.intent!==undefined&&!['join','create'].includes(msg.intent)){send(ws,{type:'error',message:'房間操作必須是建立或加入'});return}
-   let id=msg.room?msg.room.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8):'';
+   let id=msg.room?msg.room.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,32):'';
    if(msg.intent==='join'&&!rooms.has(id)){send(ws,{type:'error',message:'找不到房間，請確認房號；要開新房請選擇建立房間'});return}
    if(msg.intent==='create'&&id&&rooms.has(id)){send(ws,{type:'error',message:'房號已被使用，請加入該房間或建立新房'});return}
-   if(!id)id=newCode();let room=rooms.get(id);const requestedMode=msg.mode==='team'?'team':'duel';
+   if(!id)id=newCode(msg.private?16:4);let room=rooms.get(id);const requestedMode=msg.mode==='team'?'team':'duel';
    // Validate before allocating a room: malformed nicknames must not exhaust the room limit.
+   if(msg.private!==undefined&&typeof msg.private!=='boolean'){send(ws,{type:'error',message:'私人房間設定必須是布林值'});return}
+   if(msg.spectatorsAllowed!==undefined&&typeof msg.spectatorsAllowed!=='boolean'){send(ws,{type:'error',message:'觀戰權限設定必須是布林值'});return}
+   if(msg.private&&!ws.auth){send(ws,{type:'error',message:'私人房間需要登入'});return}
    if(msg.name!==undefined&&!cleanLabel(msg.name)){send(ws,{type:'error',message:'玩家暱稱需 2–16 字，只能使用中英文字、數字、空格、底線、句點及連字號'});return}
    if(msg.title!==undefined&&msg.title!==null&&msg.title!==''&&!cleanLabel(msg.title,24)){send(ws,{type:'error',message:'房間名稱需 2–24 字，不能含特殊控制字元'});return}
+   if(!room&&msg.room&&id.length>8){send(ws,{type:'error',message:'此長邀請碼已失效，請由房主重新建立私人房間'});return}
+   if(!room&&msg.private&&msg.room){send(ws,{type:'error',message:'私人邀請碼由伺服器產生，請留空建立新房'});return}
    if(!room){if(rooms.size>=ROOM_LIMIT){send(ws,{type:'error',message:'目前房間數已達上限，請稍後再試'});return}
     const title=msg.title?cleanLabel(msg.title,24):'海線格鬥房';
     if(!title){send(ws,{type:'error',message:'房間名稱需 2–24 字，不能含特殊控制字元'});return}
-    room={id,title,hostWs:null,mode:requestedMode,maxPlayers:requestedMode==='team'?4:2,players:[],spectators:new Set(),game:null,session:null,completed:false,revision:0,rematchVotes:new Set(),lastActive:now};
+    room={id,title,private:!!msg.private,spectatorsAllowed:msg.spectatorsAllowed!==false,hostWs:null,mode:requestedMode,maxPlayers:requestedMode==='team'?4:2,players:[],spectators:new Set(),game:null,session:null,completed:false,revision:0,rematchVotes:new Set(),lastActive:now};
    }
    if(room.mode!==requestedMode){send(ws,{type:'error',message:'房間模式不同，請確認是 1v1 還是 2v2'});return}
    if(room.players.filter(p=>p.ws!==ws).length>=room.maxPlayers){send(ws,{type:'error',message:'玩家席已滿，可以改用觀戰模式'});return}
@@ -137,8 +150,8 @@ wss.on('connection',ws=>{
    // All target validation completed before leaving or allocating any room.
    leave(ws);rooms.set(id,room);
    const used=new Set(room.players.map(p=>p.slot));let slot=Array.from({length:room.maxPlayers},(_,i)=>i).find(i=>!used.has(i));
-   room.players.push({ws,slot,char,name:displayName,ready:false,keys:{},pulses:[]});resetReady(room);ws.record={room:id,role:'player'};room.lastActive=now;
-   if(!room.hostWs)room.hostWs=ws;
+   room.players.push({ws,slot,char,name:ws.auth?.user.nickname||displayName,ready:false,keys:{},pulses:[]});resetReady(room);ws.record={room:id,role:'player'};room.lastActive=now;
+   if(!room.hostWs)room.hostWs=ws;online.afterJoin(ws);
    send(ws,{type:'joined',room:id,mode:room.mode,slot,team:slot%2,needed:room.maxPlayers,title:room.title,name:displayName,host:ws===room.hostWs});roomRoster(room);
    return;
   }
@@ -150,7 +163,7 @@ wss.on('connection',ws=>{
     if(room.hostWs!==ws){send(ws,{type:'error',message:'只有房主可以開始比賽'});return}
     if(!Number.isSafeInteger(msg.revision)||msg.revision!==room.revision){send(ws,{type:'error',message:'房間狀態已更新，請確認準備狀態後再開賽'});roomRoster(room);return}
     if(!canStart(room)){send(ws,{type:'error',message:'需滿員且全員準備後才能開賽'});return}
-    begin(room);return;
+    if(room.starting){send(ws,{type:'error',message:'比賽正在準備，請稍候'});return;}const revision=room.revision;room.starting=true;try{await online.beforeStart(room);if(rooms.get(room.id)!==room||room.revision!==revision||!canStart(room)){await online.abortStart(room);send(ws,{type:'error',message:'準備期間房間狀態已改變，請重新確認 Ready'});roomRoster(room);return;}begin(room);}finally{room.starting=false;}return;
    }
    if(msg.type==='set_ready'){
     if(typeof msg.ready!=='boolean'){send(ws,{type:'error',message:'準備狀態必須為 true 或 false'});return}
@@ -184,6 +197,7 @@ wss.on('connection',ws=>{
    const room=rooms.get(ws.record.room),p=room?.players.find(p=>p.ws===ws),session=room?.session;
    if(!session||!p||msg.matchId!==room.matchId)return;
    if(!Number.isSafeInteger(msg.frame)||msg.frame<1)return;
+   if(room.resumeFloor&&msg.frame<=room.resumeFloor)return;
    session.submit(p.slot,msg.frame,{keys:msg.keys,pulses:msg.pulses},{lockExisting:true});
    room.game=session.game;room.lastActive=now;return;
   }
@@ -199,17 +213,25 @@ wss.on('connection',ws=>{
    return;
   }
   if(msg.type==='leave')leave(ws);
+ }).catch(err=>online.error(ws,err)).finally(()=>{ws.pendingMessages--;});
  });
- ws.on('close',()=>{connections--;leave(ws)});ws.on('error',()=>{leave(ws)});
+ ws.on('close',()=>{connections--;leave(ws,{unexpected:!ws.explicitLeave})});ws.on('error',()=>{});
 });
+function finalize(room,settlement=null){
+ const session=room.session;if(!session)return;room.lastActive=Date.now();room.completed=true;room.paused=false;
+ const checkpoint={frame:session.frame,state:Rollback.clone(session.game),hash:session.digest()};
+ group(room,{type:'match_complete',matchId:room.matchId,frame:session.frame,checkpoint,settlement});
+ audience(room,{type:'watch_complete',mode:room.mode,matchId:room.matchId,serverFrame:session.frame,game:compactGame(room)});
+ room.session=null;room.game=null;resetReady(room);roomRoster(room);
+}
 // Monotonic accumulator prevents setInterval drift; simulate every logical frame at 60Hz.
 // Network publishes 30 authoritative snapshots/s to bound bandwidth for mobile clients.
 let simulationFrame=0;let lastClock=process.hrtime.bigint(),lag=0n;
 function simulateFrame(){
  const now=Date.now();simulationFrame++;
  for(const [id,room] of rooms){
-  if(now-room.lastActive>1000*60*15){for(const ws of room.spectators||[])ws.close(1000,'Room timeout');for(const p of room.players){send(p.ws,{type:'error',message:'房間閒置過久，已關閉'});p.ws.close(1000,'Room timeout')}rooms.delete(id);continue}
-  const session=room.session;if(!session||room.players.length!==room.maxPlayers)continue;
+  if(now-room.lastActive>1000*60*15){if(room.persisted){online.expire(room);continue;}for(const ws of room.spectators||[])ws.close(1000,'Room timeout');for(const p of room.players){send(p.ws,{type:'error',message:'房間閒置過久，已關閉'});p.ws?.close(1000,'Room timeout')}rooms.delete(id);continue}
+  const session=room.session;if(!session||room.paused||room.settling||room.players.length!==room.maxPlayers)continue;
   const events=session.advance();room.game=session.game;
   for(const [index,event] of events.entries()){const tagged={...event,id:`${session.frame}:${index}`};room.playerEventBuffer.push(tagged);room.watchEventBuffer.push(tagged);}
   if(room.watchEventBuffer.length>120)room.watchEventBuffer.splice(0,room.watchEventBuffer.length-120);
@@ -233,11 +255,7 @@ function simulateFrame(){
   if(session.game.status==='finished'){
    if(room.finishingSince===null)room.finishingSince=session.frame;
    if(session.frame-room.finishingSince>=Rollback.WINDOW){
-    room.lastActive=now;room.completed=true;
-    group(room,{type:'match_complete',matchId:room.matchId,frame:session.frame,checkpoint:{frame:session.frame,state:Rollback.clone(session.game),hash:session.digest()}});
-    audience(room,{type:'watch_complete',mode:room.mode,matchId:room.matchId,serverFrame:session.frame,game:compactGame(room)});
-    room.session=null;room.game=null;
-    resetReady(room);roomRoster(room);
+    if(room.persisted)online.finished(room);else finalize(room);
    }
   }else{
    room.finishingSince=null;
@@ -251,10 +269,10 @@ const timer=setInterval(()=>{
  let steps=0;while(lag>=FRAME_NS&&steps<6){simulateFrame();lag-=FRAME_NS;steps++}
  if(lag>FRAME_NS*2n)lag=FRAME_NS; // avoid spiral-of-death on overloaded VPS
 },8);timer.unref();
-const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.isAlive){ws.terminate();continue}ws.isAlive=false;ws.ping()}},30000);heartbeat.unref();
+const heartbeat=setInterval(()=>{for(const ws of wss.clients){if(!ws.isAlive){ws.terminate();continue}ws.isAlive=false;online.probe(ws)}},10000);heartbeat.unref();
 server.listen(PORT,HOST,()=>console.log(`阿志向錢衝 ${VERSION} named rooms & spectator rollback ready at http://${HOST}:${server.address().port}`));
-function shutdown(){for(const ws of wss.clients)ws.close(1001,'Server restarting');server.close(()=>process.exit(0));setTimeout(()=>process.exit(0),5000).unref()}
+async function shutdown(){try{await online.close();}catch{}for(const ws of wss.clients)ws.close(1001,'Server restarting');server.close(async()=>{await services.close();process.exit(0)});setTimeout(()=>process.exit(0),5000).unref()}
 process.on('SIGTERM',shutdown);process.on('SIGINT',shutdown);
 // Export in-process handles solely for deterministic tests and maintenance tooling.
 // They are not exposed as HTTP endpoints.
-module.exports={server,rooms,wss,simulateFrame,cleanLabel};
+module.exports={server,rooms,wss,simulateFrame,cleanLabel,services,online};

@@ -1,3 +1,4 @@
+const {enterLocalBattle}=require('./flow-helpers.cjs');
 'use strict';
 const {test,before,after,afterEach}=require('node:test');
 const assert=require('node:assert/strict'),{spawn}=require('node:child_process'),{once}=require('node:events'),{existsSync,mkdirSync}=require('node:fs');
@@ -38,7 +39,7 @@ test('Phase 1.5 actual menu, existing cards and HUD use role assets while combat
  await p.setViewportSize({width:1366,height:768});await p.waitForTimeout(250);await p.screenshot({path:'coverage/phase15-portraits.png'});
  for(const id of ['winnie','sezi','gambler','azhi']){await p.locator('#characterList [data-char="'+id+'"]').click();await p.evaluate(()=>window.AzhiShell.open('home'));await decoded(p.locator('.arcade-hero'));assert.match(await p.locator('.arcade-hero').getAttribute('src'),/\/azhi\/fullbody\.webp/);assert.match(await p.locator('.arcade-support-hero').getAttribute('src'),/\/gambler\/fullbody\.webp/);assert.equal(await p.evaluate(()=>window.AzhiGame.character),'azhi','unconfirmed previews do not overwrite the saved fighter');await p.evaluate(()=>window.AzhiShell.open('fighters'));}
  await p.evaluate(()=>{window.artDraws=[];const draw=CanvasRenderingContext2D.prototype.drawImage;CanvasRenderingContext2D.prototype.drawImage=function(image,...args){if(this.canvas.id==='stage'&&image?.src?.includes('/sprites/'))window.artDraws.push({src:image.src,width:image.naturalWidth,height:image.naturalHeight});return draw.call(this,image,...args);};});
- await p.locator('#mainAction').click();await p.waitForFunction(()=>window.AzhiGame.game?.introFrames===0);await decoded(p.locator('#p1Portrait,#p2Portrait'));assert.match(await p.locator('#p1Portrait').getAttribute('src'),/\/azhi\/hud\.webp/);
+ await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>window.AzhiGame.game?.introFrames===0);await decoded(p.locator('#p1Portrait,#p2Portrait'));assert.match(await p.locator('#p1Portrait').getAttribute('src'),/\/azhi\/hud\.webp/);
  const draw=await p.evaluate(()=>window.artDraws.at(-1));assert.equal(draw.width,3840);assert.equal(draw.height,5100);assert.match(draw.src,/\/sprites\//);
  await p.screenshot({path:'coverage/phase15-combat-hud.png'});assert.deepEqual(p.errors,[]);
  const team=await page();await team.goto(base+'/team.html');await team.evaluate(()=>window.AzhiShell.open('fighters'));await decoded(team.locator('#teamCharacters img'));for(const image of await team.locator('#teamCharacters img').all())assert.equal(await image.getAttribute('data-art-role'),'portrait');assert.deepEqual(team.errors,[]);
@@ -51,7 +52,7 @@ test('Phase 1.5 missing art uses a same-character backup and terminal failures s
  await p.route('**/art/portrait_gambler.webp*',route=>{requests.push('old-gambler');return route.abort()});
  await p.goto(base);await p.waitForFunction(()=>window.AzhiShell?.isOpen());await p.evaluate(()=>window.AzhiShell.open('fighters'));
  await p.waitForFunction(()=>document.querySelector('#characterList [data-char="winnie"] img').dataset.artStatus==='fallback');assert.match(await p.locator('#characterList [data-char="winnie"] img').getAttribute('src'),/portrait_winnie/);
- await p.locator('#characterList [data-char="gambler"]').click();await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen()&&AzhiGame.character==='gambler');await p.waitForFunction(()=>document.querySelector('#p1Portrait').dataset.artStatus==='missing');
+ await p.locator('#characterList [data-char="gambler"]').click();await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen()&&AzhiGame.character==='gambler');await p.waitForFunction(()=>document.querySelector('#p1Portrait').dataset.artStatus==='missing');
  assert.equal(await p.locator('#p1Portrait').isHidden(),true);assert.match(await p.locator('.art-unavailable').textContent(),/金沙賭神圖片暫未載入/);
  await p.evaluate(()=>{for(let i=0;i<20;i++)window.AzhiCharacterArt.bindImage(document.querySelector('#p1Portrait'),'gambler','hud');});await p.waitForTimeout(600);
  assert.equal(requests.filter(x=>x==='new-gambler').length,1);assert.equal(requests.filter(x=>x==='old-gambler').length,1);assert.deepEqual(p.errors,[]);

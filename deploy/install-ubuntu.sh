@@ -12,7 +12,7 @@ CONF=/etc/nginx/conf.d/azhi71.conf
 say(){ printf '\n[Azhi] %s\n' "$*"; }
 fail(){ echo "[停止] $*" >&2; exit 1; }
 (( EUID == 0 )) || fail '請以 root 執行部署腳本'
-[[ -f "$SRC_DIR/package-lock.json" && -f "$SRC_DIR/server.js" && -f "$SRC_DIR/package.json" && -f "$SRC_DIR/public/core.js" ]] || fail '專案不完整，請解壓縮完整 ZIP。'
+[[ -f "$SRC_DIR/package-lock.json" && -f "$SRC_DIR/server.js" && -f "$SRC_DIR/server/db.js" && -f "$SRC_DIR/tools/db-migrate.cjs" && -f "$SRC_DIR/deploy/runtime-check.cjs" && -f "$SRC_DIR/package.json" && -f "$SRC_DIR/public/core.js" && -f "$SRC_DIR/public/rank-rules.js" ]] || fail '專案不完整，請解壓縮完整 ZIP。'
 [[ -f /etc/os-release ]] && . /etc/os-release
 [[ ${ID:-} == ubuntu ]] || fail '本腳本僅針對 Ubuntu；其他系統請手動部署。'
 command -v node >/dev/null || fail '找不到 Node.js，請先安裝 v20 以上。'
@@ -36,12 +36,13 @@ fi
 say '創建獨立 azhi71 系統帳號，安裝到 /opt/azhi71'
 id -u "$USER_NAME" >/dev/null 2>&1 || useradd --system --user-group --home-dir "$APP" --shell /usr/sbin/nologin "$USER_NAME"
 mkdir -p "$APP"
-cp -a "$SRC_DIR/public" "$SRC_DIR/server.js" "$SRC_DIR/package.json" "$SRC_DIR/package-lock.json" "$SRC_DIR/test" "$APP/"
+cp -a "$SRC_DIR/public" "$SRC_DIR/server" "$SRC_DIR/tools" "$SRC_DIR/deploy" "$SRC_DIR/server.js" "$SRC_DIR/package.json" "$SRC_DIR/package-lock.json" "$SRC_DIR/test" "$APP/"
 # Asset validation requires the preserved source art and manifests.
 [[ ! -d "$SRC_DIR/assets" ]] || cp -a "$SRC_DIR/assets" "$APP/"
 chown -R "$USER_NAME:$USER_NAME" "$APP"
 # Install as unprivileged dedicated account; no global npm changes
 runuser -u "$USER_NAME" -- env npm_config_cache=/tmp/azhi71-npm-cache npm --prefix "$APP" ci --omit=dev --ignore-scripts --no-audit --no-fund
+(cd "$APP" && runuser -u "$USER_NAME" -- node deploy/runtime-check.cjs) || fail '正式依賴／Argon2 原生執行檔無法載入，尚未建立服務。'
 NODE_BIN="$(command -v node)"
 cat > /etc/systemd/system/${SERVICE}.service <<SYSTEMD
 [Unit]
@@ -105,3 +106,4 @@ echo '未修改 UFW／雲端安全群組。請依需求開放 TCP 18071。'
 echo '6.9/7.0 服務仍然保持原狀。'
 echo '檢查：systemctl status azhi71 --no-pager'
 echo '記錄：journalctl -u azhi71 -n 50 --no-pager'
+echo '此首次安裝只提供既有 HTTP 遊戲入口；會員／排位上線前請另依 docs/ONLINE_DEPLOYMENT.md 設定 HTTPS、PostgreSQL 與外置環境檔。'

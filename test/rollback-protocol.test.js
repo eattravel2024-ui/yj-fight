@@ -36,8 +36,11 @@ test('room-to-room rollback protocol: join, frame IDs, late corrections, checkpo
  wss.emit('connection',a);wss.emit('connection',b);
  a.sendToServer({type:'join',room:'ROLL84',char:'azhi'});
  b.sendToServer({type:'join',room:'ROLL84',char:'winnie'});
+ await Promise.all([a.messageChain,b.messageChain]);
  for(const player of [a,b])player.sendToServer({type:'set_ready',ready:true});
+ await Promise.all([a.messageChain,b.messageChain]);
  a.sendToServer({type:'start_match',revision:a.find('roster').at(-1).revision});
+ await a.messageChain;
  assert.equal(a.find('joined').length,1);assert.equal(b.find('joined')[0].slot,1);
  assert.equal(a.find('start').length,1);assert.equal(b.find('start').length,1);
  const matchId=a.find('start')[0].matchId;
@@ -59,7 +62,7 @@ test('room-to-room rollback protocol: join, frame IDs, late corrections, checkpo
  a.sendToServer({type:'input',matchId,frame:current-4,keys:{left:true},pulses:['super']});
  await sleep(70);
  assert.equal(a.find('frames').at(-1).serverRollbacks,oldCount,'cannot replace already accepted authoritative input');
- a.sendToServer({type:'ping',sentAt:17.5});assert.equal(a.find('pong').at(-1).sentAt,17.5);
+ a.sendToServer({type:'ping',sentAt:17.5});await a.messageChain;assert.equal(a.find('pong').at(-1).sentAt,17.5);
  b.close();a.close();wss.clients.clear();
  await closeServer();
 });

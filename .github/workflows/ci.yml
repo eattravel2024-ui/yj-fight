@@ -9,6 +9,20 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: azhi_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable_ci_fixture_only
+        ports:
+          - '127.0.0.1:5432:5432'
+        options: >-
+          --health-cmd "pg_isready -U postgres -d azhi_test"
+          --health-interval 5s --health-timeout 5s --health-retries 12
+    env:
+      AZHI_TEST_DATABASE_URL: postgresql://postgres:disposable_ci_fixture_only@127.0.0.1:5432/azhi_test
     strategy:
       matrix:
         node: [22, 24]
@@ -24,7 +38,10 @@ jobs:
       - name: Tests
         run: npm test
       - name: Deployment script syntax
-        run: bash -n deploy/*.sh
+        run: |
+          for script in deploy/*.sh; do
+            bash -n "$script"
+          done
       - name: Install browser for end-to-end tests
         if: matrix.node == 24
         run: npx playwright install --with-deps chromium

@@ -1,0 +1,24 @@
+'use strict';
+const test=require('node:test'),assert=require('node:assert/strict'),http=require('node:http');
+const {createAccounts}=require('../server/accounts');const {database}=require('./online-test-helpers.cjs');
+test('persistent accounts: real HTTP registration, one-use email/reset, sessions, CSRF and privacy',{skip:!process.env.AZHI_TEST_DATABASE_URL&&'Requires isolated PostgreSQL'},async t=>{
+ const {db}=await database(t),mail=[];const accounts=createAccounts({db,env:{},mailer:{ready:true,send:async value=>mail.push(value),close(){}}});
+ const server=http.createServer((req,res)=>accounts.handle(req,res).then(done=>{if(!done)res.writeHead(404).end()}));await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(()=>new Promise(resolve=>server.close(resolve)));t.after(()=>accounts.close());
+ const base='http://127.0.0.1:'+server.address().port;let cookie='',csrf='';
+ async function request(path,body,{method=body===undefined?'GET':'POST',useCookie=true,origin=base,withCsrf=true}={}){const r=await fetch(base+path,{method,headers:{Origin:origin,...(body?{'Content-Type':'application/json'}:{}),...(useCookie&&cookie?{Cookie:cookie}:{}),...(withCsrf&&csrf?{'X-CSRF-Token':csrf}:{})},body:body?JSON.stringify(body):undefined});const data=await r.json();return {r,data};}
+ const player={email:'player@example.test',password:'My safe passphrase 123456',nickname:'測試拳王'};
+ assert.equal((await request('/api/auth/register',player)).r.status,202);assert.equal(mail.length,1);assert.ok(!JSON.stringify((await request('/api/auth/register',player)).data).includes('token'));assert.equal(mail.length,1);
+ const stored=(await db.query('SELECT * FROM users')).rows[0];assert.match(stored.password_hash,/^\$argon2id\$/);assert.equal(stored.email_verified,false);assert.ok(!JSON.stringify(stored).includes(player.password));
+ const verifyToken=new URLSearchParams(new URL(mail[0].url).hash.slice(1)).get('verify-email');assert.equal((await request('/api/auth/verify-email',{token:verifyToken})).r.status,200);assert.equal((await request('/api/auth/verify-email',{token:verifyToken})).r.status,400);
+ const login=await request('/api/auth/login',{email:player.email,password:player.password});assert.equal(login.r.status,200);csrf=login.data.csrfToken;const cookies=login.r.headers.getSetCookie();assert.ok(cookies.every(v=>v.includes('HttpOnly')&&v.includes('SameSite=Lax')));cookie=cookies.map(v=>v.split(';')[0]).join('; ');const id=login.data.user.id;
+ assert.equal((await request('/api/auth/me')).data.user.id,id);assert.equal((await request('/api/profile',{nickname:'新拳王',avatar:'gambler'},{method:'PATCH',withCsrf:false})).r.status,403);
+ assert.equal((await request('/api/profile',{nickname:'新拳王',avatar:'gambler'},{method:'PATCH',origin:'https://evil.example'})).r.status,403);
+ const changed=await request('/api/profile',{nickname:'新拳王',avatar:'gambler',preferences:{reducedMotion:true}},{method:'PATCH'});assert.equal(changed.r.status,200);assert.equal(changed.data.user.id,id);assert.equal(changed.data.user.nickname,'新拳王');
+ assert.equal((await request('/api/profile',{rp:99999},{method:'PATCH'})).r.status,400);assert.equal((await request('/api/profile',undefined,{useCookie:false})).r.status,401);
+ assert.equal((await request('/api/auth/forgot-password',{email:player.email})).r.status,202);const resetToken=new URLSearchParams(new URL(mail[1].url).hash.slice(1)).get('reset-password');
+ assert.equal((await request('/api/auth/reset-password',{token:resetToken,password:'Another strong passphrase 2026'})).r.status,200);assert.equal((await request('/api/auth/reset-password',{token:resetToken,password:'Another strong passphrase 2026'})).r.status,400);assert.equal((await request('/api/auth/me')).data.user,null);
+ assert.equal((await request('/api/auth/login',{email:player.email,password:player.password})).r.status,401);const next=await request('/api/auth/login',{email:player.email,password:'Another strong passphrase 2026'});assert.equal(next.r.status,200);csrf=next.data.csrfToken;cookie=next.r.headers.getSetCookie().map(v=>v.split(';')[0]).join('; ');assert.equal((await request('/api/auth/logout',{})).r.status,200);assert.equal((await request('/api/auth/me')).data.user,null);
+ const tokens=(await db.query('SELECT token_hash,consumed_at FROM auth_tokens')).rows;assert.ok(tokens.every(row=>/^[a-f0-9]{64}$/.test(row.token_hash)&&row.consumed_at));
+ await db.query("UPDATE auth_rate_limits SET attempts=100 WHERE key LIKE 'ip:login:%'");assert.equal((await request('/api/auth/login',{email:player.email,password:'bad'})).r.status,429);
+});
+test('missing SMTP is an explicit unavailable capability; public APIs never emit verification tokens',async()=>{const a=createAccounts({env:{},mailer:{ready:false}});assert.equal(a.capabilities().email.enabled,false);assert.equal(a.capabilities().google.enabled,false);assert.equal(a.capabilities().accounts,false);a.close();});

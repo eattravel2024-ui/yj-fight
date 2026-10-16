@@ -32,3 +32,11 @@ id_rsa*
 # Python asset authoring cache
 __pycache__/
 *.pyc
+
+# Local review screenshots and browser artifacts
+artifacts/
+
+# Persistent player database backups must never enter source control
+*.dump
+*.dump.sha256
+*.sql.gz

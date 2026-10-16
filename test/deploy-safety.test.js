@@ -23,8 +23,9 @@ function fixture(t,scenario='success'){
  fs.writeFileSync(path.join(app,'server.js'),'old-server');
  fs.writeFileSync(path.join(app,'package.json'),JSON.stringify({version:'8.6.0'}));
  fs.writeFileSync(path.join(root,'azhi71.service'),'fixture service');
- const required=['public/index.html','public/team.html','public/team-core.js','public/team.js','public/engine/frame-data.js','public/rollback.js','public/engine/commands.js','public/engine/boxes.js','public/sprites/manifest.json','public/skill-vfx.js','public/combat-hud.js','test/fixture.test.js','README.md','server.js'];
+ const required=['public/index.html','public/team.html','public/team-core.js','public/team.js','public/engine/frame-data.js','public/rollback.js','public/engine/commands.js','public/engine/boxes.js','public/sprites/manifest.json','public/skill-vfx.js','public/combat-hud.js','test/fixture.test.js','README.md','server.js','server/db.js','tools/db-migrate.cjs','deploy/runtime-check.cjs','public/rank-rules.js'];
  for(const file of required){const filename=path.join(src,file);fs.mkdirSync(path.dirname(filename),{recursive:true});fs.writeFileSync(filename,'new fixture content');}
+ fs.writeFileSync(path.join(src,'deploy/runtime-check.cjs'),'// Inert fixture preflight; actual native dependency check runs separately.\n');
  fs.writeFileSync(path.join(src,'package.json'),JSON.stringify({version:releaseVersion}));
  fs.writeFileSync(path.join(src,'package-lock.json'),'fixture reviewed lockfile');
  function stub(name,body){fs.writeFileSync(path.join(bin,name),'#!/usr/bin/env bash\nset -euo pipefail\n'+body+'\n',{mode:0o755});}

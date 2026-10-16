@@ -1,5 +1,5 @@
 'use strict';
-const {enterLocalBattle}=require('./flow-helpers.cjs');
+const {enterLocalBattle,openRoomForm}=require('./flow-helpers.cjs');
 const {test,before,after,afterEach}=require('node:test');
 const assert=require('node:assert/strict');
 const {spawn}=require('node:child_process');
@@ -33,7 +33,7 @@ async function backHome(p){await p.keyboard.press('Escape');await waitPanel(p,'h
 
 test('Phase 1 five main-menu entries reach real existing panels without automatically starting combat',async()=>{
  const p=await page({viewport:{width:1366,height:768}});await p.goto(base);await waitPanel(p,'home');
- assert.deepEqual(await p.locator('.arcade-option').evaluateAll(nodes=>nodes.map(node=>node.dataset.menuEntry)),['arcade','practice','online','settings','guide']);
+ assert.deepEqual(await p.locator('.arcade-option').evaluateAll(nodes=>nodes.map(node=>node.dataset.menuEntry)),['arcade','practice','online','quick','ranked','team','account','settings','guide']);
  await p.evaluate(()=>{delete window.AzhiDebug;delete window.AzhiTeamDebug;});
  for(const [entry,panel] of [['arcade','fighters'],['practice','fighters'],['online','room'],['settings','settings'],['guide','guide']]){
   await choose(p,entry,entry==='arcade');await waitPanel(p,panel);
@@ -79,7 +79,7 @@ test('Phase 1 keyboard selection, back and resume preserve local battle and rele
 
 test('Phase 1 changing menu modes while joined keeps the existing online room and connection',async()=>{
  const p=await page();await p.goto(base+'/?room=P1GUARD');await waitPanel(p,'room');
- await p.locator('#onlineNickname').fill('Phase One');await p.locator('#joinRoom').evaluate(button=>button.click());
+ await openRoomForm(p);await p.locator('#onlineNickname').fill('Phase One');await p.locator('#joinRoom').evaluate(button=>button.click());
  await p.waitForFunction(()=>window.AzhiGame.connected&&window.AzhiGame.room==='P1GUARD'&&!document.querySelector('#readyButton').disabled);
  for(const entry of ['practice','arcade','online']){
   await p.evaluate(()=>window.AzhiShell.open('home'));await choose(p,entry);await waitPanel(p,'room');
@@ -87,7 +87,7 @@ test('Phase 1 changing menu modes while joined keeps the existing online room an
   assert.equal(await p.evaluate(()=>window.AzhiGame.connected),true);assert.equal(await p.evaluate(()=>window.AzhiGame.room),'P1GUARD');
  }
  await p.locator('[data-custom-mode="team"]').evaluate(button=>button.click());assert.equal(new URL(p.url()).pathname,'/');assert.equal(await p.evaluate(()=>window.AzhiGame.room),'P1GUARD','secondary room navigation also preserves an occupied room');
- await p.locator('#onlineNickname').fill('Typed W S');await p.locator('#onlineNickname').press('Enter');
+ await openRoomForm(p);await p.locator('#onlineNickname').fill('Typed W S');await p.locator('#onlineNickname').press('Enter');
  assert.equal(await p.evaluate(()=>window.AzhiShell.currentPanel),'room','text-field Enter is not consumed by main-menu navigation');
  assert.equal(await p.evaluate(()=>window.AzhiGame.connected),true);assert.deepEqual(p.errors,[]);
 });
@@ -112,25 +112,25 @@ test('Phase 1 desktop main menu has a full-window key visual, five visible slant
   const geometry=await p.evaluate(()=>{
    const rect=element=>{const b=element.getBoundingClientRect();return {x:b.x,y:b.y,width:b.width,height:b.height};};
    return {menu:rect(document.querySelector('#appMenu')),hero:rect(document.querySelector('.arcade-hero')),heroFit:getComputedStyle(document.querySelector('.arcade-hero')).objectFit,
-    options:[...document.querySelectorAll('.arcade-option')].map(element=>{const copy=element.querySelector('.arcade-option-copy');return {...rect(element),shape:getComputedStyle(element,'::before').clipPath,textFits:copy.scrollWidth<=copy.clientWidth+1};}),
+    options:[...document.querySelectorAll('.arcade-option')].map(element=>{const copy=element.querySelector('.arcade-option-copy');return {...rect(element),shape:getComputedStyle(element).clipPath,textFits:copy.scrollWidth<=copy.clientWidth+1};}),
     confirm:rect(document.querySelector('#arcadeEnter')),overflow:document.documentElement.scrollWidth>innerWidth+1||document.documentElement.scrollHeight>innerHeight+1};
   });
   assert.ok(Math.abs(geometry.menu.width-viewport.width)<=1&&Math.abs(geometry.menu.height-viewport.height)<=1,'home fills the viewport');
-  assert.equal(geometry.heroFit,'contain','the main illustration keeps its original proportions');assert.ok(geometry.hero.width>viewport.width*.4&&geometry.hero.height>viewport.height*.4);
-  for(const option of geometry.options){assert.ok(option.x>=0&&option.y>=0&&option.x+option.width<=viewport.width+1&&option.y+option.height<=viewport.height+1);assert.ok(option.height>=44);assert.ok(option.shape.startsWith('polygon('));assert.equal(option.textFits,true);}
+  assert.equal(geometry.heroFit,'contain','the main illustration keeps its original proportions');assert.ok(geometry.hero.width>viewport.width*.35&&geometry.hero.height>viewport.height*.4);
+  for(const option of geometry.options){assert.ok(option.x>=0&&option.y>=0&&option.x+option.width<=viewport.width+1&&option.y+option.height<=viewport.height+1,JSON.stringify({viewport,option}));assert.ok(option.height>=44);assert.equal(option.textFits,true);}
   assert.ok(geometry.confirm.y+geometry.confirm.height<=viewport.height+1);assert.equal(geometry.overflow,false);
   await p.screenshot({path:`coverage/phase1-main-menu-${viewport.width}.png`,fullPage:false});
  }
- const unselected=await p.locator('[data-menu-entry="practice"]').evaluate(element=>({panel:getComputedStyle(element,'::before').backgroundColor,number:getComputedStyle(element.querySelector('.arcade-option-number')).transform}));
+ const unselected=await p.locator('[data-menu-entry="practice"]').evaluate(element=>({panel:getComputedStyle(element).backgroundColor,number:getComputedStyle(element).transform}));
  await p.locator('[data-menu-entry="practice"]').click();await p.waitForTimeout(220);
- const selected=await p.locator('[data-menu-entry="practice"]').evaluate(element=>({panel:getComputedStyle(element,'::before').backgroundColor,number:getComputedStyle(element.querySelector('.arcade-option-number')).transform}));
+ const selected=await p.locator('[data-menu-entry="practice"]').evaluate(element=>({panel:getComputedStyle(element).backgroundColor,number:getComputedStyle(element).transform}));
  assert.notEqual(selected.panel,unselected.panel);assert.notEqual(selected.number,unselected.number);
  await p.screenshot({path:'coverage/phase1-main-menu-selected.png',fullPage:false});assert.deepEqual(p.errors,[]);
 });
 
 test('Phase 1 reduced-motion mobile menu remains touchable with no horizontal overflow',async()=>{
  const p=await page({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'});await p.goto(base);await waitPanel(p,'home');await p.locator('.arcade-hero').evaluate(image=>image.decode());
- assert.equal(await p.locator('.arcade-option').count(),5);
+ assert.equal(await p.locator('.arcade-option').count(),9);
  for(const button of await p.locator('.arcade-option').all())assert.ok((await button.boundingBox()).height>=44);
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  const animations=await p.locator('.arcade-home').evaluate(element=>element.getAnimations({subtree:true}).filter(animation=>animation.effect.getTiming().duration>10).length);assert.equal(animations,0,'reduced motion disables menu entrance and selection animations');

@@ -1,6 +1,6 @@
 # 陪公子練武 — Spar With the Young Master
 
-> GitHub/Codex development baseline: **8.13.0**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.14.0**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,16 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.14.0 — Official Arcade UI v2 and online players
+
+Scene-based navigation, focused mode list, large opposing fighter art, modal room entry, real Ready seats, stage thumbnails and Match Found share [the official UI Style Bible](docs/UI_STYLE_BIBLE.md). All four fighters, existing moves/sprites, arcade/practice, 1v1, 2v2, spectators, HUD and original audio are retained. The Legislature original is still missing; only three maps are enabled.
+
+Optional PostgreSQL persistence now supports Argon2id email accounts, one-use verification/reset, cookie sessions/CSRF, profiles/private history, real quick/ranked queues, authenticated 1v1 reconnect, server-validated results, five placements, five tiers (no Gold), RP/hidden Elo, paginated leaderboards and preserved seasons. Guests can still play without login. Missing database/SMTP/Google credentials are reported explicitly. Season 01 is a draft until an operator activates actual dates. There is no public result/rating edit API.
+
+Run `npm run db:migrate` with an **isolated development** `DATABASE_URL`; production migrations, SMTP, HTTPS/WSS, backups and season activation are manual steps in [ONLINE_DEPLOYMENT.md](docs/ONLINE_DEPLOYMENT.md). Set `AZHI_TEST_DATABASE_URL` to a disposable PostgreSQL database to run real DB/network/browser integration tests; tests create separate random schemas and remove only their fixtures. Never point tests at production.
+
+See [8.14.0 delivery, actual verification and remaining limits](docs/DELIVERY_8.14.0.md) and [manual source-package update](docs/MANUAL_RELEASE.md). Use `feat/arcade-phase1` for this release; older fixed checkpoints do not include 8.14.0. Production updates remain manual.
 
 ## 8.13.0 — Phase 4 combat tuning
 
@@ -105,13 +115,13 @@ Four original fighters return with dedicated entrances, frame-driven skill chore
 
 Modern fighting-game HUD, four original fighters, one-button signatures (U / 25 energy) and supers (O / 60 energy), original per-character effects, improved combat parity and preserved game modes. Sam has been removed as requested; old selections safely fall back to Azhi. See [release notes](docs/UPGRADE_8.7.md), [manual VPS commands](docs/MANUAL_RELEASE.md), and `npm run test:e2e` for browser validation.
 
-Ready and explicit host start are available in 1v1 and 2v2. Reconnect recovery and private-room authorization remain planned; room links are not access controls.
+Ready and explicit host start remain available in custom 1v1/2v2. Authenticated 1v1 has rotating-token reconnect; private rooms require login and support host-owned spectator permissions. Guest/2v2 results are not ranked; seamless 2v2 reconnect remains future work.
 
 ## Project layout
 
 | File/folder | Responsibility |
 | --- | --- |
-| `server.js` | HTTP, WebSocket, rooms, player messages, authoritative network logic |
+| `server.js`, `server/` | HTTP/WS, accounts, PostgreSQL, matchmaking, reconnect and authoritative settlement |
 | `public/core.js` | Deterministic 60 Hz combat simulation |
 | `public/team-core.js` | 2v2 four-fighter simulation |
 | `public/rollback.js` | Prediction, input history and rollback |
