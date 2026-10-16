@@ -6,9 +6,9 @@ function advice(game,slot){
  const p=game?.players?.[slot];
  if(!p)return {state:'waiting',title:'接技提示',detail:'開戰後顯示可接招式；U 必殺 25 能量，O 超必殺 60 能量。'};
  if(game.introFrames>0||game.status!=='playing'||p.hp<=0)return {state:'waiting',title:'準備開打',detail:'J → K → U；命中或被擋後，在接技窗口按下一招。'};
- if(p.stun>0)return {state:'stun',title:'受擊／防禦硬直中',detail:'恢復後再出招；按住 L 防禦，H 摔技可破防。'};
+ if(p.stun>0)return {state:'stun',title:p.riposteFrames>0?'精準防禦成功 · 等待反擊':'受擊／防禦硬直 '+p.stun+' F',detail:p.riposteFrames>0?'恢復後放開 L，按 K／I／U／O 強化反擊。':p.stun<=C.INPUT_BUFFER?'可預輸入下一招；恢復後放開 L 施放。':'按住 L 防禦，H 摔技可破防。'};
  const char=C.CHAR[p.char],sup=C.skillStatus(game,slot,'super'),special=C.skillStatus(game,slot,'special');
- const effect=p.armorCharges>0&&p.armorTimer>0?' · 霸體剩 '+(p.armorTimer/60).toFixed(1)+' 秒（可擋一次輕拳）':'';
+ const effect=p.armorCharges>0&&p.armorTimer>0?' · 霸體剩 '+p.armorTimer+' F（可擋一次輕拳）':p.riposteFrames>0?' · 反擊窗口 '+p.riposteFrames+' F，K／I／U／O 傷害 +20%':'';
  if(p.move){
   const name=p.move.name,targets=['heavy','special','super'].filter(next=>C.canChain(name,next));
   const available=targets.filter(next=>{const s=C.skillStatus(game,slot,next);return s.code==='cancel'&&s.available;});
@@ -28,7 +28,7 @@ function create(arena){
  function events(list,game,slot,now=performance.now()){
   for(const e of list||[]){
    if(e.kind==='round'){records.clear();continue;}
-   if(slot>=0&&e.slot!==slot&&!(e.kind==='armor'&&e.target===slot))continue;
+   if(slot>=0&&e.slot!==slot&&!((e.kind==='armor'||e.perfectGuard)&&e.target===slot))continue;
    if(e.id){if(seen.has(e.id))continue;seen.add(e.id);if(seen.size>512)seen.delete(seen.values().next().value);}
    const p=game?.players?.[e.slot],char=C.CHAR[p?.char||e.char];if(!char)continue;
    let active=records.get(e.slot);
@@ -37,12 +37,14 @@ function create(arena){
     show(e.name+' · '+(e.move==='super'?'超必殺 60':'必殺 25')+' 能量',e.move==='super'?char.superDescription:char.skillDescription,'cast',now);
    }
    if(e.kind==='armor'&&game?.players?.[e.target]?.char==='gambler')show('霸體吸收輕拳','仍會受少量傷害；重拳與摔技可破解。','armor',now);
+   if(e.kind==='hit'&&e.perfectGuard){show('JUST GUARD · 精準防禦','零削血 · 硬直 '+e.blockstun+' F · 放開 L 接 K／I／U／O 強化反擊。','perfect-guard',now);continue;}
+   if(e.kind==='hit'&&!['special','super'].includes(e.move)&&(e.riposte||e.punish||e.counter))show(e.riposte?'RIPOSTE · 反擊成功':e.punish?'PUNISH · 抓到破綻':'COUNTER · 反擊命中','−'+e.appliedDamage+' HP · '+e.hitstun+' F 命中硬直',e.riposte?'riposte':'punish',now);
    if(e.kind==='fortune'&&active)active.fortune=e.fortune;
    if(e.kind==='hit'&&['special','super'].includes(e.move)){
     if(!active||active.slot!==e.slot||active.move!==e.move||active.settled)active={slot:e.slot,move:e.move,char:p.char,name:e.move==='super'?char.superName:char.special,damage:0,hits:0,blocks:0,at:now,settled:false};
     records.set(e.slot,active);
     active.damage+=e.appliedDamage??e.damage;active.hits++;if(e.block)active.blocks++;
-    show(active.name+' · '+(e.block?'被防禦':'命中')+' −'+active.damage+' HP',active.hits+' 段 · 本次實際累計傷害'+(e.block?'（防禦減傷）':'')+(e.counter||e.counterBoost?' · 反擊加成':'')+(active.fortune==='jackpot'?' · 彩金加成':active.fortune==='blank'?' · 小額牌':''),'hit',now);
+    show(active.name+' · '+(e.block?'被防禦':e.riposte?'反擊命中':e.punish?'破綻懲罰':'命中')+' −'+active.damage+' HP',active.hits+' 段 · 本次實際累計傷害'+(e.block?'（防禦減傷）':'')+(e.counter||e.counterBoost?' · 反擊加成':'')+(active.fortune==='jackpot'?' · 彩金加成':active.fortune==='blank'?' · 小額牌':''),'hit',now);
    }
   }
  }

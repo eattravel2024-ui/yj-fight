@@ -6,13 +6,14 @@ const STAGES=Object.freeze(Object.fromEntries(Registry.PLAYABLE.map(id=>{const s
 const VISUALS=Object.freeze({
  night:Object.freeze({saturation:.80,brightness:.91,contrast:.93,combat:'art/stages/night-market/combat.webp?v=8112'}),
  garage:Object.freeze({saturation:.78,brightness:.90,contrast:.92,combat:'art/stages/golden-casino/combat.webp?v=8112'}),
- harbor:Object.freeze({saturation:.78,brightness:.91,contrast:.94,combat:'art/stages/tiananmen-square/combat.webp?v=8112'})
+ harbor:Object.freeze({saturation:.78,brightness:.91,contrast:.94,combat:'art/stages/tiananmen-square/combat.webp?v=8112'}),
+ legislature:Object.freeze({saturation:.77,brightness:.85,contrast:.91,combat:'art/stages/legislature/combat.webp?v=8130'})
 });
 function create(){
  const images={},promises={},reloaders={};
  for(const [id,stage] of Object.entries(STAGES)){
   const image=new Image();let attempt=0,resolve;
-  const sources=[VISUALS[id].combat,stage.img,stage.fallback];
+  const sources=[VISUALS[id].combat,stage.img,stage.fallback].filter(Boolean);
   image.addEventListener('load',()=>resolve?.(true));
   image.addEventListener('error',()=>{if(++attempt<sources.length)image.src=sources[attempt];else resolve?.(false);});
   const load=(retry=false)=>{attempt=0;promises[id]=new Promise(done=>resolve=done);image.src=sources[0]+(retry?'&retry='+Date.now():'');return promises[id];};

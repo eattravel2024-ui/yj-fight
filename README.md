@@ -1,6 +1,6 @@
 # 陪公子練武 — Spar With the Young Master
 
-> GitHub/Codex development baseline: **8.12.0**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.13.0**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,10 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.13.0 — Phase 4 combat tuning
+
+Four real combat roles, a 10F input buffer, move-specific hit/block timing, Sezi just guard/riposte and Gambler recovery punishes now share contact handling in 1v1/2v2. Existing skills, sprites, HUD, audio, arcade progress and networking remain. STAGE 04 `legislature` is wired but **disabled until the supplied `立法院議場對決舞台.png` is available as a file**; only three maps are currently playable. Import it with `python3 tools/import_legislature_stage.py`, then run the documented checks. No unrelated image substitutes or automatic VPS deployment. User-authorized Git checkpoint: `checkpoint-phase4-8.13.0` on `feat/arcade-phase1`. See [Phase 4 delivery and remaining art requirement](docs/PHASE4_COMBAT_8.13.0.md).
 
 ## 8.12.0 — Phase 3 complete arcade flow
 

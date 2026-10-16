@@ -114,3 +114,8 @@
 .combat-layout.team-page .combat-energy.side-0 b{color:#ffb0d0}
 .combat-layout.team-page .combat-energy.side-1 b{color:#9af4ff}
 @media(prefers-reduced-motion:reduce){.combat-layout .combat-energy .energy[data-change=gain]{animation:none}}
+
+/* Phase 4 contact feedback reuses the existing receipt; no second battle HUD. */
+.combat-layout .combat-receipt[data-state="perfect-guard"]{border-color:#86ffea;background:#06272bee;box-shadow:0 0 22px #60ffe52b}
+.combat-layout .combat-receipt[data-state="perfect-guard"] strong{color:#a1ffec}
+.combat-layout .combat-receipt[data-state="riposte"],.combat-layout .combat-receipt[data-state="punish"]{border-color:#ffd86d}

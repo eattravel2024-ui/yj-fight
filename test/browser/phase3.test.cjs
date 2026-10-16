@@ -23,7 +23,12 @@ async function actualFight(p,win=true){
   while(g.status!=='finished'&&frames++<25000){
    const a=g.players[0],b=g.players[1],d=Math.abs(a.x-b.x),keys={};
    if(win){if(d>55)keys[a.x<b.x?'right':'left']=true;keys.pulses=[d<86?'throw':a.meter>=60?'super':a.meter>=25?'special':'heavy'];}
-   C.input(g,0,keys);C.cpu(g,1,g.difficulty);C.step(g);
+   C.input(g,0,keys);
+   if(win)C.cpu(g,1,g.difficulty);
+   // Deterministic legal opponent trace: score a real jab, then guard to exercise TIME OVER.
+   // The Phase 4 rush CPU now KOs an idle player before timeout; wins still face the real CPU.
+   else C.input(g,1,a.hp===100?{left:d>90,pulses:d<=100?['light']:[]}:{guard:true});
+   C.step(g);
    for(const e of g.events){if(e.kind==='hit')hits++;if(e.kind==='round'){if(g.time<=0)timeouts++;if(g.players.some(p=>p.hp<=0))kos++;}}
    if(g.status!=='finished')g.events.splice(0);
   }

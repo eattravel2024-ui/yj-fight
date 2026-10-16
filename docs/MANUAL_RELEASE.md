@@ -1,3 +1,23 @@
+# 8.13.0 — Phase 4 GitHub 更新
+
+使用者已授權推送此版本。包含戰鬥手感與四角色定位調整；**立法院尚未取得可讀取原始 PNG，維持停用**。既有三張場景、街機／練習／自訂對戰與觀戰保留。
+
+自行登入原 VPS 後執行（Node.js 20+、既有 azhi71 安裝）：
+
+```bash
+set -euo pipefail
+cd ~/azhi-update.lvccoe
+git fetch origin tag checkpoint-phase4-8.13.0
+git switch --detach checkpoint-phase4-8.13.0
+npm ci --ignore-scripts --no-fund
+sudo bash deploy/upgrade-ubuntu.sh
+curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+```
+
+健康版本應為 **8.13.0**。腳本先測試並保留舊版完整備份，會短暫重啟 azhi71；不改既有 Nginx、SSH、Docker。更新後強制重新整理瀏覽器。若有本機修改導致切換失敗，先保存，不強制覆蓋。回退固定版為 `checkpoint-phase3-8.12.0` 或使用腳本備份。正式 VPS 由使用者操作，沒有自動部署。
+
+以下保留前版流程作參考。
+
 # 手動發佈與回滾
 
 目前版本 **8.12.0／Phase 3**：選角 → 選關／選圖 → VS → 真實戰鬥 → 結算 → 重試／下一關／全通關。保留 HUD、OST、自訂對戰與舊存檔；絨毛禁區仍待正式美術。本次未連線或部署正式 VPS。

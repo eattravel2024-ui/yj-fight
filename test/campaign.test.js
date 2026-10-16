@@ -1,10 +1,10 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const S=require('../public/stage-registry'),M=require('../public/campaign'),C=require('../public/core'),Save=require('../public/save-state');
-test('three real stage IDs map to distinct supplied art/BGM; fur lab remains non-playable',()=>{
- assert.deepEqual(S.PLAYABLE,['night','garage','harbor']);const music=require('../public/audio/manifest.json');
+test('only supplied stage art is playable; legislature is STAGE 04 and fur lab remains planned',()=>{
+ assert.deepEqual(S.PLAYABLE,['night','garage','harbor',...(require('../public/stage-assets').legislature.ready?['legislature']:[])]);const music=require('../public/audio/manifest.json');
  for(const id of S.PLAYABLE){const s=S.get(id);for(const key of ['previewAsset','backgroundAsset','combatAsset'])assert.ok(fs.existsSync(path.join(__dirname,'../public',s[key].split('?')[0])));assert.ok(music.tracks.some(t=>t.id===s.bgm));assert.equal(s.layers,1);assert.deepEqual(s.geometry.spawns,C.create().players.map(p=>p.x));assert.equal(s.geometry.groundY,448);assert.equal(s.geometry.width/s.geometry.height,16/9);assert.ok(Object.isFrozen(s));}
- assert.match(S.get('harbor').backgroundAsset,/tiananmen-square/);assert.equal(S.get('fur_lab').available,false);assert.equal(S.get('fur_lab').previewAsset,undefined);for(const bad of ['__proto__','constructor',{},null])assert.equal(S.get(bad),null);
+ assert.match(S.get('harbor').backgroundAsset,/tiananmen-square/);assert.equal(S.get('legislature').number,4);assert.equal(S.get('fur_lab').available,false);assert.equal(S.get('fur_lab').previewAsset,undefined);for(const bad of ['__proto__','constructor',{},null])assert.equal(S.get(bad),null);
 });
 test('one five-mission registry uses existing fighters, fair increasing difficulty and real stages',()=>{
  assert.equal(M.MISSIONS.length,5);let difficulty=0;for(const m of M.MISSIONS){assert.ok(Object.hasOwn(C.CHAR,m.enemy));assert.ok(S.playable(m.stage));assert.ok(m.difficulty>=difficulty&&m.difficulty<=3);difficulty=m.difficulty;assert.ok(Number.isSafeInteger(m.reward)&&m.reward>0);assert.ok(Object.isFrozen(m));}

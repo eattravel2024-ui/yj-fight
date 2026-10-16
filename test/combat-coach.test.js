@@ -15,7 +15,7 @@ test('live combo advice follows confirmed contact, valid chains and actual energ
 });
 for(const [label,core] of [['1v1',C],['2v2',T]]){
  test(label+': all four supers spend real energy and deal character-specific damage',()=>{
-  for(const [id,expected] of Object.entries({winnie:28,sezi:36,gambler:32,azhi:30})){
+  for(const [id,expected] of Object.entries({winnie:38,sezi:38,gambler:42,azhi:25})){
    const m=setup(core,id),hits=attack(core,m,'super');assert.equal(100-m.players[1].hp,expected,id);
    assert.equal(hits.reduce((n,e)=>n+e.appliedDamage,0),expected,id);assert.ok(m.players[0].meter<100);assert.equal(hits.length,id==='sezi'?3:1);
   }
@@ -31,18 +31,18 @@ for(const [label,core] of [['1v1',C],['2v2',T]]){
   for(let f=0;f<90&&!m.events.some(e=>e.kind==='hit');f++)core.step(m);
   assert.equal(m.events.find(e=>e.kind==='hit').block,true);core.input(m,1,{});
   for(let f=0;f<100;f++)core.step(m);assert.ok(m.events.some(e=>e.kind==='hit'&&!e.block));
-  const low=setup(core,'winnie');core.input(low,1,{guard:true});attack(core,low,'super');assert.equal(low.players[1].hp,72,'a standing guard cannot block the low wave');
+  const low=setup(core,'winnie');core.input(low,1,{guard:true});attack(core,low,'super');assert.equal(low.players[1].hp,62,'a standing guard cannot block the low wave');
  });
  test(label+': Azhi super never draws a blank, while the ordinary signature keeps roulette',()=>{
-  const superGame=setup(core,'azhi',110,1800);attack(core,superGame,'super');assert.equal(superGame.events.find(e=>e.kind==='fortune').fortune,'standard');assert.equal(superGame.players[1].hp,70);
+  const superGame=setup(core,'azhi',110,1800);attack(core,superGame,'super');assert.equal(superGame.events.find(e=>e.kind==='fortune').fortune,'standard');assert.equal(superGame.players[1].hp,75);
   const specialGame=setup(core,'azhi',110,1800);attack(core,specialGame,'special');assert.equal(specialGame.events.find(e=>e.kind==='fortune').fortune,'blank');assert.ok(100-specialGame.players[1].hp<10);
  });
  test(label+': receipts report HP actually removed rather than overkill',()=>{
   const m=setup(core,'winnie');m.players[1].hp=3;const [e]=attack(core,m,'super');assert.ok(e.damage>3);assert.equal(e.appliedDamage,3);assert.equal(m.players[1].hp,0);
  });
- test(label+': Gambler super absorbs one jab, retains the buff and strengthens its actual hit',()=>{
+ test(label+': Gambler super has a short startup armor window and strengthens its actual counter hit',()=>{
   const m=setup(core,'gambler',75),p=m.players[0],foe=m.players[1];foe.char='azhi';core.input(m,0,{pulses:['super']});core.step(m);
-  assert.equal(p.armorTimer,180);assert.equal(p.armorCharges,1);
+  assert.equal(p.armorTimer,12);assert.equal(p.armorCharges,1);
   foe.move={name:'light',frame:C.moveFor(foe,'light').start-1,hit:false,hits:0,spawned:false,hitSlots:[],hitCounts:{}};
   core.step(m);assert.equal(p.armorCharges,0);assert.equal(p.move.countered,true);
   for(let i=0;i<95;i++)core.step(m);const e=m.events.find(e=>e.kind==='hit'&&e.slot===0&&e.move==='super');assert.ok(e.counterBoost);assert.ok(e.appliedDamage>32);
@@ -54,7 +54,7 @@ test('late Azhi super input replays its guaranteed projectile and real hit recei
   const entry={pulses:f===2?['super']:[]};a.submit(0,f,entry);if(f!==2)b.submit(0,f,entry);
   if(f===10)b.submit(0,2,{pulses:['super']});a.advance();b.advance();
  }
- assert.ok(b.rollbacks>0);assert.equal(a.digest(),b.digest());assert.equal(a.game.players[1].hp,70);
+ assert.ok(b.rollbacks>0);assert.equal(a.digest(),b.digest());assert.equal(a.game.players[1].hp,75);
 });
 for(const core of [C,T])test((core===C?'1v1':'2v2')+' late guard input preserves multi-hit defence across rollback',()=>{
  const initial=setup(core,'sezi',110),a=new RB.Session(initial),b=new RB.Session(initial);

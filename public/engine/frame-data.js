@@ -19,7 +19,22 @@ const MOVE={
  special:{startup:14,active:13,recovery:31,reach:245,impactY:116,hitHeight:62,damage:20,knock:36,level:'mid',gain:0,cost:25,hitstun:44},
  super:{startup:18,active:15,recovery:42,reach:285,impactY:121,hitHeight:83,damage:34,knock:65,level:'mid',gain:0,cost:60,hitstun:49}
 };
-const SPECIAL_STYLES={winnie:{mode:'shockwave',label:'低空蜂蜜震波'},sezi:{mode:'spin',label:'三段旋風突進'},gambler:{mode:'counter',label:'吸收輕拳反擊'},azhi:{mode:'cards',label:'幸運牌遠程牽制'}};
+// Phase 4: one shared tuning source for both deterministic rulesets and selection UI.
+const PROFILES={
+ azhi:{role:'高速近身連打',style:'rush',speed:3.8,power:1.0,desc:'高速貼身三連拳與短收招；加油幸運牌用來掩護接近。',combat:{},moves:{light:{startup:3,active:5,recovery:8,damage:6,knock:7},light2:{startup:3,recovery:8,knock:9},light3:{startup:5,recovery:16,knock:22},kick:{startup:7,recovery:15},special:{recovery:24},super:{hitstop:12}},projectile:{damage:12,superDamage:25}},
+ sezi:{role:'防禦反擊',style:'counter',speed:3.1,power:.92,desc:'防禦按下後 4F 內可精準防禦；零削血、縮短硬直，接 K／I／U／O 反擊。',combat:{perfectGuardWindow:4,guardCooldown:24,riposteWindow:48,riposteBonus:1.20,blockstunScale:.85},moves:{light:{startup:4,recovery:12},heavy:{startup:9,recovery:23,damage:14},kick:{startup:8,reach:151},special:{startup:10,recovery:28}}},
+ gambler:{role:'技巧爆發／高風險高報酬',style:'balanced',speed:3.05,power:1,desc:'抓住對手收招破綻獲得 22% 傷害加成；全押必殺傷害高，落空後收招較長。',superDescription:'高傷害近身全押；起手短暫吸收一次輕拳，落空會留下長破綻。',combat:{punishBonus:1.22,armorWindow:8,superArmorWindow:12},moves:{special:{startup:15,damage:29,recovery:42},super:{startup:21,damage:42,recovery:52,hitstop:14}}},
+ winnie:{role:'重量級高傷害壓制',style:'heavy',speed:2.45,power:1.14,desc:'移動較慢、重拳與投技威力最高；低空掌波封鎖地面，重擊落空可被反打。',combat:{},moves:{light:{startup:5,recovery:14,damage:8},heavy:{startup:14,recovery:30,damage:20,blockstun:21,hitstop:11},kick:{damage:14},throw:{damage:20},special:{recovery:38}},projectile:{damage:18,superDamage:33}}
+};
+for(const [id,profile] of Object.entries(PROFILES)){
+ const c=CHAR[id];for(const key of ['role','style','speed','power','desc','superDescription'])if(profile[key]!==undefined)c[key]=profile[key];
+ c.combat=Object.freeze(profile.combat);c.projectile=profile.projectile?Object.freeze(profile.projectile):null;
+ for(const [key,values] of Object.entries(profile.moves))c.moves[key]={...c.moves[key],...values};
+ for(const values of Object.values(c.moves))Object.freeze(values);Object.freeze(c.moves);
+}
+const TIMING={light:[11,6,4],light2:[12,6,4],light3:[15,8,5],heavy:[18,10,5],kick:[14,7,4],low:[13,7,4],upper:[18,10,5],throw:[0,9,4],special:[18,10,5],super:[23,13,6]};
+for(const [key,[blockstun,hitstop,blockstop]] of Object.entries(TIMING))Object.assign(MOVE[key],{blockstun,hitstop,blockstop});
+const SPECIAL_STYLES={winnie:{mode:'shockwave',label:'重量壓制／低空掌波'},sezi:{mode:'spin',label:'精準防禦／旋風反擊'},gambler:{mode:'counter',label:'破綻懲罰／全押爆發'},azhi:{mode:'cards',label:'高速連打／幸運牌掩護'}};
 for(const [id,v] of Object.entries(CHAR)){v.specialMode=SPECIAL_STYLES[id].mode;v.specialLabel=SPECIAL_STYLES[id].label;Object.freeze(v);}
 
 for(const key of Object.keys(MOVE)){

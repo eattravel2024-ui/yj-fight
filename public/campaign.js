@@ -7,7 +7,7 @@ const MISSIONS=Object.freeze([
  mission('honey-ruler','第二關 · 蜜糖霸主','蜜糖霸主','金沙賭城迎戰維尼，利用下段攻擊或摔技突破防守。','「正面硬拼可不見得划算。」—— 維尼','winnie','garage',2,160),
  mission('white-vortex','第三關 · 白毛旋風','白毛旋風','在天安門廣場迎戰塞子，提防快速踢擊與低段進攻。','「旋風登場！跟得上我的腳步再說！」—— 塞子','sezi','harbor',2,200),
  mission('golden-duel','第四關 · 金沙決勝','金沙決勝','回到嘴砲夜市，利用出招距離破解金沙賭神的壓制。','「每一次出拳都像下注，出手前要懂得算距離。」—— 金沙賭神','gambler','night',3,260),
- mission('azhi-finale','最終關 · 阿志逆轉','阿志逆轉','天安門廣場的最後對決，打贏阿志，拿下街機冠軍。','「欠打？那就上擂台，看看誰最後還站得住！」—— 阿志','azhi','harbor',3,350)
+ mission('azhi-finale','最終關 · 阿志逆轉','阿志逆轉',(Stages.playable('legislature')?'立法院議場':'天安門廣場')+'的最後對決，打贏阿志，拿下街機冠軍。','「欠打？那就上擂台，看看誰最後還站得住！」—— 阿志','azhi',Stages.playable('legislature')?'legislature':'harbor',3,350)
 ]);
 const IDS=Object.freeze(MISSIONS.map(m=>m.id));
 function indexOf(id){return typeof id==='string'?IDS.indexOf(id):-1;}

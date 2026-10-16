@@ -4,6 +4,9 @@ const VFX=require('../public/vfx.js');
 const {create,typeFor}=VFX;
 test('impact types vary by confirmed block, counter and move class',()=>{
  assert.equal(typeFor({block:true,move:'super'}),'block');
+ assert.equal(typeFor({block:true,perfectGuard:true}),'parry');
+ assert.equal(typeFor({riposte:true,move:'heavy'}),'riposte');
+ assert.equal(typeFor({punish:true,move:'heavy'}),'punish');
  assert.equal(typeFor({counter:true,move:'heavy'}),'counter');
  assert.equal(typeFor({move:'super'}),'super');
  assert.equal(typeFor({move:'heavy'}),'heavy');

@@ -1,0 +1,30 @@
+{
+  "baselineCommit": "d5947ff",
+  "scope": "User explicitly authorized Phase 4 combat feel/roles and STAGE 04 plumbing; no remote push or deployment.",
+  "changed": {
+    "server.js": {
+      "before": "6bb00ce2ee58101114ea7ab42632f2f9bcc223f86309e22b73b8da10e6683e09",
+      "after": "a51bc973cc7be25c992d07ce68223e2a22221701a805388d521e46aa22b849cb"
+    },
+    "public/core.js": {
+      "before": "77e528eeb79370647a1deb7e4a44530363e21fc1a0c513a8fece71e1bdac93b8",
+      "after": "586179c14e3548e5f581362c3b468f15378cdcff88929a0ff07bb70156b79b54"
+    },
+    "public/team-core.js": {
+      "before": "8ac14b0e5e2b91953aa5245dd48ece909a052dbeb0fb6da57284a89ca236afb8",
+      "after": "833677a5e6d2dfad6eca5b441a5f1bdf5005b068392c3c940d9583f18d44424b"
+    },
+    "public/engine/frame-data.js": {
+      "before": "bf9de3a56a8956d0abdd3f836c2cb36cbe12004cbe42f5f9505a3e7c4287d808",
+      "after": "c0f793eae2a5b9b144b22d7656b35781f206305ce342c1efe20401a3c2d884ba"
+    },
+    "public/engine/ai.js": {
+      "before": "42ae41d61f115ca72102c4df16df07cb97d470a37ef35c69830c8d6b172a0845",
+      "after": "c8f48251cdafaa1937ecf0b356798b554708a2e873e6f9e1ec47685f20857df8"
+    },
+    "public/vfx.js": {
+      "before": "98fad45fdc8da68450182e53b1b107c3fffbe3384bd342e3a39461f553f6fce1",
+      "after": "bdbd0542371e61ec7c6532d8a52c4048603b6aefe17d2fb0a6610660f33c0e19"
+    }
+  }
+}

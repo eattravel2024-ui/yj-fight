@@ -9,7 +9,7 @@ window.AzhiArcadeFlowFactory={create({panes,game,battle,open,playSound}){
  const button=(label,fn,className='secondary')=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.className=className;b.onclick=fn;return b;};
  function imageStage(image,id,large=false){
   const stage=S.get(id),key=id+':'+large;if(image.dataset.stageKey===key)return;image.dataset.stageKey=key;image.hidden=!stage?.available;if(stage?.available&&!motion.matches){for(const animation of image.getAnimations())animation.cancel();image.animate([{opacity:.4,transform:'translateX(10px)'},{opacity:1,transform:'translateX(0)'}],{duration:220,easing:'ease-out'});}
-  if(!stage?.available)return;const paths=[large?stage.combatAsset:stage.previewAsset,stage.backgroundAsset,stage.fallbackAsset];let index=0;
+  if(!stage?.available)return;const paths=[large?stage.combatAsset:stage.previewAsset,stage.backgroundAsset,stage.fallbackAsset].filter(Boolean);let index=0;
   image.alt=stage.name+' · '+stage.theme;image.onerror=()=>{if(image.dataset.stageKey!==key)return;if(++index<paths.length)image.src=paths[index];else image.hidden=true;};image.src=paths[0];
  }
  const heading=(title,kicker)=>'<header class="journey-heading"><div><small>'+kicker+'</small><h2>'+title+'</h2></div><span>01 選手　/　<span class="active">02 擂台</span>　/　03 FIGHT</span></header>';
@@ -44,7 +44,7 @@ window.AzhiArcadeFlowFactory={create({panes,game,battle,open,playSound}){
   for(const b of pane.querySelectorAll('.journey-choice')){
    const id=b.dataset.mission||b.dataset.stage,available=kind==='missions'?M.canPlay(id,progress):S.playable(id),selected=id===(kind==='missions'?missionId:stageId);
    b.disabled=!available;b.classList.toggle('is-selected',selected);b.setAttribute('aria-pressed',String(selected));b.tabIndex=selected?0:-1;
-   text(b.querySelector('small'),kind==='missions'?(progress.completed.includes(id)?'✓ CLEAR':available?'挑戰':'未解鎖'):available?'READY':'準備中');
+   text(b.querySelector('small'),kind==='missions'?(progress.completed.includes(id)?'✓ CLEAR':available?'挑戰':'未解鎖'):available?'READY':id==='legislature'?'素材待匯入':'準備中');
   }
   imageStage(pane.querySelector('.journey-stage-image>img'),stage.id,true);text(pane.querySelector('.journey-stage-number'),'STAGE '+String(stage.number).padStart(2,'0'));
   text(pane.querySelector('.journey-stage-image small'),stage.theme);text(pane.querySelector('.journey-stage-image h3'),stage.name);

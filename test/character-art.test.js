@@ -22,8 +22,13 @@ test('all supplied originals retain exact bytes and optimized role assets exist 
  }
  assert.equal(count,12);assert.ok(outputs<sources*.1,'UI derivatives avoid shipping original-resolution PNGs');
 });
-test('combat code, timing, collisions, animation data and existing atlases remain byte-identical',()=>{
+test('protected combat files match the reviewed baseline, including explicitly authorized Phase 4 tuning',()=>{
  const protectedFiles=require('../assets/source-art/phase1_5/protected-combat-sha256.json');
+ const before=require('../assets/source-art/phase4/protected-before-8.12.0.json'),audit=require('../assets/source-art/phase4/authorized-combat-changes.json');
+ assert.deepEqual(Object.keys(audit.changed).sort(),['server.js','public/core.js','public/team-core.js','public/engine/frame-data.js','public/engine/ai.js','public/vfx.js'].sort());
  assert.ok(Object.keys(protectedFiles).length>=15);
- for(const [file,hash] of Object.entries(protectedFiles))assert.equal(sha(fs.readFileSync(path.join(root,file))),hash,file);
+ for(const [file,hash] of Object.entries(protectedFiles)){
+  assert.equal(sha(fs.readFileSync(path.join(root,file))),hash,file);
+  if(audit.changed[file]){assert.equal(audit.changed[file].before,before[file]);assert.equal(audit.changed[file].after,hash);}else assert.equal(hash,before[file],file+' must retain the Phase 3 bytes');
+ }
 });

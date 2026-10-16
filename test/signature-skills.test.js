@@ -51,13 +51,13 @@ for(const [mode,core] of [['1v1',Core],['2v2',Team]]){
    core.input(m,0,{pulses:['super']});advance(core,m,50);
    const impact=m.events.find(e=>e.kind==='hit'&&e.slot===0);assert.ok(impact,`${id} projectile should hit`);
    assert.equal(impact.move,'super',`${id} super impact must keep its source move`);
-   assert.equal(impact.hitstop,7,'impact metadata must match the unblocked projectile hitstop');
+   assert.equal(impact.hitstop,id==='azhi'?12:13,'super projectile uses the published move hitstop');
   }
  });
  test(`${mode}: blocked projectile impact reports the shorter guard hitstop`,()=>{
   const m=game(core,'winnie');m.players[0].meter=100;
   core.input(m,0,{pulses:['super']});core.input(m,1,{guard:true,down:true});advance(core,m,50);
-  const impact=m.events.find(e=>e.kind==='hit'&&e.slot===0);assert.equal(impact?.block,true);assert.equal(impact.hitstop,4);
+  const impact=m.events.find(e=>e.kind==='hit'&&e.slot===0);assert.equal(impact?.block,true);assert.equal(impact.hitstop,6);
  });
  test(`${mode}: unavailable cancel does not hide a valid queued follow-up`,()=>{
   const m=game(core),p=m.players[0];p.meter=0;

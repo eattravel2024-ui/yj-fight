@@ -8,6 +8,7 @@ const {WebSocketServer,WebSocket}=require('ws');
 const Combat=require('./public/core.js');
 const Rollback=require('./public/rollback.js');
 const Team=require('./public/team-core.js');
+const Stages=require('./public/stage-registry.js');
 const VERSION=require('./package.json').version;
 const PORT=Number(process.env.PORT||31071);
 const HOST=process.env.HOST||'127.0.0.1';
@@ -42,7 +43,7 @@ function begin(room){
  resetReady(room);
  const sorted=[...room.players].sort((a,b)=>a.slot-b.slot);room.rematchVotes=new Set();room.completed=false;
  room.matchId=crypto.randomBytes(8).toString('hex');room.finishingSince=null;room.playerEventBuffer=[];room.watchEventBuffer=[];
- const opts={introFrames:90,stage:['night','garage','harbor'][crypto.randomInt(3)],seed:crypto.randomInt(1,2**31)};
+ const opts={introFrames:90,stage:Stages.PLAYABLE[crypto.randomInt(Stages.PLAYABLE.length)],seed:crypto.randomInt(1,2**31)};
  room.session=new Rollback.Session(room.mode==='team'?Team.create(sorted.map(p=>p.char),opts):Combat.create(sorted[0].char,sorted[1].char,opts));
  room.game=room.session.game;
  roomRoster(room);

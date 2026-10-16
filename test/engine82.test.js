@@ -3,11 +3,11 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path');
 const C=require('../public/core.js');
 function step(m,n=1){for(let i=0;i<n;i++)C.step(m)}
-test('input buffer accepts 8 frames, not the old sluggish 18 frames',()=>{
- assert.equal(C.INPUT_BUFFER,8);
+test('input buffer accepts exactly 10 simulation frames and expires after the window',()=>{
+ assert.equal(C.INPUT_BUFFER,10);
  let m=C.create(),p=m.players[0];C.input(m,0,{pulses:['light']});
- assert.equal(p.buffer[0].until-m.tick,8);
- step(m,9);assert.equal(p.buffer.length,0);
+ assert.equal(p.buffer[0].until-m.tick,10);
+ step(m,11);assert.equal(p.buffer.length,0);
 });
 test('buffered button during the final 6 frames of recovery executes automatically',()=>{
  const m=C.create(),p=m.players[0];m.players[1].x=880;
@@ -36,7 +36,7 @@ test('melee super requires meter, and its hitstop is stronger than a light jab',
  m.players[0].meter=100;m.players[0].x=430;m.players[1].x=515;
  C.input(m,0,{pulses:['super']});
  for(let i=0;i<60;i++){C.step(m);if(m.hitstop>0)break}
- assert.equal(m.hitstop,12);assert.ok(m.players[1].hp<100);
+ assert.equal(m.hitstop,14);assert.ok(m.players[1].hp<100);
 });
 test('corner knockback transfers excess velocity to the attacker',()=>{
  const m=C.create();const a=m.players[0],b=m.players[1];

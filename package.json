@@ -1,11 +1,11 @@
 {
   "name": "azhi-haixian-fighting",
-  "version": "8.12.0",
+  "version": "8.13.0",
   "private": true,
-  "description": "陪公子練武 8.12.0：滿版擂台、遊戲內大廳、選角與設定",
+  "description": "陪公子練武 8.13.0：滿版擂台、遊戲內大廳、選角與設定",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check server.js && node --check public/core.js && node --check public/game.js && node --check public/rollback.js && node --check public/team-core.js && node --check public/team.js && node --check public/vfx.js && node --check public/engine/frame-data.js && node --check public/engine/commands.js && node --check public/engine/boxes.js && node --check public/engine/animation.js && node --check public/engine/ai.js && node --check public/skill-vfx.js && node --check public/presentation.js && node --check public/lobby.js && node --check public/hud.js && node --check public/combat-hud.js && node --check public/stage-art.js && node --check public/character-art.js && node --check public/game-flow.js && node --check public/save-state.js && node --check public/audio-manager.js && node --check public/audio-director.js && node --check public/character-select.js && node --check public/game-shell.js && node --check public/stage-registry.js && node --check public/campaign.js && node --check public/arcade-flow.js && node --check public/custom-room.js && node --check public/combat-coach.js",
+    "check": "node --check server.js && node --check public/core.js && node --check public/game.js && node --check public/rollback.js && node --check public/team-core.js && node --check public/team.js && node --check public/vfx.js && node --check public/engine/frame-data.js && node --check public/engine/commands.js && node --check public/engine/boxes.js && node --check public/engine/animation.js && node --check public/engine/ai.js && node --check public/skill-vfx.js && node --check public/presentation.js && node --check public/lobby.js && node --check public/hud.js && node --check public/combat-hud.js && node --check public/stage-art.js && node --check public/character-art.js && node --check public/game-flow.js && node --check public/save-state.js && node --check public/audio-manager.js && node --check public/audio-director.js && node --check public/character-select.js && node --check public/game-shell.js && node --check public/stage-assets.js && node --check public/stage-registry.js && node --check public/campaign.js && node --check public/arcade-flow.js && node --check public/custom-room.js && node --check public/combat-coach.js",
     "test": "node --test test/*.test.js",
     "test:e2e": "node --test test/browser/*.test.cjs"
   },

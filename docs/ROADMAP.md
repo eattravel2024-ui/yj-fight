@@ -25,7 +25,8 @@
 - [x] 8.11.1 user-requested audio: 21 original OST tracks, shared manager, independent levels, gesture unlock, real battle events and future scene hooks. Fourth stage music is ready; fourth map is not implemented.
 - [x] 8.11.2 separately requested combat readability/HUD: background-only variants, in-scene HP/timer/energy, real announcer events and classic 6.8 retirement. No stage selector or combat-rule change.
 - [x] Phase 3 (8.12.0, expanded user scope): central stage/mission data, progress migration, arcade missions/practice stage selection, resource-ready VS, real results/retry/next/full clear. Online stages remain server-assigned; host-selectable stage settings remain future work.
-- [ ] Phase 4 remaining scope: deeper pause/resource options and further polish; VS/results/confirmed next/retry were explicitly delivered within Phase 3.
+- [x] Phase 4 combat scope (8.13.0, user-authorized Git checkpoint): shared 10F input buffer and move-specific impact timing, four role profiles, Sezi just guard/riposte, Gambler punishes, HUD/SFX feedback and deterministic 1v1/2v2 tests. VS/results/next/retry reuse Phase 3.
+- [ ] STAGE 04 Legislature: registry/import/selection/finale/VS/server wiring prepared, but original PNG is missing from workspace. Disabled until supplied art is imported and actual four-map visuals are checked; no substitute. See PHASE4_COMBAT_8.13.0.md.
 - [ ] Phase 5: unified audio/input, gamepads, responsive/performance polish.
 - Stop after each phase for user review; do not silently start the next phase.
 
