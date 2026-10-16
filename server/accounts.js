@@ -3,8 +3,7 @@
 const crypto=require('node:crypto');
 const {isIP}=require('node:net');
 const {hash,verify,Algorithm}=require('@node-rs/argon2');
-const {createMailer}=require('./mailer');
-const COOKIE='azhi_session',CSRF_COOKIE='azhi_csrf',OAUTH_COOKIE='azhi_oauth';
+const COOKIE='azhi_session',CSRF_COOKIE='azhi_csrf';
 const AVATARS=new Set(['azhi','sezi','gambler','winnie']);
 const PASSWORD_OPTIONS={algorithm:Algorithm.Argon2id,memoryCost:65536,timeCost:3,parallelism:1,outputLen:32};
 const SESSION_MS=7*24*60*60*1000;
@@ -20,13 +19,12 @@ function cookies(req){
  }return out;
 }
 function publicUser(row){
- return {id:row.id,uid:row.id,nickname:row.display_name,avatar:row.avatar,email:row.email,
-  emailVerified:row.email_verified,status:row.status,preferences:row.preferences||{},createdAt:row.created_at,lastLoginAt:row.last_login_at};
+ return {id:row.id,uid:row.id,username:row.username,nickname:row.display_name,avatar:row.avatar,
+  hasRecoveryCode:!!row.recovery_code_hash,status:row.status,preferences:row.preferences||{},createdAt:row.created_at,lastLoginAt:row.last_login_at};
 }
-function email(value){
- if(typeof value!=='string')return null;const v=value.trim().toLowerCase();
- return v.length<=254&&/^[^\s@\x00-\x1f]+@[^\s@\x00-\x1f]+\.[^\s@\x00-\x1f]+$/.test(v)?v:null;
-}
+function username(value){if(typeof value!=='string')return null;const v=value.trim().toLowerCase();return /^[a-z0-9_]{3,32}$/.test(v)?v:null;}
+function recoveryCode(){return 'AZHI-'+crypto.randomBytes(24).toString('hex').toUpperCase().match(/.{8}/g).join('-');}
+function recoveryHash(value){if(typeof value!=='string'||value.length>100)return null;const v=value.toUpperCase().replace(/[-\s]/g,'');return /^AZHI[A-F0-9]{48}$/.test(v)?sha(v):null;}
 function nickname(value){
  if(typeof value!=='string')return null;const v=value.normalize('NFKC').trim().replace(/\s+/gu,' '),length=Array.from(v).length;
  return length>=2&&length<=16&&/^[\p{L}\p{N} _.-]+$/u.test(v)&&!/^(admin|administrator|moderator|staff|system|官方|管理員|系統|客服)$/iu.test(v)?v:null;
@@ -49,16 +47,14 @@ async function body(req){
 }
 function json(res,status,value){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','X-Frame-Options':'DENY'});res.end(JSON.stringify(value));}
 
-function createAccounts({db,env=process.env,mailer=createMailer({env})}={}){
- const oauthStates=new Map();
+function createAccounts({db,env=process.env}={}){
  let configuredOrigin=null,configurationError=false;
  if(env.APP_ORIGIN){try{const u=new URL(env.APP_ORIGIN);if(u.origin!==env.APP_ORIGIN.replace(/\/$/,'')||u.username||u.password||u.search||u.hash||!['http:','https:'].includes(u.protocol))throw 0;
-   const local=['127.0.0.1','localhost','[::1]'].includes(u.hostname);if(u.protocol!=='https:'&&!local)throw 0;configuredOrigin=u.origin;
+   const local=['127.0.0.1','localhost','[::1]'].includes(u.hostname);if(u.protocol!=='https:'&&!local&&env.ALLOW_INSECURE_HTTP!=='true')throw 0;configuredOrigin=u.origin;
   }catch{configurationError=true;}}
  else if(env.NODE_ENV==='production')configurationError=true;
- const googleReady=Boolean(configuredOrigin&&env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET);
  function origin(req){
-  if(configurationError)throw error(503,'ACCOUNT_CONFIGURATION','請先設定有效的 HTTPS APP_ORIGIN');
+  if(configurationError)throw error(503,'ACCOUNT_CONFIGURATION','請設定 APP_ORIGIN；使用公網 HTTP 需明確設定 ALLOW_INSECURE_HTTP=true');
   if(configuredOrigin)return configuredOrigin;
   try{const u=new URL(`http://${req.headers.host}`);if(!['127.0.0.1','localhost','[::1]'].includes(u.hostname))throw 0;return u.origin;}
   catch{throw error(503,'ACCOUNT_CONFIGURATION','請先設定 APP_ORIGIN');}
@@ -71,8 +67,7 @@ function createAccounts({db,env=process.env,mailer=createMailer({env})}={}){
  function cookie(req,name,value,maxAge=SESSION_MS/1000){return `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${origin(req).startsWith('https:')?'; Secure':''}`;}
  function setSessionCookies(req,res,sessionToken,csrfToken){res.setHeader('Set-Cookie',[cookie(req,COOKIE,sessionToken),cookie(req,CSRF_COOKIE,csrfToken)]);}
  function clearSessionCookies(req,res){res.setHeader('Set-Cookie',[cookie(req,COOKIE,'',0),cookie(req,CSRF_COOKIE,'',0)]);}
- function capabilities(){return {accounts:!!db&&!configurationError,email:{enabled:!!mailer.ready,reason:mailer.ready?null:'SMTP_NOT_CONFIGURED'},google:{enabled:googleReady},password:{minLength:12,maxLength:128},avatars:[...AVATARS]};}
- function requireMail(){if(!mailer.ready)throw error(503,'EMAIL_UNAVAILABLE','Email 服務尚未設定，請管理者設定 SMTP 後再試');}
+ function capabilities(){return {accounts:!!db&&!configurationError,authMethod:'username',recovery:{enabled:true,oneTime:true},transport:{encrypted:!!configuredOrigin?.startsWith('https:'),insecureHttp:!!configuredOrigin?.startsWith('http:')},password:{minLength:12,maxLength:128},avatars:[...AVATARS]};}
  async function rate(req,purpose,account,{ipLimit=30,accountLimit=10,seconds=900}={}){
   // Deliberately use the TCP peer. Never trust arbitrary X-Forwarded-For. A proxy
   // can configure a separate trusted real-IP transport at deployment time.
@@ -94,10 +89,7 @@ function createAccounts({db,env=process.env,mailer=createMailer({env})}={}){
   return {user:publicUser(row),session:{tokenHash:row.token_hash,csrfHash:row.csrf_hash,expiresAt:row.expires_at},
    csrfToken:validToken(csrfToken)&&safeEqual(sha(csrfToken),row.csrf_hash)?csrfToken:null};
  }
- async function requireUser(req,{verified=false}={}){
-  const auth=await authenticateRequest(req);if(!auth)throw error(401,'LOGIN_REQUIRED','請先登入');
-  if(verified&&!auth.user.emailVerified)throw error(403,'EMAIL_VERIFICATION_REQUIRED','請先完成 Email 驗證');return auth;
- }
+ async function requireUser(req){const auth=await authenticateRequest(req);if(!auth)throw error(401,'LOGIN_REQUIRED','請先登入有效玩家帳號');return auth;}
  function validateCsrf(req,auth){checkOrigin(req);const v=req.headers['x-csrf-token'];if(!auth||!validToken(v)||!safeEqual(sha(v),auth.session.csrfHash))throw error(403,'CSRF_REJECTED','安全驗證已過期，請重新整理');return true;}
  async function issueSession(client,userId){
   const sessionToken=token(),csrfToken=token();
@@ -106,56 +98,51 @@ function createAccounts({db,env=process.env,mailer=createMailer({env})}={}){
    (SELECT token_hash FROM sessions WHERE user_id=$1 AND revoked_at IS NULL ORDER BY created_at DESC OFFSET 5)`,[userId]);
   return {sessionToken,csrfToken};
  }
- async function sendToken(req,user,kind){
-  const value=token(),expires=new Date(Date.now()+(kind==='verify_email'?86400000:1800000));
-  await db.transaction(async client=>{
-   await client.query('UPDATE auth_tokens SET consumed_at=now() WHERE user_id=$1 AND kind=$2 AND consumed_at IS NULL',[user.id,kind]);
-   await client.query('INSERT INTO auth_tokens(token_hash,user_id,kind,expires_at) VALUES($1,$2,$3,$4)',[sha(value),user.id,kind,expires]);
-  });
-  try{await mailer.send({to:user.email,kind,url:`${origin(req)}/#${kind==='verify_email'?'verify-email':'reset-password'}=${encodeURIComponent(value)}`});}
-  catch{await db.query('UPDATE auth_tokens SET consumed_at=now() WHERE token_hash=$1',[sha(value)]);throw error(503,'EMAIL_DELIVERY_FAILED','Email 暫時無法寄送，請稍後重試');}
- }
  async function register(req,res,input){
-  requireMail();const mail=email(input.email),name=nickname(input.nickname);
-  await rate(req,'register',mail,{ipLimit:15,accountLimit:5,seconds:3600});
-  if(!mail||!name||!password(input.password))throw error(400,'INVALID_REGISTRATION','請輸入有效 Email、2–16 字暱稱及 12–128 字密碼');
-  const passwordHash=await hash(input.password,PASSWORD_OPTIONS);
-  const created=await db.query(`INSERT INTO users(id,email,password_hash,display_name,avatar) VALUES($1,$2,$3,$4,'azhi') ON CONFLICT(email) DO NOTHING RETURNING id,email`,[crypto.randomUUID(),mail,passwordHash,name]);
-  if(created.rows[0]){try{await sendToken(req,created.rows[0],'verify_email');}catch(err){if(err.code!=='EMAIL_DELIVERY_FAILED')throw err;console.error('[mail] verification delivery unavailable');}}
-  json(res,202,{message:'若此 Email 可用，驗證信將寄至信箱；已註冊可直接登入或重設密碼。'});
+  const account=username(input.username),name=nickname(input.nickname);
+  await rate(req,'register',account||'invalid',{ipLimit:15,accountLimit:5,seconds:3600});
+  if(!account||!name||!password(input.password)||Object.hasOwn(input,'email'))throw error(400,'INVALID_REGISTRATION','帳號需為 3–32 位英文字母、數字或底線；暱稱 2–16 字，密碼 12–128 字');
+  const passwordHash=await hash(input.password,PASSWORD_OPTIONS),code=recoveryCode();
+  const result=await db.transaction(async client=>{
+   const created=await client.query(`INSERT INTO users(id,username,password_hash,display_name,avatar,recovery_code_hash,recovery_issued_at) VALUES($1,$2,$3,$4,'azhi',$5,now()) ON CONFLICT(username) DO NOTHING RETURNING *`,[crypto.randomUUID(),account,passwordHash,name,recoveryHash(code)]);
+   if(!created.rows[0])throw error(409,'USERNAME_UNAVAILABLE','此玩家帳號無法使用，請換一個');
+   return {user:created.rows[0],session:await issueSession(client,created.rows[0].id)};
+  });
+  setSessionCookies(req,res,result.session.sessionToken,result.session.csrfToken);json(res,201,{user:publicUser(result.user),csrfToken:result.session.csrfToken,recoveryCode:code});
  }
  async function login(req,res,input){
-  const mail=email(input.email);await rate(req,'login',mail||'invalid');
-  const found=mail?await db.query('SELECT * FROM users WHERE email=$1',[mail]):{rows:[]},user=found.rows[0];
+  // Existing email-based password accounts retain a migration-only login alias.
+  // It is never required for new accounts or returned by public/account APIs.
+  const value=typeof input.username==='string'?input.username.trim().toLowerCase():'',account=username(value),legacy=value.length<=254&&value.includes('@')?value:null;
+  await rate(req,'login',account||legacy||'invalid');
+  const found=account||legacy?await db.query('SELECT * FROM users WHERE username=$1 OR (email IS NOT NULL AND email=$2)',[account,legacy]):{rows:[]},user=found.rows[0];
   const encoded=user?.password_hash||await getDummyHash();let valid=false;
   try{valid=await verify(encoded,typeof input.password==='string'&&Buffer.byteLength(input.password)<=512?input.password:'');}catch{}
-  if(!valid||!user||user.status!=='active')throw error(401,'INVALID_CREDENTIALS','Email 或密碼不正確');
-  const session=await db.transaction(async client=>{const fresh=(await client.query('SELECT password_hash,status FROM users WHERE id=$1 FOR UPDATE',[user.id])).rows[0];if(!fresh||fresh.status!=='active'||fresh.password_hash!==user.password_hash)throw error(401,'INVALID_CREDENTIALS','Email 或密碼不正確');await client.query('UPDATE users SET last_login_at=now() WHERE id=$1',[user.id]);return issueSession(client,user.id);});
+  if(!valid||!user||user.status!=='active')throw error(401,'INVALID_CREDENTIALS','玩家帳號或密碼不正確');
+  const session=await db.transaction(async client=>{const fresh=(await client.query('SELECT password_hash,status FROM users WHERE id=$1 FOR UPDATE',[user.id])).rows[0];if(!fresh||fresh.status!=='active'||fresh.password_hash!==user.password_hash)throw error(401,'INVALID_CREDENTIALS','玩家帳號或密碼不正確');await client.query('UPDATE users SET last_login_at=now() WHERE id=$1',[user.id]);return issueSession(client,user.id);});
   setSessionCookies(req,res,session.sessionToken,session.csrfToken);user.last_login_at=new Date();json(res,200,{user:publicUser(user),csrfToken:session.csrfToken});
  }
- async function consumeToken(req,res,input,kind){
-  await rate(req,kind,null,{ipLimit:20});if(!validToken(input.token))throw error(400,'INVALID_TOKEN','連結無效或已過期');
-  if(kind==='reset_password'&&!password(input.password))throw error(400,'WEAK_PASSWORD','密碼需為 12–128 字');
-  const passwordHash=kind==='reset_password'?await hash(input.password,PASSWORD_OPTIONS):null;
+ async function resetPassword(req,res,input){
+  const account=username(input.username),supplied=recoveryHash(input.recoveryCode);
+  await rate(req,'recovery',account||'invalid',{ipLimit:15,accountLimit:5,seconds:3600});
+  if(!password(input.password))throw error(400,'WEAK_PASSWORD','密碼需為 12–128 字');
+  if(!account||!supplied)throw error(400,'INVALID_RECOVERY','帳號或救援碼不正確，或救援碼已使用');
+  const encoded=await hash(input.password,PASSWORD_OPTIONS),replacement=recoveryCode();
   await db.transaction(async client=>{
-   const result=await client.query(`UPDATE auth_tokens SET consumed_at=now() WHERE token_hash=$1 AND kind=$2 AND consumed_at IS NULL AND expires_at>now() RETURNING user_id`,[sha(input.token),kind]);
-   const id=result.rows[0]?.user_id;if(!id)throw error(400,'INVALID_TOKEN','連結無效或已過期');
-   const user=await client.query(`SELECT id FROM users WHERE id=$1 AND status='active' FOR UPDATE`,[id]);if(!user.rows.length)throw error(400,'INVALID_TOKEN','連結無效或已過期');
-   if(kind==='verify_email')await client.query('UPDATE users SET email_verified=true,updated_at=now() WHERE id=$1',[id]);
-   else{
-    await client.query('UPDATE users SET password_hash=$2,updated_at=now() WHERE id=$1',[id,passwordHash]);
-    await client.query('UPDATE sessions SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL',[id]);
-    await client.query("UPDATE auth_tokens SET consumed_at=now() WHERE user_id=$1 AND kind='reset_password' AND consumed_at IS NULL",[id]);
-   }
+   const user=(await client.query('SELECT id,status,recovery_code_hash FROM users WHERE username=$1 FOR UPDATE',[account])).rows[0];
+   if(!user||user.status!=='active'||!safeEqual(user.recovery_code_hash,supplied))throw error(400,'INVALID_RECOVERY','帳號或救援碼不正確，或救援碼已使用');
+   await client.query('UPDATE users SET password_hash=$2,recovery_code_hash=$3,recovery_issued_at=now(),updated_at=now() WHERE id=$1',[user.id,encoded,recoveryHash(replacement)]);
+   await client.query('UPDATE sessions SET revoked_at=now() WHERE user_id=$1 AND revoked_at IS NULL',[user.id]);
   });
-  if(kind==='reset_password')clearSessionCookies(req,res);json(res,200,{ok:true});
+  clearSessionCookies(req,res);json(res,200,{ok:true,recoveryCode:replacement});
  }
- async function forgot(req,res,input){
-  requireMail();const mail=email(input.email);await rate(req,'forgot',mail||'invalid',{ipLimit:15,accountLimit:4,seconds:3600});
-  if(!mail)throw error(400,'INVALID_EMAIL','請輸入有效 Email');
-  const result=await db.query("SELECT id,email FROM users WHERE email=$1 AND status='active'",[mail]);
-  if(result.rows[0]){try{await sendToken(req,result.rows[0],'reset_password');}catch(err){if(err.code!=='EMAIL_DELIVERY_FAILED')throw err;console.error('[mail] reset delivery unavailable');}}
-  json(res,202,{message:'若此 Email 已註冊，重設密碼連結將寄至信箱。'});
+ async function rotateRecovery(req,res,input){
+  const auth=await requireUser(req);validateCsrf(req,auth);await rate(req,'rotate_recovery',auth.user.id,{ipLimit:15,accountLimit:5,seconds:3600});
+  const user=(await db.query('SELECT password_hash FROM users WHERE id=$1',[auth.user.id])).rows[0];let valid=false;
+  try{valid=await verify(user?.password_hash||await getDummyHash(),typeof input.password==='string'&&Buffer.byteLength(input.password)<=512?input.password:'');}catch{}
+  if(!valid)throw error(401,'INVALID_PASSWORD','目前密碼不正確');
+  const code=recoveryCode();await db.transaction(async client=>{const fresh=(await client.query('SELECT status,password_hash FROM users WHERE id=$1 FOR UPDATE',[auth.user.id])).rows[0];if(!fresh||fresh.status!=='active'||fresh.password_hash!==user.password_hash)throw error(401,'INVALID_PASSWORD','目前密碼不正確');await client.query('UPDATE users SET recovery_code_hash=$2,recovery_issued_at=now(),updated_at=now() WHERE id=$1',[auth.user.id,recoveryHash(code)]);});
+  json(res,200,{ok:true,recoveryCode:code});
  }
  async function profile(req,res,input){
   const auth=await requireUser(req);if(req.method==='GET'){json(res,200,{user:auth.user});return;}
@@ -167,43 +154,6 @@ function createAccounts({db,env=process.env,mailer=createMailer({env})}={}){
   const r=await db.query('UPDATE users SET display_name=$2,avatar=$3,preferences=$4,updated_at=now() WHERE id=$1 RETURNING *',[auth.user.id,name,avatar,JSON.stringify(prefs)]);
   json(res,200,{user:publicUser(r.rows[0])});
  }
- async function googleStart(req,res){
-  if(!googleReady)throw error(503,'GOOGLE_NOT_CONFIGURED','Google 登入尚未設定');checkOrigin(req);await rate(req,'google',null,{ipLimit:20});
-  const state=token(),verifier=token(),nonce=token(),binding=token();
-  for(const [k,v]of oauthStates)if(v.expiresAt<Date.now())oauthStates.delete(k);
-  if(oauthStates.size>=1000)throw error(503,'OAUTH_BUSY','登入服務忙碌，請稍後再試');
-  oauthStates.set(sha(state),{verifier,nonce,binding:sha(binding),expiresAt:Date.now()+600000});
-  res.setHeader('Set-Cookie',cookie(req,OAUTH_COOKIE,binding,600));
-  const u=new URL('https://accounts.google.com/o/oauth2/v2/auth');
-  for(const [k,v]of Object.entries({client_id:env.GOOGLE_CLIENT_ID,redirect_uri:`${configuredOrigin}/api/auth/google/callback`,response_type:'code',scope:'openid email profile',state,nonce,code_challenge:crypto.createHash('sha256').update(verifier).digest('base64url'),code_challenge_method:'S256',prompt:'select_account'}))u.searchParams.set(k,v);
-  res.writeHead(302,{Location:u.href,'Cache-Control':'no-store','Referrer-Policy':'no-referrer'}).end();
- }
- async function googleCallback(req,res,url){
-  if(!googleReady)throw error(503,'GOOGLE_NOT_CONFIGURED','Google 登入尚未設定');
-  const state=url.searchParams.get('state'),code=url.searchParams.get('code'),key=sha(state),pending=oauthStates.get(key);oauthStates.delete(key);
-  const binding=cookies(req)[OAUTH_COOKIE];res.setHeader('Set-Cookie',cookie(req,OAUTH_COOKIE,'',0));
-  if(!validToken(state)||!validToken(binding)||!pending||pending.expiresAt<Date.now()||!safeEqual(sha(binding),pending.binding)||!code||code.length>2048)throw error(400,'OAUTH_STATE','Google 登入已過期，請重新開始');
-  const reply=await fetch('https://oauth2.googleapis.com/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({code,client_id:env.GOOGLE_CLIENT_ID,client_secret:env.GOOGLE_CLIENT_SECRET,redirect_uri:`${configuredOrigin}/api/auth/google/callback`,grant_type:'authorization_code',code_verifier:pending.verifier}),signal:AbortSignal.timeout(10000)});
-  if(!reply.ok)throw error(400,'OAUTH_FAILED','Google 登入失敗，請重新開始');const tokens=await reply.json();
-  const {createRemoteJWKSet,jwtVerify}=await import('jose');
-  const {payload}=await jwtVerify(tokens.id_token,createRemoteJWKSet(new URL('https://www.googleapis.com/oauth2/v3/certs')),{issuer:['https://accounts.google.com','accounts.google.com'],audience:env.GOOGLE_CLIENT_ID,algorithms:['RS256'],clockTolerance:5});
-  const mail=email(payload.email);if(!mail||payload.email_verified!==true||payload.nonce!==pending.nonce||typeof payload.sub!=='string')throw error(400,'OAUTH_IDENTITY','Google 帳號尚未驗證');
-  const result=await db.transaction(async client=>{
-   const existing=await client.query("SELECT u.* FROM oauth_identities o JOIN users u ON u.id=o.user_id WHERE o.provider='google' AND o.subject=$1 FOR UPDATE",[payload.sub]);
-   let user=existing.rows[0];
-   if(!user){
-    const byEmail=await client.query('SELECT * FROM users WHERE email=$1 FOR UPDATE',[mail]);user=byEmail.rows[0];
-    if(user&&!user.email_verified)throw error(409,'OAUTH_VERIFY_EXISTING','請先驗證原帳號 Email 或重設密碼，再使用 Google 登入');
-    if(!user){const display=nickname(payload.name)||`選手${crypto.randomBytes(3).toString('hex')}`;
-     user=(await client.query("INSERT INTO users(id,email,display_name,email_verified,avatar) VALUES($1,$2,$3,true,'azhi') RETURNING *",[crypto.randomUUID(),mail,display])).rows[0];}
-    await client.query("INSERT INTO oauth_identities(provider,subject,user_id,email_at_link) VALUES('google',$1,$2,$3)",[payload.sub,user.id,mail]);
-   }
-   if(user.status!=='active')throw error(403,'ACCOUNT_DISABLED','帳號無法登入');await client.query('UPDATE users SET last_login_at=now() WHERE id=$1',[user.id]);
-   return issueSession(client,user.id);
-  });
-  setSessionCookies(req,res,result.sessionToken,result.csrfToken);res.setHeader('Set-Cookie',[...res.getHeader('Set-Cookie'),cookie(req,OAUTH_COOKIE,'',0)]);
-  res.writeHead(302,{Location:`${configuredOrigin}/#account`,'Cache-Control':'no-store','Referrer-Policy':'no-referrer'}).end();
- }
  async function handle(req,res){
   let url;try{url=new URL(req.url,'http://localhost');}catch{return false;}
   const pathname=url.pathname;
@@ -211,32 +161,26 @@ function createAccounts({db,env=process.env,mailer=createMailer({env})}={}){
   try{
    if(pathname==='/api/auth/capabilities'&&req.method==='GET'){json(res,200,capabilities());return true;}
    if(pathname==='/api/auth/me'&&req.method==='GET'){const auth=await authenticateRequest(req);json(res,200,{user:auth?.user||null,csrfToken:auth?.csrfToken||null,capabilities:capabilities()});return true;}
+   if(!['/api/profile','/api/auth/register','/api/auth/login','/api/auth/reset-password','/api/auth/recovery-code','/api/auth/logout'].includes(pathname))throw error(404,'NOT_FOUND','找不到此功能');
    if(!db)throw error(503,'DATABASE_UNAVAILABLE','帳號資料庫尚未設定');origin(req);
-   if(pathname==='/api/auth/google'&&req.method==='GET'){await googleStart(req,res);return true;}
-   if(pathname==='/api/auth/google/callback'&&req.method==='GET'){await googleCallback(req,res,url);return true;}
    if(pathname==='/api/profile'&&req.method==='GET'){await profile(req,res);return true;}
    if(!['POST','PATCH'].includes(req.method))throw error(405,'METHOD_NOT_ALLOWED','不支援此操作');
    checkOrigin(req);const input=await body(req);
    if(pathname==='/api/profile'&&req.method==='PATCH')await profile(req,res,input);
    else if(pathname==='/api/auth/register'&&req.method==='POST')await register(req,res,input);
    else if(pathname==='/api/auth/login'&&req.method==='POST')await login(req,res,input);
-   else if(pathname==='/api/auth/verify-email'&&req.method==='POST')await consumeToken(req,res,input,'verify_email');
-   else if(pathname==='/api/auth/forgot-password'&&req.method==='POST')await forgot(req,res,input);
-   else if(pathname==='/api/auth/reset-password'&&req.method==='POST')await consumeToken(req,res,input,'reset_password');
+   else if(pathname==='/api/auth/reset-password'&&req.method==='POST')await resetPassword(req,res,input);
+   else if(pathname==='/api/auth/recovery-code'&&req.method==='POST')await rotateRecovery(req,res,input);
    else if(pathname==='/api/auth/logout'&&req.method==='POST'){
     const auth=await requireUser(req);validateCsrf(req,auth);await db.query('UPDATE sessions SET revoked_at=now() WHERE token_hash=$1',[auth.session.tokenHash]);clearSessionCookies(req,res);json(res,200,{ok:true});
-   }else if(pathname==='/api/auth/resend-verification'&&req.method==='POST'){
-    const auth=await requireUser(req);validateCsrf(req,auth);requireMail();await rate(req,'resend',auth.user.email,{ipLimit:10,accountLimit:3,seconds:3600});
-    if(!auth.user.emailVerified)await sendToken(req,auth.user,'verify_email');json(res,202,{message:'若帳號尚未驗證，驗證信將寄至信箱。'});
    }else throw error(404,'NOT_FOUND','找不到此功能');
   }catch(err){
    const status=Number.isInteger(err.status)?err.status:500;
-   if(pathname==='/api/auth/google/callback'&&googleReady){res.writeHead(302,{Location:`${configuredOrigin}/#auth-error=${encodeURIComponent(status===500?'OAUTH_FAILED':err.code)}`,'Cache-Control':'no-store','Referrer-Policy':'no-referrer'}).end();}
-   else json(res,status,{error:{code:status===500?'ACCOUNT_UNAVAILABLE':err.code,message:status===500?'帳號服務暫時無法使用':err.message}});
+   json(res,status,{error:{code:status===500?'ACCOUNT_UNAVAILABLE':err.code,message:status===500?'帳號服務暫時無法使用':err.message}});
   }
   return true;
  }
- return {handle,authenticateRequest,requireUser,validateCsrf,capabilities,close(){oauthStates.clear();mailer.close?.();}};
+ return {handle,authenticateRequest,requireUser,validateCsrf,capabilities,close(){}};
 }
 
 module.exports={createAccounts};

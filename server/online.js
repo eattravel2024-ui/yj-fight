@@ -12,7 +12,7 @@ function createOnline({services,rooms,send,all,begin,finalize,roster,env=process
  const serial=fn=>{const work=mutation.then(fn);mutation=work.catch(err=>{if(!err.status||err.status>=500)console.error('[online] operation failed:',err.code||err.name)});return work;};
  const error=(ws,err)=>send(ws,{type:'error',code:err.code||'ONLINE_UNAVAILABLE',message:err.status?err.message:'線上服務暫時無法使用，請稍後重試'});
  const service=()=>{if(!services.competition||!services.healthy)fail('ONLINE_NOT_CONFIGURED','線上競技尚未設定或資料庫無法連線',503);return services.competition;};
- async function auth(ws,{verified=false}={}){const value=await services.accounts.requireUser(ws.request,{verified});ws.auth=value;return value.user;}
+ async function auth(ws){const value=await services.accounts.requireUser(ws.request);ws.auth=value;return value.user;}
  function packet(room){return {matchId:room.matchId,kind:room.kind,stage:room.stage,deadline:room.deadline,players:room.players.map(p=>({userId:p.userId,slot:p.slot,name:p.name,char:p.char,avatar:p.avatar,rank:p.rank,accepted:!!p.accepted,ready:!!p.loaded,connected:!!p.ws}))};}
  function found(room,type='match_found'){all(room,{type,...packet(room)});}
  function tokenFor(player){const value=crypto.randomBytes(32).toString('base64url');player.resumeHash=digest(value);return value;}
@@ -33,7 +33,7 @@ function createOnline({services,rooms,send,all,begin,finalize,roster,env=process
  }
  async function reservePair(a,b){
   if(a.ws.readyState!==1||b.ws.readyState!==1)return;
-  await auth(a.ws,{verified:a.kind==='ranked'});await auth(b.ws,{verified:b.kind==='ranked'});
+  await auth(a.ws);await auth(b.ws);
   const id=crypto.randomBytes(16).toString('hex'),stage=Stages.PLAYABLE[crypto.randomInt(Stages.PLAYABLE.length)],seed=crypto.randomInt(1,2**31);
   await service().reserveMatch({id,mode:a.kind,stage,seed,participants:[a,b].map((p,slot)=>({userId:p.user.id,slot,char:p.char}))});
   let roomCode;do{roomCode=crypto.randomBytes(4).toString('hex').toUpperCase();}while(rooms.has(roomCode));
@@ -59,7 +59,7 @@ function createOnline({services,rooms,send,all,begin,finalize,roster,env=process
   }
  }
  async function enqueue(ws,msg){
-  const user=await auth(ws,{verified:msg.kind==='ranked'});service();
+  const user=await auth(ws);service();
   if(!['quick','ranked'].includes(msg.kind)||typeof msg.char!=='string'||!Object.hasOwn(Combat.CHAR,msg.char))fail('INVALID_QUEUE','請選擇有效模式及角色');
   if(ws.record||occupied.has(user.id))fail('PLAYER_BUSY','請先完成或離開目前的房間',409);
   const old=queue.get(user.id);if(old){if(old.ws!==ws)fail('PLAYER_BUSY','此帳號正在其他分頁搜尋對手',409);send(ws,{type:'queue_status',state:'searching',kind:old.kind,queueSince:old.since});return;}
@@ -74,7 +74,7 @@ function createOnline({services,rooms,send,all,begin,finalize,roster,env=process
  }
  async function prepare(room){
   if(room.players.some(p=>!p.loaded||!p.ws))return;
-  for(const p of room.players)await auth(p.ws,{verified:room.kind==='ranked'});
+  for(const p of room.players)await auth(p.ws);
   const started=await service().startMatch(room.matchId);if(started.status!=='running'){await invalidate(room,'start_rejected','比賽未能開始，不計積分');return;}
   if(room.players.some(p=>!p.ws)){await invalidate(room,'preparation_disconnected','有人離線，本場不計積分');return;}room.prepare=null;room.deadline=null;room.startedAt=Date.now();begin(room);found(room,'match_playing');
  }
@@ -118,7 +118,7 @@ function createOnline({services,rooms,send,all,begin,finalize,roster,env=process
   }
   if(room?.kind){
    if(['set_ready','start_match','select_character','rematch','set_title'].includes(msg.type))fail('MATCH_LOCKED','自動匹配請使用對戰確認，角色與規則已鎖定',409);
-   if(msg.type==='match_accept'){await serial(async()=>{await auth(ws,{verified:room.kind==='ranked'});if(room.prepare!=='accept'||!player||typeof msg.accept!=='boolean')fail('NOT_PREPARING','比賽不在確認階段',409);if(Date.now()>room.deadline){await invalidate(room,'accept_timeout','確認逾時，不計積分');return;}if(!msg.accept){await invalidate(room,'declined','有人婉拒對戰，請重新搜尋');return;}player.accepted=true;found(room);if(room.players.every(p=>p.accepted&&p.ws)){room.prepare='resources';room.deadline=Date.now()+loadTimeout;found(room,'resources_required');}});return true;}
+   if(msg.type==='match_accept'){await serial(async()=>{await auth(ws);if(room.prepare!=='accept'||!player||typeof msg.accept!=='boolean')fail('NOT_PREPARING','比賽不在確認階段',409);if(Date.now()>room.deadline){await invalidate(room,'accept_timeout','確認逾時，不計積分');return;}if(!msg.accept){await invalidate(room,'declined','有人婉拒對戰，請重新搜尋');return;}player.accepted=true;found(room);if(room.players.every(p=>p.accepted&&p.ws)){room.prepare='resources';room.deadline=Date.now()+loadTimeout;found(room,'resources_required');}});return true;}
    if(msg.type==='resources_ready'){await serial(async()=>{if(!player||room.prepare!=='resources'||msg.matchId!==room.matchId)fail('NOT_LOADING','資源同步狀態已更新',409);if(msg.ok!==true){await invalidate(room,'resource_failed','必要素材載入失敗，不計積分');return;}player.loaded=true;found(room,'resources_required');await prepare(room);});return true;}
   }
   if(player?.userId&&['set_ready','start_match','select_character','set_name','set_title'].includes(msg.type))await auth(ws);

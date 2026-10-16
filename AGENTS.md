@@ -2,7 +2,7 @@
 
 ## Goal
 Maintain and improve the existing browser-based 60 Hz fighting game, without removing existing modes.
-Current baseline: 8.14.0. Preserve the four playable characters (維尼, 塞子, 金沙賭神, 阿志), 1v1, 2v2, spectators, player/room names, arcade mode, and WebSocket networking. Sam was removed at the user’s request; do not restore that character or its assets. The user explicitly retired the standalone classic adventure 6.8 in 8.11.2; do not restore its page/script/links. Preserve modern arcade, practice and saves.
+Current baseline: 8.14.1. Preserve the four playable characters (維尼, 塞子, 金沙賭神, 阿志), 1v1, 2v2, spectators, player/room names, arcade mode, and WebSocket networking. Sam was removed at the user’s request; do not restore that character or its assets. The user explicitly retired the standalone classic adventure 6.8 in 8.11.2; do not restore its page/script/links. Preserve modern arcade, practice and saves.
 
 ## Source map
 - `public/stage-registry.js`, `public/campaign.js`: central stage/mission registries, stable legacy simulation IDs, bounded progress migration and local encounter validation. Three real stages currently; legislature is STAGE 04 but gated by stage-assets.js until validated user PNG import. Never enable it with substitute art. fur_lab remains planned as 05. Keep supplied Tiananmen art/tanks mapped to harbor. All maps currently share the existing 448px ground and 274/686 duel spawns; do not silently change physics.
@@ -73,3 +73,8 @@ Follow [docs/UI_STYLE_BIBLE.md](docs/UI_STYLE_BIBLE.md) for all subsequent UI wo
 Keep SMTP/Google credentials external. An unavailable provider or draft season is not an enabled feature. Preserve the Phase 4 combat/rollback/sprite bytes; only server.js is authorized to change in the protected set for online lifecycle integration, with an explicit Phase 5 audit chain. This task forbids remote pushes and production deployment; previous push authorization does not apply. Tests may use isolated local PostgreSQL fixtures, never a production database.
 
 The user subsequently explicitly authorized pushing the completed 8.14.0 release to GitHub. Publish the reviewed current `feat/arcade-phase1` branch; do not merge main or deploy production. Manual VPS update instructions are required.
+
+## Username account follow-up (8.14.1)
+The user explicitly replaced Email/Google accounts with username/password and one-time recovery codes. Follow the current account APIs in server/accounts.js and additive migration 003; do not restore mail/provider UI or dependencies. Preserve existing UUIDs, passwords, sessions, match records and ratings. Only store recovery-code hashes; plaintext is returned once after explicit registration/recovery/password-confirmed rotation and must never be logged, placed in localStorage or exposed by GET/profile APIs. Recovery and rotation must lock the user row; reset revokes all sessions. Rank eligibility checks active accounts and a live season, never email_verified. Public IP/HTTP requires exact APP_ORIGIN and explicit ALLOW_INSECURE_HTTP=true; preserve Origin/CSRF, and Secure cookies on HTTPS. No production VPS changes are authorized.
+
+The user subsequently explicitly authorized pushing the completed 8.14.1 username/recovery release to GitHub on feat/arcade-phase1. This does not authorize production deployment or merging main.

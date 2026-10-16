@@ -1,3 +1,39 @@
+# 8.14.1 — 玩家帳號／一次性救援碼
+
+本版移除 Email、SMTP 與 Google 登入需求，使用玩家帳號／密碼與一次性救援碼。使用者已授權發佈至 `feat/arcade-phase1`；舊 `7745d9e` 是 8.14.0，不含此版修改。
+
+從 Git 更新原始碼：
+
+```bash
+cd ~/azhi-update.lvccoe
+git fetch origin
+git switch feat/arcade-phase1
+git pull --ff-only
+npm ci --ignore-scripts --no-fund
+```
+
+有設定資料庫時，先依下方說明備份並執行 Migration 003，再執行升級腳本。
+
+可先下載 `azhi-fighting-8.14.1.tar.gz` 上傳至 VPS 家目錄：
+
+```bash
+AZHI_UPDATE_DIR="$(mktemp -d "$HOME/azhi-update-8.14.1.XXXXXX")"
+tar -xzf ~/azhi-fighting-8.14.1.tar.gz -C "$AZHI_UPDATE_DIR"
+cd "$AZHI_UPDATE_DIR"
+npm ci --ignore-scripts --no-fund
+```
+
+若有設定帳號資料庫，先備份並依 [ONLINE_DEPLOYMENT.md](ONLINE_DEPLOYMENT.md) 執行 Migration（含新增的 003）、設定正確 APP_ORIGIN；使用公網 HTTP 時明確設 ALLOW_INSECURE_HTTP=true。完成後再執行：
+
+```bash
+sudo bash deploy/upgrade-ubuntu.sh
+curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+```
+
+健康版本應為 **8.14.1**。僅遊玩訪客模式不必設定資料庫；會員與匹配仍需 PostgreSQL。排名仍需啟用具有起訖日期的賽季。
+
+以下為歷史版本說明。
+
 # 8.14.0 — GitHub 更新與原始碼包
 
 使用者已授權發佈至 `feat/arcade-phase1`。在既有 VPS 原始碼目錄執行：

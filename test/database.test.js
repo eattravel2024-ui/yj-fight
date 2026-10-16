@@ -112,7 +112,7 @@ test('real PostgreSQL enforces persistent identity, active-match uniqueness and 
     await admin.end();
   });
   const applied = await db.migrate();
-  assert.deepEqual(applied, ['001_player_accounts_and_competition.sql','002_casual_skill.sql']);
+  assert.deepEqual(applied, ['001_player_accounts_and_competition.sql','002_casual_skill.sql','003_username_recovery.sql']);
   assert.deepEqual(await db.migrate(), []);
   const season = (await db.query('SELECT * FROM seasons WHERE id=$1', ['season-01'])).rows[0];
   assert.equal(season.status, 'draft');
@@ -121,10 +121,10 @@ test('real PostgreSQL enforces persistent identity, active-match uniqueness and 
 
   const ids = [crypto.randomUUID(), crypto.randomUUID()];
   for (let i = 0; i < ids.length; i++) {
-    await db.query('INSERT INTO users (id,email,password_hash,display_name) VALUES ($1,$2,$3,$4)', [ids[i], `player${i}@example.invalid`, '$argon2id$test-encoded-password', `玩家${i}`]);
+    await db.query('INSERT INTO users (id,username,password_hash,display_name) VALUES ($1,$2,$3,$4)', [ids[i], `player${i}`, '$argon2id$test-encoded-password', `玩家${i}`]);
   }
-  await assert.rejects(db.query('INSERT INTO users (id,email,display_name) VALUES ($1,$2,$3)', [crypto.randomUUID(), 'PLAYER0@example.invalid', '另位玩家']), error => error.code === '23514');
-  await assert.rejects(db.query('INSERT INTO users (id,email,display_name) VALUES ($1,$2,$3)', [crypto.randomUUID(), 'player0@example.invalid', '另位玩家']), error => error.code === '23505');
+  await assert.rejects(db.query('INSERT INTO users (id,username,display_name) VALUES ($1,$2,$3)', [crypto.randomUUID(), 'PLAYER0', '另位玩家']), error => error.code === '23514');
+  await assert.rejects(db.query('INSERT INTO users (id,username,display_name) VALUES ($1,$2,$3)', [crypto.randomUUID(), 'player0', '另位玩家']), error => error.code === '23505');
   await assert.rejects(db.query('UPDATE users SET avatar=$1 WHERE id=$2', ['untrusted-external-url', ids[0]]), error => error.code === '23514');
   await db.query(`INSERT INTO matches(id,mode,stage) VALUES ('match-a','quick','night'),('match-b','quick','garage')`);
   for (const match of ['match-a', 'match-b']) {
@@ -148,7 +148,7 @@ test('real PostgreSQL enforces persistent identity, active-match uniqueness and 
   const brokenDirectory = await fs.mkdtemp(path.join(os.tmpdir(), 'azhi-real-failed-migration-'));
   t.after(() => fs.rm(brokenDirectory, { recursive: true, force: true }));
   for(const file of applied)await fs.copyFile(path.join(__dirname,'..','server','migrations',file),path.join(brokenDirectory,file));
-  await fs.writeFile(path.join(brokenDirectory, '003_atomic_failure.sql'), 'CREATE TABLE should_not_exist(id INT); SELECT * FROM nonexistent_migration_table;');
+  await fs.writeFile(path.join(brokenDirectory, '004_atomic_failure.sql'), 'CREATE TABLE should_not_exist(id INT); SELECT * FROM nonexistent_migration_table;');
   await assert.rejects(db.migrate({ directory: brokenDirectory }), error => error.code === '42P01');
   assert.equal((await db.query("SELECT to_regclass('should_not_exist') AS value")).rows[0].value, null);
   assert.equal((await db.query('SELECT count(*)::int AS total FROM schema_migrations')).rows[0].total, applied.length);

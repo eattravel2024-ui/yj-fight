@@ -38,3 +38,5 @@
 @media(prefers-reduced-motion:no-preference){.player-settlement.is-promoted .rank-elite{animation:elite-reveal .6s var(--ease-out) both}@keyframes elite-reveal{from{filter:drop-shadow(0 0 15px #ffc24788);transform:scale(.85)}to{filter:drop-shadow(3px 5px #0008);transform:scale(1)}}}
 .player-found-scene .player-found-player small:last-child{color:var(--text-secondary)}.player-found-scene .player-found-player[data-accepted=true] small:last-child{color:var(--success)}
 .player-reduced-motion .player-system,.player-reduced-motion .player-system *,.player-reduced-motion .player-system *::before,.player-reduced-motion .player-system *::after{animation:none!important;transition:none!important}
+
+.player-recovery{max-width:850px;margin:4vh auto;padding:clamp(20px,4vw,48px)}.player-recovery-code{display:block;width:100%;min-height:54px;margin:20px 0;background:var(--bg-primary,#101522);color:var(--gold-primary,#ffc247);border:1px solid var(--gold-primary,#ffc247);padding:14px;font:700 clamp(12px,1.5vw,20px) monospace}.player-recovery .player-check{margin:24px 0}.player-recovery .player-primary{min-height:48px}

@@ -1,6 +1,6 @@
 # 陪公子練武 — Spar With the Young Master
 
-> GitHub/Codex development baseline: **8.14.0**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.14.1**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,16 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.14.1 — Player username and recovery code, without Email / domain services
+
+Register and log in using a case-insensitive player username and password. Keep nickname/avatar, real quick/ranked matches and persistent records. Email, verification mail, password-reset mail and Google login are removed. A 192-bit one-use recovery code is shown once at registration; only its hash is stored. Recovery consumes the old code, revokes all existing sessions and shows a replacement once. Profile code rotation requires the current password and CSRF. Save the code privately: losing both it and the password prevents self-service recovery.
+
+PostgreSQL and explicit season dates remain required. Run additive migration `003_username_recovery.sql` before enabling accounts; it preserves identities, sessions and match/rank records. Existing password accounts retain their old sign-in alias, receive a stable generated username visible in profile and can generate a recovery code after login. Legacy Google-only accounts without passwords require operator-assisted identity review.
+
+No domain or SMTP is required. For the existing public IP/HTTP site, set the exact `APP_ORIGIN=http://YOUR_VPS_IP:18071` and explicitly opt in with `ALLOW_INSECURE_HTTP=true`. HTTP does not encrypt passwords/cookies/recovery codes; use a unique game password. HTTPS remains supported, including IP-based certificates, and automatically uses Secure cookies. See [current deployment steps](docs/ONLINE_DEPLOYMENT.md) and [8.14.1 delivery](docs/ACCOUNTS_8.14.1.md). The user authorized publishing this follow-up on `feat/arcade-phase1`; VPS deployment remains manual.
+
+The sections below describe historical releases; their SMTP/Email requirements no longer apply to 8.14.1.
 
 ## 8.14.0 — Official Arcade UI v2 and online players
 

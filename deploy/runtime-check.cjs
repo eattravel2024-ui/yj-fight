@@ -6,10 +6,8 @@ async function main() {
   if (Number(process.versions.node.split('.')[0]) < 20) throw new Error('Node.js 20+ required');
   require('ws');
   const { Pool } = require('pg');
-  const { createTransport } = require('nodemailer');
   const { hash, verify, Algorithm } = require('@node-rs/argon2');
-  const { jwtVerify, createRemoteJWKSet } = await import('jose');
-  if ([Pool, createTransport, hash, verify, jwtVerify, createRemoteJWKSet].some(value => typeof value !== 'function')) {
+  if ([Pool, hash, verify].some(value => typeof value !== 'function')) {
     throw new Error('A runtime dependency does not expose the expected API');
   }
   const probe = 'azhi71-local-native-runtime-check';

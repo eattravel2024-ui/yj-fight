@@ -100,6 +100,6 @@ say '更新成功！舊版完整備份仍在，未刪除。'
 echo "遊戲網址（須原本 Nginx 18071 正常）：http://YOUR_VPS_IP:18071/"
 echo "備份目錄：$BACKUP"
 echo '保持原有 Nginx、SSH、Docker、6.9 與 7.0 不變。'
-echo '會員／排位需另依 docs/ONLINE_DEPLOYMENT.md 設定 HTTPS、資料庫、環境檔、Migration 與賽季；本腳本不修改這些設定。'
+echo '會員／排位需另依 docs/ONLINE_DEPLOYMENT.md 設定遊戲網址、資料庫、環境檔、Migration 與賽季（不需要 SMTP 或網域）；本腳本不修改這些設定。'
 echo '若瀏覽器顯示舊圖，請按 Cmd + Shift + R 強制重新整理。'
 echo "記錄檔：$LOG"

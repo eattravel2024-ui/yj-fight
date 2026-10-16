@@ -61,9 +61,8 @@ function createCompetition({db,config={},now=()=>Date.now()}={}){
  }
  async function reserveMatch(value){const ps=validateReservation(value);return tx(async client=>{
   // Lock accounts in a stable order before acquiring per-player active-match rows.
-  const {rows:users}=await client.query('SELECT id,status,email_verified FROM users WHERE id=ANY($1::uuid[]) ORDER BY id FOR UPDATE',[ps.map(p=>p.userId)]);
+  const {rows:users}=await client.query('SELECT id,status FROM users WHERE id=ANY($1::uuid[]) ORDER BY id FOR UPDATE',[ps.map(p=>p.userId)]);
   if(users.length!==2||users.some(u=>u.status!=='active'))fail('account_unavailable','Both players must be active accounts',403);
-  if(value.mode==='ranked'&&users.some(u=>!u.email_verified))fail('email_required','Verified email is required for ranked play',403);
   const found=await client.query('SELECT * FROM matches WHERE id=$1 FOR UPDATE',[value.id]);
   if(found.rows[0]){const row=found.rows[0],old=await participants(client,row.id);if(row.mode!==value.mode||row.stage!==value.stage||old.some((p,i)=>p.user_id!==ps[i].userId||int(p.slot)!==ps[i].slot||p.character_id!==ps[i].char)||old.length!==2)fail('match_id_conflict','Match ID is already in use',409);return {...await publicMatch(client,row),alreadyReserved:true};}
   let season=null;if(value.mode==='ranked'){const active=await currentSeason(client);if(!active)fail('season_closed','No ranked season is currently open',409);season=await lockSeason(client,active.id);if(!liveSeason(season))fail('season_closed','The ranked season is closed',409);}
@@ -79,7 +78,7 @@ function createCompetition({db,config={},now=()=>Date.now()}={}){
  }
  async function startMatch(id){checkId(id);return tx(async client=>{const {rows}=await client.query('SELECT * FROM matches WHERE id=$1 FOR UPDATE',[id]);const row=rows[0];if(!row)fail('match_missing','Match not found',404);if(row.status==='running')return {...await publicMatch(client,row),alreadyStarted:true};if(row.status!=='preparing')fail('match_closed','This match is already closed',409);
   if(row.mode==='ranked'){const season=await lockSeason(client,row.season_id);if(!liveSeason(season))return invalidateLocked(client,row,'season_closed_before_start');}
-  const {rows:users}=await client.query('SELECT u.status,u.email_verified FROM users u JOIN match_participants p ON p.user_id=u.id WHERE p.match_id=$1',[id]);if(users.length!==2||users.some(u=>u.status!=='active'||row.mode==='ranked'&&!u.email_verified))return invalidateLocked(client,row,'account_unavailable');
+  const {rows:users}=await client.query('SELECT u.status FROM users u JOIN match_participants p ON p.user_id=u.id WHERE p.match_id=$1',[id]);if(users.length!==2||users.some(u=>u.status!=='active'))return invalidateLocked(client,row,'account_unavailable');
   const updated=await client.query("UPDATE matches SET status='running',started_at=$2 WHERE id=$1 AND status='preparing' RETURNING *",[id,new Date(clock())]);return publicMatch(client,updated.rows[0]);
  });}
  function validateResult(result){if(!result||![0,1,null].includes(result.winnerSlot)||!['ko','time_over','forfeit'].includes(result.reason)||!Array.isArray(result.rounds)||result.rounds.length!==2||result.rounds.some(x=>!Number.isSafeInteger(x)||x<0||x>9))fail('invalid_result','A validated authoritative result is required');if(result.winnerSlot===null&&(result.reason!=='time_over'||result.rounds[0]!==result.rounds[1]))fail('invalid_result','Only a tied time-over can be a draw');if(result.winnerSlot!==null&&result.reason!=='forfeit'&&result.rounds[result.winnerSlot]<=result.rounds[1-result.winnerSlot])fail('invalid_result','Winner and round scores disagree');}
@@ -89,7 +88,7 @@ function createCompetition({db,config={},now=()=>Date.now()}={}){
   if(['completed','invalid'].includes(row.status))return {...await publicMatch(client,row),alreadySettled:true};if(row.status!=='running'||!row.started_at)fail('match_not_running','A match must start before settlement',409);
   const finish=clock(),start=new Date(row.started_at).getTime();if(finish<start||finish-start>c.maxMatchAgeMs)return invalidateLocked(client,row,'match_lifetime_exceeded');
   const ps=await participants(client,id);if(ps.length!==2)return invalidateLocked(client,row,'invalid_roster');
-  const {rows:users}=await client.query('SELECT id,status,email_verified FROM users WHERE id=ANY($1::uuid[])',[ps.map(p=>p.user_id)]);if(users.length!==2||users.some(u=>u.status!=='active'||row.mode==='ranked'&&!u.email_verified))return invalidateLocked(client,row,'account_unavailable');
+  const {rows:users}=await client.query('SELECT id,status FROM users WHERE id=ANY($1::uuid[])',[ps.map(p=>p.user_id)]);if(users.length!==2||users.some(u=>u.status!=='active'))return invalidateLocked(client,row,'account_unavailable');
   if(row.mode==='ranked'&&result.reason==='forfeit'){const recent=await client.query("SELECT m.id FROM matches m JOIN match_participants a ON a.match_id=m.id JOIN match_participants b ON b.match_id=m.id WHERE m.mode='ranked' AND m.status='completed' AND m.reason='forfeit' AND m.ended_at>$3 AND a.user_id=$1 AND b.user_id=$2 LIMIT 1",[ps[0].user_id,ps[1].user_id,new Date(finish-3600000)]);if(recent.rowCount)return invalidateLocked(client,row,'repeated_pair_forfeit');}
   const score=result.winnerSlot===null?.5:result.winnerSlot===0?1:0,playerResults=[];let ratings=null,nextPair=null;
   if(row.mode==='ranked'){

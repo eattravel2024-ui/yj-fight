@@ -1,6 +1,7 @@
 # Roadmap — GitHub / Codex
 
 ## P0 — reliability and safety
+- [x] 8.14.1: username/password registration and one-use recovery, no Email/SMTP/Google requirement; additive legacy migration, active-account ranked eligibility and explicit IP/HTTP mode. PostgreSQL and dated seasons remain required.
 - [x] 8.9: 1v1 and 2v2 Ready + explicit host start; membership/character changes invalidate readiness. Role/revision/start/rematch regression tests.
 - [x] 8.14.0 authenticated 1v1 rotating reconnect token, 30-second paused reservation and authoritative recovery; 2v2 recovery remains future work.
 - Room access controls: private room/invite code, spectator permissions, rate limiting and validation.

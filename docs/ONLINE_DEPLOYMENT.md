@@ -1,4 +1,4 @@
-# Player accounts and online competition — manual VPS update
+# 8.14.1 — Username accounts and online competition (no domain / SMTP required)
 
 No script in this change connects to a VPS, pushes Git or alters another project. Review the changes locally before publishing the branch. The current production version remains unchanged until the operator runs an update.
 
@@ -37,12 +37,12 @@ This opt-in container uses its own `azhi-db-data` volume; **do not run `down -v`
 Copy `.env.example` to `/etc/azhi71.env` with permissions `root:azhi71 0640`, and edit it locally on the VPS. Required values:
 
 - `DATABASE_URL`: URL for the dedicated `azhi_app` role; percent-encode special password characters.
-- `APP_ORIGIN`: the game's canonical **HTTPS** origin, e.g. `https://game.example.com`.
+- `APP_ORIGIN`: the exact browser-facing game origin, including the port: `http://YOUR_VPS_IP:18071` for the existing IP-only installation. Replace the placeholder with your own public IP. No path or trailing slash.
+- `ALLOW_INSECURE_HTTP=true` explicitly permits this public HTTP origin. HTTP does **not** encrypt passwords, session cookies or recovery codes; use unique game passwords and save recovery codes privately. HTTPS with an IP certificate remains optional; no domain is required by the account model.
 - `NODE_ENV=production`, existing `HOST=127.0.0.1` and `PORT=31071`.
-- `SMTP_HOST`, `SMTP_FROM`, SMTP credentials and TLS settings. Without SMTP, existing accounts can log in, but registration/verification/reset are unavailable. No verification links are returned by an API or printed to logs.
-- Optional Google client ID/secret. Register the exact redirect URI `https://game.example.com/api/auth/google/callback`. This requires configuring Google's consent screen and testing with real Google credentials.
+No SMTP, Email verification, Google OAuth or third-party account credentials are needed. Registration uses a unique case-insensitive username, a password and nickname. The UI presents a one-use recovery code once; PostgreSQL stores only its hash. Password recovery revokes all prior sessions, consumes the previous code and presents a replacement once. Logged-in players can rotate the code with their current password and CSRF verification. If both password and recovery code are lost, there is no automatic recovery.
 
-Install the **new game's modules only**, load the protected environment via systemd, back up the DB, then migrate the reviewed schema:
+Install the **new game's modules only**, load the protected environment via systemd, back up the DB, then migrate the reviewed schema. If an account service is already active, schedule maintenance and stop **only azhi71** for this identity migration; do not allow the old registration API to write during conversion. Install/start the new release after migration:
 
 ```bash
 sudo install -d -m 0700 /var/backups/azhi71
@@ -52,13 +52,25 @@ sudo systemd-run --wait --pipe --collect -p EnvironmentFile=/etc/azhi71.env -p W
 
 This reviewed migration command runs as root when the source checkout is under `/root`, so it does not require weakening `/root` permissions; PostgreSQL access still uses the restricted `azhi_app` role from the environment file. From an already installed readable `/opt/azhi71`, add `-p User=azhi71` instead. Do not enable the service environment drop-in until the migrations succeed; otherwise the upgrade health check correctly rejects an unmigrated database. For an existing non-container PostgreSQL service use its corresponding `pg_dump --format=custom` backup instead. Verify a restore on an isolated database before trusting backups. Keep backups off-host with the same privacy protection as player records.
 
-To load the external environment, manually install the reviewed `deploy/azhi71-env.conf.example` as `/etc/systemd/system/azhi71.service.d/online.conf`. This drop-in only adds `EnvironmentFile=-/etc/azhi71.env`. Run `systemctl daemon-reload` and restart **only azhi71** when ready. A process restart voids incomplete official matches and releases their reservations without RP changes. Inform active players before maintenance.
+To load the external environment, manually install the reviewed `deploy/azhi71-env.conf.example` as `/etc/systemd/system/azhi71.service.d/online.conf`. This drop-in only adds `EnvironmentFile=-/etc/azhi71.env`. Use the commands below to reload systemd and start the **updated** game through its upgrade script; do not restart an old Email-only service midway through migration. A process restart voids incomplete official matches and releases their reservations without RP changes. Inform active players before maintenance.
 
-## HTTPS and WSS
+## Existing IP / HTTP deployment and optional HTTPS
 
-Keep Node on `127.0.0.1:31071`. Add the locations in `deploy/nginx-https-location.conf.example` **inside this game's existing HTTPS server block only**. Configure a valid certificate for the chosen domain; do not replace the VPS's global Nginx configuration or another site's server block. Preserve `/ws` Upgrade/Connection forwarding, host and origin headers. Validate with `sudo nginx -t` before reloading Nginx yourself. For per-user IP rate limits behind a loopback proxy, ensure Nginx overwrites `X-Real-IP` with `$remote_addr`, then enable `TRUST_PROXY_LOOPBACK=true`. Otherwise the application deliberately rate limits the TCP peer and does not trust client-supplied forwarded headers.
+Keep Node on `127.0.0.1:31071` and PostgreSQL on loopback. The existing Nginx `18071` game site can serve `/api/` through its existing `location /` proxy, and `/ws` must retain Upgrade/Connection forwarding. **Do not replace existing Nginx files.** With `APP_ORIGIN=http://YOUR_VPS_IP:18071` and `ALLOW_INSECURE_HTTP=true`, accounts use HttpOnly, SameSite=Lax cookies without Secure because the connection is HTTP. CSRF and strict Origin checks remain enabled, including the production WebSocket Origin check.
 
-Production cookies use HttpOnly, SameSite=Lax and Secure for the HTTPS origin; account mutations require CSRF validation. Public HTTP IP-only access is suitable for guest gameplay, not production accounts. Never open the Node or database port to the public internet.
+After migrations succeed, install only the environment drop-in and then run the reviewed game upgrade:
+
+```bash
+sudo install -d /etc/systemd/system/azhi71.service.d
+sudo install -m 0644 deploy/azhi71-env.conf.example /etc/systemd/system/azhi71.service.d/online.conf
+sudo systemctl daemon-reload
+sudo bash deploy/upgrade-ubuntu.sh
+curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+```
+
+An HTTP-to-HTTPS change later requires changing APP_ORIGIN to the exact HTTPS origin and setting ALLOW_INSECURE_HTTP=false; cookies automatically gain Secure. The optional `deploy/nginx-https-location.conf.example` is an incremental HTTPS example, not a required domain setup. Validate any manually edited Nginx configuration with `sudo nginx -t` before reloading it. Never alter another project's site. For per-user IP rate limits behind a loopback proxy, have Nginx overwrite `X-Real-IP` with `$remote_addr` before enabling `TRUST_PROXY_LOOPBACK=true`. Otherwise the application rate limits the TCP peer and does not trust client-supplied forwarded headers.
+
+Migration `003_username_recovery.sql` retains old UUIDs, passwords, sessions, histories and ratings, assigning old accounts a stable 32-character username derived from their UUID. Existing password users may still enter their old login identifier into the username field, then read their generated username and create a rescue code in their profile. Old Email reset/verification and Google endpoints now return 404. No new Email addresses are collected. Retired provider tables and existing Email columns remain solely for historical compatibility; old unconsumed email tokens are invalidated. Google-only accounts without a password need a separate operator-assisted identity review; they cannot create a rescue code without a current password. Do not downgrade to 8.14.0's email-only login after users create new username accounts; back up the DB and retain a compatible account service.
 
 ## Activate a season explicitly
 
@@ -74,11 +86,11 @@ sudo systemd-run --wait --pipe --collect -p User=azhi71 -p EnvironmentFile=/etc/
 
 ## Verification, logs and rollback
 
-Check `/healthz`, `/api/auth/capabilities`, account email delivery and `/api/competition/status`, then use two different browser accounts to verify queue → acceptance → asset loading → server-authoritative battle → result → profile. Ranked requires verified email; quick requires login. Legacy guest custom, 2v2 and spectators remain available. Official queue matches block unsolicited room joins and spectating.
+Check `/healthz`, `/api/auth/capabilities`, username registration/recovery and `/api/competition/status`, then use two different browser accounts to verify queue → acceptance → asset loading → server-authoritative battle → result → profile. Quick and ranked require a logged-in active account; ranked also requires an active dated season. No Email verification is checked. Legacy guest custom, 2v2 and spectators remain available. Official queue matches block unsolicited room joins and spectating.
 
 Unexpected authenticated 1v1 disconnects pause both sides for a 30-second rotating-token reconnect window. Explicit leave forfeits once; both-player disconnect or server restart voids the match. Registered custom 1v1 matches are persisted; guest and 2v2 results are not ranked. There is no claim of seamless 2v2 reconnect. No frontend result/RP submission API exists.
 
-Use `journalctl -u azhi71 -n 100 --no-pager` for startup errors. Logs intentionally omit passwords, session cookies, recipients and email links. Configure log retention with the VPS's existing logging policy. Monitor CPU, event-loop delays, memory, DB connections and storage before increasing the existing 200-room/500-client caps; those caps are limits, not a measured capacity promise.
+Use `journalctl -u azhi71 -n 100 --no-pager` for startup errors. Logs intentionally omit passwords, session cookies and recovery codes. Configure log retention with the VPS's existing logging policy. Monitor CPU, event-loop delays, memory, DB connections and storage before increasing the existing 200-room/500-client caps; those caps are limits, not a measured capacity promise.
 
 The upgrade script's application backup does not include PostgreSQL. Restore application files and DB backups separately, with the game service stopped. The first migration is additive; do not drop tables to roll back a UI release. Keep secrets in `/etc/azhi71.env`, outside release swaps. Back up before each reviewed future migration.
 
@@ -86,6 +98,6 @@ The upgrade script's application backup does not include PostgreSQL. Restore app
 
 Ranked disconnects within the first 600 authoritative frames are void, without RP. Later explicit departures forfeit; a second forfeit between the same pair within an hour is void, preventing rapid alternate-account point farming. Five unfinished ranked preparations/early departures/forfeits in ten minutes temporarily block requeue. These rules reduce common abuse; they are not a complete anti-collusion/moderation service. Private room creation generates a 128-bit invitation code and requires login; changing a short-code public room into private requires creating a new private room.
 
-Run exactly one authoritative Node process for this release. The database is persistent, while active input/room state belongs to that process; do not run multiple PM2/cluster workers against the same match tables. Distributed queues, regional relays, seamless process migration, 2v2 recovery, account self-service export/deletion and advanced moderation are follow-up work. Google and SMTP adapters are implemented, but real provider delivery/login requires your credentials and a staging smoke test. A configured SMTP delivery failure uses the same generic registration/reset response to avoid email enumeration; its token is invalidated, and a nonidentifying mail error is logged.
+Run exactly one authoritative Node process for this release. The database is persistent, while active input/room state belongs to that process; do not run multiple PM2/cluster workers against the same match tables. Distributed queues, regional relays, seamless process migration, 2v2 recovery, account self-service export/deletion and advanced moderation are follow-up work. Mail and Google dependencies have been removed; all account and competition data remain in the dedicated PostgreSQL database.
 
 Equal-HP time-over rounds follow the original engine's replay rule; a duel does not fabricate a winner on a tied round. An official match that remains unresolved for 30 minutes is void. Confirmed result persistence failures hold the canonical result and retry idempotently; an active-game database authentication failure pauses the match and voids it when the database returns, without RP penalties. Full production failure-injection/load testing remains a staging acceptance step.
