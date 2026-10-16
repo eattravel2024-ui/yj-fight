@@ -114,7 +114,10 @@ wss.on('connection',ws=>{
    const char=typeof msg.char==='string'&&Object.hasOwn(Combat.CHAR,msg.char)?msg.char:'azhi';
    if(msg.room!==undefined&&typeof msg.room!=='string'){send(ws,{type:'error',message:'請提供有效房號'});return}
    if(msg.mode!==undefined&&!['duel','team'].includes(msg.mode)){send(ws,{type:'error',message:'房間模式必須是 1v1 或 2v2'});return}
+   if(msg.intent!==undefined&&!['join','create'].includes(msg.intent)){send(ws,{type:'error',message:'房間操作必須是建立或加入'});return}
    let id=msg.room?msg.room.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8):'';
+   if(msg.intent==='join'&&!rooms.has(id)){send(ws,{type:'error',message:'找不到房間，請確認房號；要開新房請選擇建立房間'});return}
+   if(msg.intent==='create'&&id&&rooms.has(id)){send(ws,{type:'error',message:'房號已被使用，請加入該房間或建立新房'});return}
    if(!id)id=newCode();let room=rooms.get(id);const requestedMode=msg.mode==='team'?'team':'duel';
    // Validate before allocating a room: malformed nicknames must not exhaust the room limit.
    if(msg.name!==undefined&&!cleanLabel(msg.name)){send(ws,{type:'error',message:'玩家暱稱需 2–16 字，只能使用中英文字、數字、空格、底線、句點及連字號'});return}

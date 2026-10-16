@@ -7,6 +7,16 @@ test('Ready is authoritative for 1v1 and 2v2, with explicit host start and membe
  t.after(async()=>{for(const s of sockets)s.terminate();await new Promise(r=>server.close(r));wss.close();});
  async function connect(){const ws=new WS(`ws://127.0.0.1:${server.address().port}/ws`);ws.messages=[];ws.on('message',d=>ws.messages.push(JSON.parse(d)));await once(ws,'open');sockets.push(ws);return ws;}
  async function send(ws,msg){const n=ws.messages.length;ws.send(JSON.stringify(msg));const stamp=Date.now()+Math.random();ws.send(JSON.stringify({type:'ping',sentAt:stamp}));if(!ws.messages.some(m=>m.type==='pong'&&m.sentAt===stamp))await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('fence timeout')),2500);function check(){if(ws.messages.some(m=>m.type==='pong'&&m.sentAt===stamp)){clearTimeout(timer);ws.off('message',check);resolve();}}ws.on('message',check);check();});return ws.messages.slice(n);}
+ // Explicit custom-room intents must not turn a mistyped join into room creation.
+ const creator=await connect(),guest=await connect(),probe=await connect(),initial=rooms.size;
+ assert.ok((await send(probe,{type:'join',room:'MISSING',intent:'join'})).some(m=>m.type==='error'));
+ assert.equal(rooms.size,initial);
+ assert.ok((await send(probe,{type:'join',intent:{}})).some(m=>m.type==='error'));assert.equal(rooms.size,initial);
+ await send(creator,{type:'join',room:'EXPLICIT',intent:'create',char:'azhi'});assert.ok(rooms.has('EXPLICIT'));
+ assert.ok((await send(probe,{type:'join',room:'EXPLICIT',intent:'create'})).some(m=>m.type==='error'));assert.equal(rooms.get('EXPLICIT').players.length,1);
+ await send(guest,{type:'join',room:'EXPLICIT',intent:'join',char:'winnie'});assert.equal(rooms.get('EXPLICIT').players.length,2);
+ assert.ok((await send(creator,{type:'join',room:'MISSING',intent:'join'})).some(m=>m.type==='error'));assert.equal(rooms.get('EXPLICIT').players.length,2,'rejected transfer retains current membership');
+ await send(creator,{type:'leave'});await send(guest,{type:'leave'});
  for(const count of [2,4]){
   const id='READY'+count,mode=count===4?'team':'duel',actors=[];
   for(let i=0;i<count;i++){const p=await connect();actors.push(p);await send(p,{type:'join',room:id,mode,char:['azhi','winnie','sezi','gambler'][i]});}

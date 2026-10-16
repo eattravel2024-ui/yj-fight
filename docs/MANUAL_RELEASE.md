@@ -1,6 +1,24 @@
 # 手動發佈與回滾
 
-目前版本 **8.11.2**：場景內街機 HUD、背景降噪、能量／技能提示與真實回合演出；依要求移除獨立的經典冒險 6.8。街機、練習、1v1、2v2、觀戰及存檔保留。本次未連線或部署正式 VPS。
+目前版本 **8.11.3**：自訂對戰、首頁人物遮擋修正與場景內街機 HUD、背景降噪、能量／技能提示與真實回合演出；依要求移除獨立的經典冒險 6.8。街機、練習、1v1、2v2、觀戰及存檔保留。本次未連線或部署正式 VPS。
+
+## 8.11.3：自訂對戰與首頁修正
+
+「有請公子，上擂台」移至模式標題下方；1v1／2v2／觀戰合併至自訂對戰，新增清楚的建立／加入、選手席位與 Ready 流程。沒有實裝匹配或排位。登入 VPS 執行：
+
+```bash
+set -euo pipefail
+cd ~/azhi-update.lvccoe
+git fetch origin tag checkpoint-custom-8.11.3
+git switch --detach checkpoint-custom-8.11.3
+npm ci --ignore-scripts --no-fund
+sudo bash deploy/upgrade-ubuntu.sh
+curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+```
+
+健康版本應為 **8.11.3**。更新後強制重新整理瀏覽器。原有備份／回滾方式不變，沒有自動部署。
+
+以下為前版更新方式。
 
 ## 8.11.2：從 GitHub 固定檢查點更新
 

@@ -1,6 +1,6 @@
 # 陪公子練武 — Spar With the Young Master
 
-> GitHub/Codex development baseline: **8.11.2**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> GitHub/Codex development baseline: **8.11.3**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,10 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.11.3 — Custom Match and unobstructed home artwork
+
+The invitation subtitle sits below the mode heading, leaving Gambler and Azhi unobstructed. Five main entries lead to arcade, practice, Custom Match, settings and controls. Custom Match consolidates 1v1, 2v2 and spectating, with explicit create/join actions, real seat portraits, confirmed character changes, invitations and server-owned Ready/host start. Missing-room joins report an error without creating a room; old clients remain compatible. Combat rules are unchanged. Matchmaking and ranked play remain planned. Fixed tag: `checkpoint-custom-8.11.3`; see [delivery and next steps](docs/CUSTOM_MATCH_8.11.3.md).
 
 ## 8.11.2 — in-scene arcade combat HUD
 

@@ -8,6 +8,8 @@
 - Two-device/4-device end-to-end tests with latency, jitter and disconnect injection. Do not mark complete without real network evidence.
 
 ## P1 — user experience and core mechanics
+- [x] 8.11.3: unobstructed home artwork, five main entries and unified Custom Match with explicit create/join, real seat/Ready data and strict missing-room errors. All modern modes retained.
+- Next requested direction: casual quick-match queue first, then stable player accounts/IDs and persistent ranked results; see CUSTOM_MATCH_8.11.3.md. Matchmaking/ranks are not yet implemented.
 - [x] 8.9.5: shared full-window shell and in-game lobby/selection/rooms/settings/guide in both 1v1 and 2v2/spectator clients; preserves named rooms, invitations, Ready and rematch. Follow-up: public room discovery, reconnect and private-room permissions.
 - Mac keyboard focus and mobile virtual controls customization; accessible touch areas.
 - [x] 8.9.7: live cancel/energy hints and actual skill hit receipts; supers verified in both rulesets. Continue tutorials for anti-air and team mechanics.

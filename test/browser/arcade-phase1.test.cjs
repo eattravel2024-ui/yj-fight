@@ -30,20 +30,20 @@ async function choose(p,entry,rapid=false){
 }
 async function backHome(p){await p.keyboard.press('Escape');await waitPanel(p,'home');}
 
-test('Phase 1 six main-menu entries reach real existing panels without automatically starting combat',async()=>{
+test('Phase 1 five main-menu entries reach real existing panels without automatically starting combat',async()=>{
  const p=await page({viewport:{width:1366,height:768}});await p.goto(base);await waitPanel(p,'home');
- assert.deepEqual(await p.locator('.arcade-option').evaluateAll(nodes=>nodes.map(node=>node.dataset.menuEntry)),['arcade','practice','online','multiplayer','settings','guide']);
+ assert.deepEqual(await p.locator('.arcade-option').evaluateAll(nodes=>nodes.map(node=>node.dataset.menuEntry)),['arcade','practice','online','settings','guide']);
  await p.evaluate(()=>{delete window.AzhiDebug;delete window.AzhiTeamDebug;});
  for(const [entry,panel] of [['arcade','fighters'],['practice','fighters'],['online','room'],['settings','settings'],['guide','guide']]){
   await choose(p,entry,entry==='arcade');await waitPanel(p,panel);
   assert.equal(await p.evaluate(()=>window.AzhiGame.game),null,'entering '+entry+' does not initialize a match');
   assert.equal(await p.evaluate(()=>window.AzhiGame.busy),false,'entering '+entry+' does not connect automatically');
-  if(entry==='guide')assert.ok(await p.locator('#appPane-guide a[href*="adventure-legacy"]').count(),'the classic adventure remains accessible');
+  if(entry==='guide')assert.equal(await p.locator('#appPane-guide a[href*="adventure-legacy"]').count(),0);
   await backHome(p);
  }
- await choose(p,'multiplayer');await p.waitForURL('**/team.html?**');await waitPanel(p,'room');
+ await choose(p,'online');await p.locator('[data-custom-mode="team"]').click();await p.waitForURL('**/team.html?**');await waitPanel(p,'room');
  assert.equal(await p.evaluate(()=>window.AzhiGame.mode),'team');assert.equal(await p.evaluate(()=>window.AzhiGame.busy),false);
- await p.locator('#watchTab').click();assert.equal(await p.evaluate(()=>window.AzhiGame.mode),'spectator');
+ await p.locator('[data-custom-mode="spectator"]').click();assert.equal(await p.evaluate(()=>window.AzhiGame.mode),'spectator');
  assert.equal(await p.locator('#teamCharacters button:disabled').count(),4,'spectators retain read-only character controls');
  await backHome(p);await choose(p,'practice');await p.waitForURL('**/?mode=practice**');await waitPanel(p,'fighters');
  assert.equal(await p.evaluate(()=>window.AzhiGame.mode),'practice');assert.equal(await p.evaluate(()=>window.AzhiGame.game),null);
@@ -78,14 +78,14 @@ test('Phase 1 keyboard selection, back and resume preserve local battle and rele
 
 test('Phase 1 changing menu modes while joined keeps the existing online room and connection',async()=>{
  const p=await page();await p.goto(base+'/?room=P1GUARD');await waitPanel(p,'room');
- await p.locator('#onlineNickname').fill('Phase One');await p.locator('#joinRoom').click();
+ await p.locator('#onlineNickname').fill('Phase One');await p.locator('#joinRoom').evaluate(button=>button.click());
  await p.waitForFunction(()=>window.AzhiGame.connected&&window.AzhiGame.room==='P1GUARD'&&!document.querySelector('#readyButton').disabled);
- for(const entry of ['practice','arcade','multiplayer']){
+ for(const entry of ['practice','arcade','online']){
   await p.evaluate(()=>window.AzhiShell.open('home'));await choose(p,entry);await waitPanel(p,'room');
   assert.equal(new URL(p.url()).pathname,'/');assert.equal(await p.evaluate(()=>window.AzhiGame.mode),'online');
   assert.equal(await p.evaluate(()=>window.AzhiGame.connected),true);assert.equal(await p.evaluate(()=>window.AzhiGame.room),'P1GUARD');
  }
- await p.locator('#appPane-room a[href="/team.html?panel=room"]').click();assert.equal(new URL(p.url()).pathname,'/');assert.equal(await p.evaluate(()=>window.AzhiGame.room),'P1GUARD','secondary room navigation also preserves an occupied room');
+ await p.locator('[data-custom-mode="team"]').evaluate(button=>button.click());assert.equal(new URL(p.url()).pathname,'/');assert.equal(await p.evaluate(()=>window.AzhiGame.room),'P1GUARD','secondary room navigation also preserves an occupied room');
  await p.locator('#onlineNickname').fill('Typed W S');await p.locator('#onlineNickname').press('Enter');
  assert.equal(await p.evaluate(()=>window.AzhiShell.currentPanel),'room','text-field Enter is not consumed by main-menu navigation');
  assert.equal(await p.evaluate(()=>window.AzhiGame.connected),true);assert.deepEqual(p.errors,[]);
@@ -102,7 +102,7 @@ test('Phase 1 invalid legacy save recovers safely while retaining progress, purc
  assert.equal(await p.locator('#characterList [aria-pressed="true"]').count(),1);assert.deepEqual(p.errors,[]);
 });
 
-test('Phase 1 desktop main menu has a full-window key visual, six visible slanted choices and selection feedback',async()=>{
+test('Phase 1 desktop main menu has a full-window key visual, five visible slanted choices and selection feedback',async()=>{
  const p=await page({viewport:{width:1920,height:1080}});await p.goto(base);await waitPanel(p,'home');
  await p.locator('.arcade-hero').evaluate(image=>image.decode());await p.evaluate(()=>document.fonts.ready);
  for(const viewport of [{width:1920,height:1080},{width:1600,height:900},{width:1366,height:768},{width:1280,height:720}]){
@@ -129,7 +129,7 @@ test('Phase 1 desktop main menu has a full-window key visual, six visible slante
 
 test('Phase 1 reduced-motion mobile menu remains touchable with no horizontal overflow',async()=>{
  const p=await page({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'});await p.goto(base);await waitPanel(p,'home');await p.locator('.arcade-hero').evaluate(image=>image.decode());
- assert.equal(await p.locator('.arcade-option').count(),6);
+ assert.equal(await p.locator('.arcade-option').count(),5);
  for(const button of await p.locator('.arcade-option').all())assert.ok((await button.boundingBox()).height>=44);
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  const animations=await p.locator('.arcade-home').evaluate(element=>element.getAnimations({subtree:true}).filter(animation=>animation.effect.getTiming().duration>10).length);assert.equal(animations,0,'reduced motion disables menu entrance and selection animations');

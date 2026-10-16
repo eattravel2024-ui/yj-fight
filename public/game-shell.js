@@ -3,18 +3,17 @@
 (()=>{
  const $=id=>document.getElementById(id),team=document.body.classList.contains('team-page'),gameAPI=window.AzhiGame;
  const battle=document.querySelector(team?'.board':'.game-panel');if(!battle||!gameAPI||!window.AzhiGameFlow)return;
- const labels={home:'主選單',fighters:'選擇角色',room:'對戰房間',settings:'遊戲設定',guide:'操作與招式'};
+ const labels={home:'主選單',fighters:'選擇角色',room:'自訂對戰',settings:'遊戲設定',guide:'操作與招式'};
  const flow=window.AzhiGameFlow.create({mode:gameAPI.mode});
  let panel='home',lastNotice='',noticeUntil=0,navigating=false,lastMenuSound=-Infinity;
  const entries=[
   {id:'arcade',name:'街機闖關',english:'ARCADE / STORY',note:'五關街機挑戰。選好角色，走進你的下一場。'},
   {id:'practice',name:'自由練習',english:'TRAINING',note:'研究走位與連段。一鍵必殺，練到順手再上場。'},
-  {id:'online',name:'好友對戰',english:'VERSUS / 1 VS 1',note:'建立或加入房間，全員 Ready 後由房主開賽。'},
-  {id:'multiplayer',name:'團隊・觀戰',english:'2 VS 2 / LIVE',note:'四人同場，或使用房號進入只讀觀戰席。'},
+  {id:'online',name:'自訂對戰',english:'CUSTOM MATCH / 1V1・2V2・LIVE',note:'選擇規則，建立或加入房間。朋友到齊，全員 Ready 後開打。'},
   {id:'settings',name:'遊戲設定',english:'SETTINGS',note:'調整音效、打擊特效與畫面。找出你的戰鬥節奏。'},
   {id:'guide',name:'操作與招式',english:'HOW TO PLAY',note:'查看真實招式幀表、單鍵技能與接技提示。'}
  ];
- let selectedEntry=['team','spectator'].includes(gameAPI.mode)?'multiplayer':gameAPI.mode;
+ let selectedEntry=['team','spectator'].includes(gameAPI.mode)?'online':gameAPI.mode;
  const move=(element,destination)=>{if(element)destination.append(element);};
  const bar=document.createElement('header');bar.className='app-bar';bar.innerHTML='<button class="app-brand" type="button" data-panel="home" aria-label="開啟主選單"><span class="brand-icon">武</span><strong>陪公子練武</strong></button><span class="app-status" id="appStatus" role="status"></span><nav class="app-actions" aria-label="遊戲選單"></nav>';
  const menu=document.createElement('dialog');menu.className='app-menu';menu.id='appMenu';menu.setAttribute('aria-labelledby','appMenuTitle');
@@ -29,7 +28,7 @@
   if(name!=='guide'){const action=document.createElement('button');action.type='button';action.dataset.panel=name;action.textContent=name==='home'?'主選單':name==='fighters'?'選角':name==='room'?'房間':'設定';bar.querySelector('.app-actions').append(action);}
  }
  const fullButton=document.createElement('button');fullButton.type='button';fullButton.dataset.fullscreen='';fullButton.textContent='⛶';fullButton.setAttribute('aria-label','切換瀏覽器全螢幕');bar.querySelector('.app-actions').append(fullButton);
- panes.home.innerHTML='<div class="app-home arcade-home"><section class="arcade-keyart" aria-label="陪公子練武角色主視覺"><small class="arcade-edition">ARCADE FIGHTING GAME / 2.0</small><h1 class="arcade-wordmark"><span class="wordmark-big">陪公子</span><span class="wordmark-real">練武</span></h1><p class="arcade-subtitle">有請公子，上擂台</p><img class="arcade-support-hero" width="768" height="1024" alt="" aria-hidden="true"><img class="arcade-hero" width="768" height="1024" alt="" fetchpriority="high"><div class="arcade-hero-caption"><small>ALL TALK. ALL FIGHT.</small><strong>公子，該練武了。</strong></div><div class="arcade-stamp" aria-hidden="true">4 FIGHTERS<br>ONE ARENA</div><div class="arcade-ticker" aria-hidden="true">陪公子練武 / SPAR WITH THE YOUNG MASTER　／　陪公子練武 / SPAR WITH THE YOUNG MASTER　／　陪公子練武 / SPAR WITH THE YOUNG MASTER</div></section><section class="arcade-navigation" aria-labelledby="appModeTitle"><header class="arcade-nav-heading"><small>MAIN MENU / SELECT YOUR NEXT MOVE</small><h2 id="appModeTitle">選擇戰鬥模式</h2></header><div id="arcadeMenuOptions" class="arcade-options" aria-label="主選單"></div><p class="arcade-nav-note" id="arcadeMenuNote" aria-live="polite"></p><div class="arcade-controls"><div class="arcade-key-hints"><span><kbd>↑</kbd><kbd>↓</kbd> 選擇</span><span><kbd>Enter</kbd> 確認</span><span><kbd>Esc</kbd> 返回</span></div><button type="button" class="arcade-enter" id="arcadeEnter">進入街機闖關 <span>↗</span></button><button type="button" class="secondary" id="appResume" data-close hidden>繼續目前對戰 →</button></div><div id="appHomeModes" hidden aria-hidden="true"></div></section></div>';
+ panes.home.innerHTML='<div class="app-home arcade-home"><section class="arcade-keyart" aria-label="陪公子練武角色主視覺"><small class="arcade-edition">ARCADE FIGHTING GAME / 2.0</small><h1 class="arcade-wordmark"><span class="wordmark-big">陪公子</span><span class="wordmark-real">練武</span></h1><img class="arcade-support-hero" width="768" height="1024" alt="" aria-hidden="true"><img class="arcade-hero" width="768" height="1024" alt="" fetchpriority="high"><div class="arcade-hero-caption"><small>ALL TALK. ALL FIGHT.</small><strong>公子，該練武了。</strong></div><div class="arcade-stamp" aria-hidden="true">4 FIGHTERS<br>ONE ARENA</div><div class="arcade-ticker" aria-hidden="true">陪公子練武 / SPAR WITH THE YOUNG MASTER　／　陪公子練武 / SPAR WITH THE YOUNG MASTER　／　陪公子練武 / SPAR WITH THE YOUNG MASTER</div></section><section class="arcade-navigation" aria-labelledby="appModeTitle"><header class="arcade-nav-heading"><small>MAIN MENU / SELECT YOUR NEXT MOVE</small><h2 id="appModeTitle">選擇戰鬥模式</h2><p class="arcade-subtitle">有請公子，上擂台</p></header><div id="arcadeMenuOptions" class="arcade-options" aria-label="主選單"></div><p class="arcade-nav-note" id="arcadeMenuNote" aria-live="polite"></p><div class="arcade-controls"><div class="arcade-key-hints"><span><kbd>↑</kbd><kbd>↓</kbd> 選擇</span><span><kbd>Enter</kbd> 確認</span><span><kbd>Esc</kbd> 返回</span></div><button type="button" class="arcade-enter" id="arcadeEnter">進入街機闖關 <span>↗</span></button><button type="button" class="secondary" id="appResume" data-close hidden>繼續目前對戰 →</button></div><div id="appHomeModes" hidden aria-hidden="true"></div></section></div>';
  const hero=panes.home.querySelector('.arcade-hero'),supportHero=panes.home.querySelector('.arcade-support-hero'),Art=window.AzhiCharacterArt;
  function refreshHero(){Art.bindImage(hero,'azhi','fullbody');Art.bindImage(supportHero,'gambler','fullbody');}
  refreshHero();
@@ -51,8 +50,8 @@
   move(document.querySelector('.mode-bar'),$('appHomeModes'));
   move($('progressPanel'),panes.guide);$('mainAction').classList.add('app-confirm-action');move($('mainAction'),foot);
   move($('onlinePanel'),panes.room);move(document.querySelector('.sub-panel'),panes.guide);move(document.querySelector('.training-panel'),panes.guide);
-  const roomModes=document.createElement('p');roomModes.innerHTML='<a class="secondary" href="/team.html?panel=room">前往 2v2／觀戰大廳 ↗</a>';roomModes.querySelector('a').addEventListener('click',event=>{event.preventDefault();navigateMode('team')});panes.room.append(roomModes);
  }
+ const customRoom=window.AzhiCustomRoom.create({pane:panes.room,game:gameAPI,team,open,changeMode:navigateMode});
  const characterSelect=window.AzhiCharacterSelect.create({pane:panes.fighters,action:foot.querySelector('.app-confirm-action'),game:gameAPI,openRoom:()=>open('room'),playSound:menuSound});
  window.AzhiAudioDirector.mountSettings(panes.settings);
  const settingsTitle=document.createElement('h3');settingsTitle.textContent='聲音與畫面';panes.settings.append(settingsTitle);
@@ -86,7 +85,7 @@
   if(panel!=='home'||navigating)return;menuSound('confirm');
   if(selectedEntry==='settings'||selectedEntry==='guide'){open(selectedEntry);return;}
   if(busy()){open('room');return;}
-  if(selectedEntry==='multiplayer'){if(team){gameAPI.requestMode('team');open('room')}else navigateMode('team');return;}
+  if(selectedEntry==='online'){if(team)open('room');else if(gameAPI.requestMode('online'))open('room');return;}
   if(team){navigateMode(selectedEntry);return;}
   if(gameAPI.requestMode(selectedEntry))open(selectedEntry==='online'?'room':'fighters');
  }
@@ -99,7 +98,7 @@
   $('appResume').hidden=!state;$('appConfirmSummary').textContent=($('selectionSummary')?.textContent||'').replace(/^目前選擇：/,'');$('appConfirmMode').textContent=mode;
   const action=foot.querySelector('.app-confirm-action');if(action&&menu.open&&panel==='fighters')action.textContent=online?(gameAPI.mode==='spectator'?'加入觀戰 →':'前往對戰房間 →'):state?.status==='playing'?'重新開始戰鬥 →':'開始戰鬥 →';
   for(const button of bar.querySelectorAll('[data-panel]'))button.setAttribute('aria-expanded',String(menu.open&&button.dataset.panel===panel));
-  characterSelect.refresh();
+  characterSelect.refresh();customRoom.refresh();
   window.AzhiAudioDirector.route({panel,open:menu.open,game:gameAPI.game,mode:gameAPI.mode});
  }
  function open(name='home'){
@@ -109,7 +108,7 @@
   $('appMenuTitle').textContent=labels[panel];if(panel==='room'&&!team)$('onlinePanel').hidden=false;
   if(!menu.open)menu.showModal();document.body.classList.add('menu-open');
   window.dispatchEvent(new CustomEvent('azhi:menu',{detail:{open:true,panel}}));refresh();
-  if(panel==='home')selectEntry(selectedEntry,{focus:true,sound:false});else tabs.querySelector('[data-panel="'+panel+'"]').focus({preventScroll:true});
+  if(panel==='home')selectEntry(selectedEntry,{focus:true,sound:false});else if(panel==='room')customRoom.focus();else tabs.querySelector('[data-panel="'+panel+'"]').focus({preventScroll:true});
   if(panel==='fighters')characterSelect.open();else characterSelect.leave();
  }
  function close(){characterSelect.leave();flow.close();if(menu.open)menu.close();document.body.classList.remove('menu-open');window.dispatchEvent(new CustomEvent('azhi:menu',{detail:{open:false,panel}}));refresh();canvas.focus({preventScroll:true});}

@@ -65,12 +65,12 @@ test('main-menu navigation retains the chosen fighter across mode routes without
  await chooseMode(p,'practice');await p.locator('#characterList [data-char="gambler"]').click();
  assert.equal(await p.locator('#characterList .fighter-portrait').count(),4);
  await p.locator('#mainAction').click();await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>!AzhiShell.isOpen()&&AzhiGame.character==='gambler');
- await openPanel(p,'home');await p.locator('[data-menu-entry="multiplayer"]').click();
+ await openPanel(p,'home');await p.locator('[data-menu-entry="online"]').click();
  assert.equal(new URL(p.url()).pathname,'/','choosing a mode does not navigate before confirmation');
- await p.locator('#arcadeEnter').click();await p.waitForURL('**/team.html?**');
+ await p.locator('#arcadeEnter').click();await p.locator('[data-custom-mode="team"]').click();await p.waitForURL('**/team.html?**');
  await p.waitForFunction(()=>window.AzhiShell?.currentPanel==='room');
  assert.match(await p.locator('#selectionSummary').textContent(),/金沙賭神/);
- await p.locator('#watchTab').click();assert.equal(await p.locator('#teamCharacters button:disabled').count(),4);
+ await p.locator('[data-custom-mode="spectator"]').click();assert.equal(await p.locator('#teamCharacters button:disabled').count(),4);
  await openPanel(p,'home');await p.locator('[data-menu-entry="practice"]').click();
  assert.equal(new URL(p.url()).pathname,'/team.html');await p.locator('#arcadeEnter').click();
  await p.waitForURL('**/?mode=practice**');await p.waitForFunction(()=>window.AzhiShell?.currentPanel==='fighters');
@@ -183,7 +183,7 @@ test('retired classic adventure and script are no longer served',async()=>{
 });
 test('two real browser clients play 1v1 and spectator stays read only',async()=>{
  const a=await page(),b=await page();
- for(const [p,n] of [[a,'Browser Alpha'],[b,'Browser Bravo']]){await p.goto(base+'/?room=E2EDUEL');await p.locator('#onlineNickname').fill(n);await p.locator('#joinRoom').click();}
+ for(const [p,n] of [[a,'Browser Alpha'],[b,'Browser Bravo']]){await p.goto(base+'/?room=E2EDUEL');await p.locator('#onlineNickname').fill(n);await p.locator('#joinRoom').evaluate(button=>button.click());}
  assert.equal(await a.locator('#startMatchButton').isDisabled(),true);
  for(const p of [a,b])await p.locator('#readyButton').click();
  await a.locator('#onlinePanel').screenshot({path:'coverage/ready-lobby-8.9.png'});
@@ -212,14 +212,14 @@ test('real socket loss opens the room menu and permits manual rejoining in both 
  for(const team of [false,true]){
   const p=await page();await p.addInitScript(()=>{const NativeWebSocket=window.WebSocket;window.WebSocket=class extends NativeWebSocket{constructor(...args){super(...args);window.testSocket=this;}};});
   const ids=team?{nickname:'playerNickname',join:'joinButton',room:'roomCode',copies:['copyPlayerLink','copyWatchLink'],rematch:'rematch'}:{nickname:'onlineNickname',join:'joinRoom',room:'roomInput',copies:['copyRoom','copySpectatorLink'],rematch:'rematchButton'},room=team?'REJOIN2':'REJOIN1';
-  await p.goto(base+(team?'/team.html':'/')+'?room='+room);await p.locator('#'+ids.nickname).fill(team?'Reconnect Team':'Reconnect Duel');await p.locator('#'+ids.join).click();
+  await p.goto(base+(team?'/team.html':'/')+'?room='+room);await p.locator('#'+ids.nickname).fill(team?'Reconnect Team':'Reconnect Duel');await p.locator('#'+ids.join).evaluate(button=>button.click());
   await p.waitForFunction(team=>window.testSocket?.readyState===WebSocket.OPEN&&(team?window.AzhiTeamDebug.slot>=0:!document.querySelector('#leaveRoom').disabled),team);
   assert.equal(await p.locator('#readyButton').isDisabled(),false);for(const id of ids.copies)assert.equal(await p.locator('#'+id).isDisabled(),false);
   await p.evaluate(()=>window.AzhiShell.close());await p.evaluate(()=>window.testSocket.close(4001,'test disconnect'));
   await p.waitForFunction(join=>window.AzhiShell.isOpen()&&window.AzhiShell.currentPanel==='room'&&!document.getElementById(join).disabled,ids.join);
   for(const id of ['readyButton','startMatchButton',...ids.copies,ids.rematch])assert.equal(await p.locator('#'+id).isDisabled(),true,'disconnected '+id+' is disabled');
   assert.equal(await p.locator('#'+ids.room).inputValue(),room,'manual reconnect retains the original room code');
-  await p.locator('#'+ids.join).click();await p.waitForFunction(()=>!document.querySelector('#readyButton').disabled);
+  await p.locator('#'+ids.join).evaluate(button=>button.click());await p.waitForFunction(()=>!document.querySelector('#readyButton').disabled);
   assert.equal(await p.locator('#'+ids.room).inputValue(),room);for(const id of ids.copies)assert.equal(await p.locator('#'+id).isDisabled(),false);
   assert.deepEqual(p.errors,[]);
  }
@@ -228,7 +228,7 @@ test('four real browser clients start 2v2 with four retained characters',async()
  const players=[];
  for(const [i,char] of ['winnie','sezi','gambler','azhi'].entries()){
   const p=await page();players.push(p);await p.goto(base+'/team.html');await openPanel(p,'fighters');
-  await p.locator('#teamCharacters button').nth(i).click();await p.locator('.app-confirm-action').click();await p.waitForFunction(()=>AzhiShell.currentPanel==='room');await p.locator('#roomCode').fill('E2ETEAM');await p.locator('#playerNickname').fill('Team Player '+i);await p.locator('#joinButton').click();
+  await p.locator('#teamCharacters button').nth(i).click();await p.locator('.app-confirm-action').click();await p.waitForFunction(()=>AzhiShell.currentPanel==='room');await p.locator('#roomCode').fill('E2ETEAM');await p.locator('#playerNickname').fill('Team Player '+i);await p.locator('#joinButton').evaluate(button=>button.click());
  }
  assert.equal(await players[0].locator('#startMatchButton').isDisabled(),true);
  for(const p of players)await p.locator('#readyButton').click();
