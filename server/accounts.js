@@ -3,6 +3,7 @@
 const crypto=require('node:crypto');
 const {isIP}=require('node:net');
 const {hash,verify,Algorithm}=require('@node-rs/argon2');
+const Avatars=require('./avatars');
 const COOKIE='azhi_session',CSRF_COOKIE='azhi_csrf';
 const AVATARS=new Set(['azhi','sezi','gambler','winnie']);
 const PASSWORD_OPTIONS={algorithm:Algorithm.Argon2id,memoryCost:65536,timeCost:3,parallelism:1,outputLen:32};
@@ -68,7 +69,7 @@ function createAccounts({db,env=process.env}={}){
  function cookie(req,name,value,maxAge=SESSION_MS/1000){return `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${origin(req).startsWith('https:')?'; Secure':''}`;}
  function setSessionCookies(req,res,sessionToken,csrfToken){res.setHeader('Set-Cookie',[cookie(req,COOKIE,sessionToken),cookie(req,CSRF_COOKIE,csrfToken)]);}
  function clearSessionCookies(req,res){res.setHeader('Set-Cookie',[cookie(req,COOKIE,'',0),cookie(req,CSRF_COOKIE,'',0)]);}
- function capabilities(){return {accounts:!!db&&!configurationError,unavailableReason:!db?'database':configurationError?'origin':null,authMethod:'username',emailRequired:false,httpsRequired:false,recovery:{enabled:true,oneTime:true},transport:{encrypted:!!configuredOrigin?.startsWith('https:'),insecureHttp:!!configuredOrigin?.startsWith('http:')},password:{minLength:PASSWORD_MIN,maxLength:PASSWORD_MAX,requireMixedCase:false,requireNumbers:false,requireSymbols:false},avatars:[...AVATARS]};}
+ function capabilities(){return {accounts:!!db&&!configurationError,unavailableReason:!db?'database':configurationError?'origin':null,authMethod:'username',emailRequired:false,httpsRequired:false,recovery:{enabled:true,oneTime:true},transport:{encrypted:!!configuredOrigin?.startsWith('https:'),insecureHttp:!!configuredOrigin?.startsWith('http:')},password:{minLength:PASSWORD_MIN,maxLength:PASSWORD_MAX,requireMixedCase:false,requireNumbers:false,requireSymbols:false},avatars:[...AVATARS],avatarUpload:{enabled:!!db&&!configurationError,size:Avatars.SIZE,maxBytes:Avatars.MAX_BYTES,format:'webp'}};}
  async function rate(req,purpose,account,{ipLimit=30,accountLimit=10,seconds=900}={}){
   // Deliberately use the TCP peer. Never trust arbitrary X-Forwarded-For. A proxy
   // can configure a separate trusted real-IP transport at deployment time.
@@ -151,14 +152,32 @@ function createAccounts({db,env=process.env}={}){
   validateCsrf(req,auth);
   if(Object.keys(input).some(k=>!['nickname','avatar','preferences'].includes(k)))throw error(400,'PROFILE_FIELDS','只可修改暱稱、頭像與偏好設定');
   const name=input.nickname===undefined?auth.user.nickname:nickname(input.nickname),avatar=input.avatar===undefined?auth.user.avatar:input.avatar;
-  if(!name||!AVATARS.has(avatar))throw error(400,'INVALID_PROFILE','暱稱或頭像不正確');
+  if(!name||!AVATARS.has(avatar)&&!(avatar===auth.user.avatar&&Avatars.PATH.test(avatar)))throw error(400,'INVALID_PROFILE','暱稱或頭像不正確');
   const prefs=input.preferences===undefined?auth.user.preferences:preferences(input.preferences);
-  const r=await db.query('UPDATE users SET display_name=$2,avatar=$3,preferences=$4,updated_at=now() WHERE id=$1 RETURNING *',[auth.user.id,name,avatar,JSON.stringify(prefs)]);
-  json(res,200,{user:publicUser(r.rows[0])});
+  const row=await db.transaction(async client=>{
+   const current=(await client.query("SELECT avatar FROM users WHERE id=$1 AND status='active' FOR UPDATE",[auth.user.id])).rows[0];
+   if(!current)throw error(401,'LOGIN_REQUIRED','請先登入有效玩家帳號');
+   const selected=input.avatar===undefined?current.avatar:avatar;
+   if(!AVATARS.has(selected)&&selected!==current.avatar)throw error(409,'PROFILE_CHANGED','頭像已更新，請重新整理後再儲存');
+   const r=await client.query('UPDATE users SET display_name=$2,avatar=$3,preferences=$4,updated_at=now() WHERE id=$1 RETURNING *',[auth.user.id,name,selected,JSON.stringify(prefs)]);
+   if(AVATARS.has(selected))await client.query('DELETE FROM player_avatars WHERE user_id=$1',[auth.user.id]);
+   return r.rows[0];
+  });
+  json(res,200,{user:publicUser(row)});
  }
  async function handle(req,res){
   let url;try{url=new URL(req.url,'http://localhost');}catch{return false;}
   const pathname=url.pathname;
+  if(pathname.startsWith('/api/avatars/'))return Avatars.serve(db,req,res,pathname);
+  if(pathname==='/api/profile/avatar'){
+   try{
+    if(req.method!=='POST')throw error(405,'METHOD_NOT_ALLOWED','不支援此操作');
+    if(!db)throw error(503,'DATABASE_UNAVAILABLE','帳號資料庫尚未設定');
+    const auth=await requireUser(req);validateCsrf(req,auth);await rate(req,'avatar',auth.user.id,{accountLimit:20,ipLimit:60,seconds:900});
+    const user=await Avatars.store(db,auth.user.id,await Avatars.readImage(req));json(res,200,{user:publicUser(user)});
+   }catch(err){if(res.destroyed||res.writableEnded)return true;const status=Number.isInteger(err.status)?err.status:500;json(res,status,{error:{code:status===500?'AVATAR_UNAVAILABLE':err.code,message:status===500?'頭像暫時無法儲存，請稍後再試':err.message}});}
+   return true;
+  }
   if(!pathname.startsWith('/api/auth/')&&pathname!=='/api/profile')return false;
   try{
    if(pathname==='/api/auth/capabilities'&&req.method==='GET'){json(res,200,capabilities());return true;}

@@ -1,6 +1,6 @@
 # 陪公子練武 — Spar With the Young Master
 
-> Current release: **8.15.1 / Phase 4.5 + simple username registration**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> Current release: **8.15.2 / custom player avatars**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -16,6 +16,14 @@ npm start
 ```
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
+
+## 8.15.2 — Upload, crop and preview your own avatar
+
+Logged-in players can choose a JPG/PNG/WebP (up to 12 MiB), drag/zoom or use arrow keys to crop, and see square/circular previews before saving. The browser makes a 256×256 WebP of at most 96 KiB; only this cropped result is uploaded. Unsupported images produce a clear error; canceling leaves the saved avatar alone. Character presets remain available.
+
+The backend verifies the session, Origin, CSRF, request size, actual codec, dimensions and animation; it re-encodes to remove metadata and stores one normalized image per account in PostgreSQL. Public versioned same-origin URLs work in profiles and leaderboards, with a bounded fallback. Replacing an image or choosing a preset removes obsolete stored bytes. Game release swaps do not delete avatars, and the existing PostgreSQL backup includes them.
+
+**Apply additive Migration 004 before upgrading an account-enabled VPS.** The dependency preflight now checks the native Sharp/WebP codec before stopping the old service. See [manual update and migration](docs/MANUAL_RELEASE.md) and [account deployment](docs/ONLINE_DEPLOYMENT.md). Existing passwords, accounts, records, combat art and rules are preserved.
 
 ## 8.15.1 — Register with just username and an 8-character password
 

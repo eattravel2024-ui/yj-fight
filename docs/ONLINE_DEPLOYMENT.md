@@ -1,6 +1,10 @@
-# 8.15.1 — 帳號密碼註冊與 IP／HTTP 部署（免 Email、SMTP、網域）
+# 8.15.2 — 帳號密碼註冊與 IP／HTTP 部署（免 Email、SMTP、網域）
 
-此版已獲使用者授權推送 GitHub，分支為 `feat/phase4-5-grapples`，包含 Phase 4.5 與立法院。註冊只需帳號、至少 8 碼密碼，暱稱選填；不限制必須混合大小寫、數字或符號。保留救援碼與 PostgreSQL。以下命令僅由主機管理者手動執行；Codex 不會連線或部署正式 VPS。健康版本應為 **8.15.1**。
+此版已獲使用者授權推送 GitHub，分支為 `feat/phase4-5-grapples`，包含 Phase 4.5 與立法院。註冊只需帳號、至少 8 碼密碼，暱稱選填；不限制必須混合大小寫、數字或符號。保留救援碼與 PostgreSQL。以下命令僅由主機管理者手動執行；Codex 不會連線或部署正式 VPS。健康版本應為 **8.15.2**。
+
+## Avatar upgrade from 8.15.1
+
+已啟用會員時，更新前先用既有 PostgreSQL 備份流程保存帳號及圖片，再執行 `tools/db-migrate.cjs` 套用新增的 `004_custom_player_avatars.sql`，最後執行遊戲 upgrade。完整命令見 [MANUAL_RELEASE.md](MANUAL_RELEASE.md)。頭像保存在新增表的 BYTEA，不使用 `/opt/azhi71` 內的上傳目錄；APP_ORIGIN 與既有 HTTPS 設定無需更動。新增 Sharp/WebP 原生依賴會由 staging preflight 檢查。本文件下方首次設定流程會一次套用所有 Migration。
 
 ## Existing game only
 
@@ -85,7 +89,7 @@ curl -fsS --max-time 5 http://127.0.0.1:31071/api/auth/capabilities
 BASH
 ```
 
-確認 `version` 為 `8.15.1`、`accounts:true`、`authMethod:"username"`、`emailRequired:false` 與 `password.minLength:8`，再強制重新整理瀏覽器。密碼自動隨機產生並只寫入私密設定檔，命令不會列印憑證。這是首次設定，不是重試／密碼輪換工具；中途中斷請保留檔案與資料，依下方步驟續作。後續普通更新只需上方 Git／upgrade，不重建資料庫。排位另需設定實際賽季日期，註冊／登入／快速匹配不需要先啟用賽季。
+確認 `version` 為 `8.15.2`、`accounts:true`、`authMethod:"username"`、`emailRequired:false` 與 `password.minLength:8`，再強制重新整理瀏覽器。密碼自動隨機產生並只寫入私密設定檔，命令不會列印憑證。這是首次設定，不是重試／密碼輪換工具；中途中斷請保留檔案與資料，依下方步驟續作。後續普通更新只需上方 Git／upgrade，不重建資料庫。排位另需設定實際賽季日期，註冊／登入／快速匹配不需要先啟用賽季。
 
 ## Enable persistent accounts and competitive matches
 

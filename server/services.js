@@ -7,7 +7,7 @@ function createServices({env=process.env}={}){
  const db=env.DATABASE_URL?createDatabase({connectionString:env.DATABASE_URL}):null;
  const accounts=createAccounts({db,env});const competition=db?createCompetition({db}):null;
  let failure=null;
- const ready=(async()=>{if(!db)return;if(env.AZHI_AUTO_MIGRATE==='1'&&env.NODE_ENV!=='production')await db.migrate();await db.query('SELECT 1 FROM schema_migrations LIMIT 1');await db.query('SELECT 1 FROM casual_ratings LIMIT 1');await db.query('SELECT username,recovery_code_hash FROM users LIMIT 1');await competition.recoverInterruptedMatches();await db.query('DELETE FROM matchmaking_queue');})().catch(err=>{failure=err;console.error('[online] database initialization failed:',err.code||err.name);});
+ const ready=(async()=>{if(!db)return;if(env.AZHI_AUTO_MIGRATE==='1'&&env.NODE_ENV!=='production')await db.migrate();await db.query('SELECT 1 FROM schema_migrations LIMIT 1');await db.query('SELECT 1 FROM casual_ratings LIMIT 1');await db.query('SELECT username,recovery_code_hash FROM users LIMIT 1');await db.query('SELECT user_id FROM player_avatars LIMIT 1');await competition.recoverInterruptedMatches();await db.query('DELETE FROM matchmaking_queue');})().catch(err=>{failure=err;console.error('[online] database initialization failed:',err.code||err.name);});
  async function handle(req,res){
   const url=new URL(req.url,'http://localhost');if(!url.pathname.startsWith('/api/'))return false;await ready;
   if(failure){json(res,503,{error:{code:'DATABASE_UNAVAILABLE',message:'玩家資料庫暫時無法使用'}});return true;}

@@ -1,6 +1,7 @@
 # Roadmap — GitHub / Codex
 
 ## P0 — reliability and safety
+- [x] 8.15.2: authenticated custom-avatar crop/preview/compression, validated 256px WebP, PostgreSQL persistence/versioned public URLs and Migration 004. Existing presets, login and account records retained.
 - [x] 8.15.1: username/password-only registration, optional nickname, 8–128 character passwords without complexity requirements, distinct database/origin setup status; no Email/SMTP or mandatory HTTPS. Phase 4.5 publication authorized; VPS stays manual.
 - [x] 8.14.1: username/password registration and one-use recovery, no Email/SMTP/Google requirement; additive legacy migration, active-account ranked eligibility and explicit IP/HTTP mode. PostgreSQL and dated seasons remain required.
 - [x] 8.9: 1v1 and 2v2 Ready + explicit host start; membership/character changes invalidate readiness. Role/revision/start/rematch regression tests.

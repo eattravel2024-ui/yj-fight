@@ -1,4 +1,4 @@
-# 實際技術架構 — 8.15.1
+# 實際技術架構 — 8.15.2
 
 本文件描述目前程式，歷史交付保留於 README 與既有各版文件。UI 規範見 [UI_STYLE_BIBLE.md](UI_STYLE_BIBLE.md)，角色／操作見 [CHARACTER_SPEC.md](CHARACTER_SPEC.md)。
 
@@ -42,5 +42,9 @@
 ## 帳號、資料與部署
 
 `server/services.js` 可選載入 PostgreSQL，未設定時訪客單機／原房間仍可用。`server/accounts.js` 使用玩家帳號、Argon2id、HttpOnly／SameSite Cookie、CSRF／Origin、登入限流及只存雜湊的一次性救援碼；不要求 SMTP、Email 或 Google；註冊只需帳號與至少 8 碼密碼，暱稱選填，密碼不要求組成複雜度。救援／輪換鎖定帳號資料列，重設密碼撤銷全部會話；保留 UUID、舊密碼雜湊、既有對戰／排名與相容 Migration。`server/db.js` 為 pg pool、交易與有校驗碼的遷移鎖；Phase 4.5 不新增帳號 Migration。`server/ranked.js` 負責唯一比賽預約、冪等結算、RP／隱藏 Elo、五場定位、五段位、分頁排行榜與賽季保存。前端不能提交結果或改 RP。
+
+`public/avatar-editor.js` 使用既有 native dialog 與 Canvas，支援 JPG／PNG／WebP（原圖 12 MiB／50MP 上限）、拖曳／鍵盤定位、1–4 倍縮放與雙形狀預覽。以 ImageBitmap 或 data: fallback 解碼，保持既有 CSP；縮至 256×256 WebP／96 KiB 以下才以 binary POST `/api/profile/avatar` 上傳，原圖不上傳。`server/avatars.js` 先驗證登入／Origin／CSRF／限流與 128 KiB request cap，再以 Sharp 限制解碼尺寸、拒絕假格式／動畫並重新編碼移除中繼資料。
+
+Migration `004_custom_player_avatars.sql` 新增 `player_avatars`（一帳號一筆 BYTEA、內容雜湊、外鍵），並擴充既有 `users.avatar` 的受限相對路徑格式。持有帳號資料列鎖後，交易內更新圖片與頭像 URL；換回角色預設時刪除圖片。GET／HEAD `/api/avatars/:uid/:digest.webp` 提供公開靜態頭像，限制同源使用、nosniff／ETag／內容版本快取；前端只接受此路徑格式與既有角色 ID，不接受外部網址。這是玩家個人資料／排行榜頭像，戰鬥角色 Sprite 與角色肖像規格未改。頭像包含於原 PostgreSQL 備份，不需要 uploads 目錄或額外服務；新版啟動會檢查 Migration 004。
 
 既有 VPS 為 `/opt/azhi71` 與 `azhi71.service`，原 Nginx 對外埠 18071 轉送 Node `/` 與 `/ws`。`deploy/upgrade-ubuntu.sh` 在獨立 staging 安裝與測試，保留原目錄、版本健康檢查失敗會回復；不操作其他站台或 DB。環境檔 `/etc/azhi71.env`、資料庫及備份在 release swap 外；IP／HTTP 帳號須明確 opt-in，未加密的風險不會因移除 Email 而消失。詳細步驟見 [ONLINE_DEPLOYMENT.md](ONLINE_DEPLOYMENT.md)。本次已授權推送 GitHub；VPS 仍禁止自動連線或部署。

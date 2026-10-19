@@ -1,3 +1,28 @@
+# 8.15.2 — 自訂玩家頭像（需 Migration 004）
+
+上傳 JPG／PNG／WebP → 拖曳／縮放裁切與預覽 → 自動壓縮 → 儲存至帳號。只上傳 256×256 WebP，原圖不上傳。頭像與帳號資料同存 PostgreSQL，更新／重啟遊戲不會刪除；資料庫備份包含頭像。保留所有角色預設頭像、帳號與對戰模式。
+
+已啟用資料庫的 VPS，在原始碼目錄由管理者手動執行（不改 APP_ORIGIN／HTTPS 設定）：
+
+```bash
+cd ~/azhi-update.lvccoe
+git fetch origin feat/phase4-5-grapples:refs/remotes/origin/feat/phase4-5-grapples
+git switch feat/phase4-5-grapples
+git pull --ff-only origin feat/phase4-5-grapples
+npm ci --ignore-scripts --no-fund
+sudo install -d -m 0700 /var/backups/azhi71
+sudo bash deploy/backup-postgres.sh /var/backups/azhi71
+sudo systemd-run --wait --pipe --collect -p EnvironmentFile=/etc/azhi71.env -p WorkingDirectory="$PWD" /usr/bin/node tools/db-migrate.cjs
+sudo bash deploy/upgrade-ubuntu.sh
+curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+```
+
+備份指令適用既有專用 `azhi-db` 容器；外部 PostgreSQL 使用原有 `pg_dump --format=custom` 備份流程。Migration 應包含 `004_custom_player_avatars.sql`，重跑不會重建資料。健康版本應為 **8.15.2**；之後強制重新整理，在玩家資料選擇「上傳／裁切自訂頭像」。新版的登入資料庫必須套用 004，否則健康檢查會拒絕啟動並由升級腳本回復舊版。未啟用會員者可繼續訪客遊戲，首次設定見 [完整帳號部署](ONLINE_DEPLOYMENT.md)。
+
+本版新增 Sharp 原生圖片套件；請保留 npm optional dependencies。升級腳本會在獨立 staging 實際測試 Argon2id／WebP codec，通過後才停止舊服務。舊應用程式備份不含資料庫，兩者分別備份。回退到 8.15.1 不需刪除新增表；該版無自訂頭像 UI，已上傳的自訂圖需新版呈現。不要移除 Migration 004 或修改既有 Migration 校驗碼。
+
+以下為歷史版本說明。
+
 # 8.15.1 — 簡易帳號與 Phase 4.5 正式交付
 
 使用者已授權推送目前 `feat/phase4-5-grapples`，包含 Phase 4.5、立法院及本次帳號調整。只需玩家帳號／至少 8 碼密碼（可純英文或純數字），暱稱選填；不需要 Email、SMTP 或 Google。保留一次性救援碼、舊帳號與所有遊戲模式。

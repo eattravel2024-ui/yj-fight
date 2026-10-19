@@ -112,7 +112,7 @@ test('real PostgreSQL enforces persistent identity, active-match uniqueness and 
     await admin.end();
   });
   const applied = await db.migrate();
-  assert.deepEqual(applied, ['001_player_accounts_and_competition.sql','002_casual_skill.sql','003_username_recovery.sql']);
+  assert.deepEqual(applied, ['001_player_accounts_and_competition.sql','002_casual_skill.sql','003_username_recovery.sql','004_custom_player_avatars.sql']);
   assert.deepEqual(await db.migrate(), []);
   const season = (await db.query('SELECT * FROM seasons WHERE id=$1', ['season-01'])).rows[0];
   assert.equal(season.status, 'draft');

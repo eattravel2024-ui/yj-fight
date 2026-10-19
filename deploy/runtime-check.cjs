@@ -13,7 +13,10 @@ async function main() {
   const probe = 'azhi71-local-native-runtime-check';
   const encoded = await hash(probe, { algorithm: Algorithm.Argon2id, memoryCost: 8192, timeCost: 1, parallelism: 1 });
   if (!encoded.startsWith('$argon2id$') || !await verify(encoded, probe)) throw new Error('Argon2id runtime verification failed');
-  process.stdout.write('Runtime dependencies and Argon2id native binary: OK\n');
+  const sharp = require('sharp');
+  const avatar = await sharp({ create: { width: 256, height: 256, channels: 3, background: '#00d5e8' } }).webp().toBuffer();
+  if ((await sharp(avatar).metadata()).format !== 'webp') throw new Error('Avatar WebP codec verification failed');
+  process.stdout.write('Runtime dependencies, Argon2id and avatar WebP codec: OK\n');
 }
 
 main().catch(error => {
