@@ -1,6 +1,7 @@
 # Roadmap — GitHub / Codex
 
 ## P0 — reliability and safety
+- [x] 8.15.1: username/password-only registration, optional nickname, 8–128 character passwords without complexity requirements, distinct database/origin setup status; no Email/SMTP or mandatory HTTPS. Phase 4.5 publication authorized; VPS stays manual.
 - [x] 8.14.1: username/password registration and one-use recovery, no Email/SMTP/Google requirement; additive legacy migration, active-account ranked eligibility and explicit IP/HTTP mode. PostgreSQL and dated seasons remain required.
 - [x] 8.9: 1v1 and 2v2 Ready + explicit host start; membership/character changes invalidate readiness. Role/revision/start/rematch regression tests.
 - [x] 8.14.0 authenticated 1v1 rotating reconnect token, 30-second paused reservation and authoritative recovery; 2v2 recovery remains future work.
@@ -28,7 +29,7 @@
 - [x] Phase 3 (8.12.0, expanded user scope): central stage/mission data, progress migration, arcade missions/practice stage selection, resource-ready VS, real results/retry/next/full clear. Online stages remain server-assigned; host-selectable stage settings remain future work.
 - [x] Phase 4 combat scope (8.13.0, user-authorized Git checkpoint): shared 10F input buffer and move-specific impact timing, four role profiles, Sezi just guard/riposte, Gambler punishes, HUD/SFX feedback and deterministic 1v1/2v2 tests. VS/results/next/retry reuse Phase 3.
 - [x] STAGE 04 Legislature (8.15.0): supplied original imported, optimized single-layer assets, four-map selection/VS/live battle/online pool and arcade finale. Existing geometry/camera preserved; temporary stage_fur_lab music is explicit. Original missing-art note in the 8.13.0 delivery is historical.
-- [x] Phase 4.5 (8.15.0, local/unpublished): shared grounded Throw/H Tech, real paired states/one-time impact/whiff/wake protection and deterministic rollback; Azhi rush/rising anti-air/three-hit finisher, Gambler feint/chip/ALL IN; video-referenced re-timing of existing transparent key poses. See CHARACTER_SPEC.md and PHASE4_5_8.15.0.md.
+- [x] Phase 4.5 (8.15.0, published with authorized 8.15.1 follow-up): shared grounded Throw/H Tech, real paired states/one-time impact/whiff/wake protection and deterministic rollback; Azhi rush/rising anti-air/three-hit finisher, Gambler feint/chip/ALL IN; video-referenced re-timing of existing transparent key poses. See CHARACTER_SPEC.md and PHASE4_5_8.15.0.md.
 - [ ] Clean transparent in-between/throw-victim drawings, dedicated Legislature music, real WAN latency/balance and low-end performance measurements; not claimed complete by local tests.
 - [x] Phase 5 implementation (8.14.0): PostgreSQL migrations, email accounts/sessions, optional Google adapter, profiles/history, real quick match, private-room access controls, authoritative 1v1 networking/reconnect and durable results. The 8.14.1 username/recovery-code follow-up supersedes Email/Google; PostgreSQL, origin/transport settings and off-host network testing remain operator steps.
 - [x] Phase 6 implementation (8.14.0): server-only RP/Elo updates, five placements, Bronze/Silver/Platinum/Diamond/Elite with no Gold, idempotent transactions, paginated leaderboard, season history and soft-reset CLI. Season 01 stays draft until explicit dates are configured.

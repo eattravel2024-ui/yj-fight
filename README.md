@@ -1,6 +1,6 @@
 # 陪公子練武 — Spar With the Young Master
 
-> Local development: **8.15.0 / Phase 4.5** (not published). Remote baseline: **8.14.1**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> Current release: **8.15.1 / Phase 4.5 + simple username registration**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -17,6 +17,12 @@ npm start
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
 
+## 8.15.1 — Register with just username and an 8-character password
+
+No Email, SMTP, verification mail or Google account is required. Register with only a username and password; nickname is optional and can be changed later. New/reset passwords accept 8–128 characters without required mixed case, digits or symbols: eight letters, eight digits or a mixture all work. Existing passwords remain valid. Preserve Argon2id, sessions, rate limits, CSRF and one-use recovery codes.
+
+PostgreSQL remains required to store accounts and results. A public IP/HTTP site can enable accounts with exact `APP_ORIGIN` and `ALLOW_INSECURE_HTTP=true`; HTTPS and a domain are optional. Missing setup messages now identify database versus origin instead of suggesting Email/SMTP or mandatory HTTPS. [First-time account setup and routine updates](docs/ONLINE_DEPLOYMENT.md) use the published `feat/phase4-5-grapples` branch, including all completed Phase 4.5 combat and Legislature assets. Health version must be **8.15.1**. Production deployment stays manual.
+
 ## 8.15.0 — Phase 4.5 throws, fighter additions and Legislature
 
 All four fighters share real grounded throws and 10F H throw-tech, one-time impact damage, whiff recovery and wake-up protection in 1v1/2v2. Azhi adds forward+K rush, rising I anti-air and forward+O three-hit finisher; Gambler adds down+K feint and forward+U chip projectile while retaining his O ALL IN. Easy direction modifiers are captured at key-down, with character/energy validation in the shared authoritative core. Cancel paths cannot loop back into jabs.
@@ -25,7 +31,7 @@ The supplied Legislature original is now preserved and imported into STAGE 04 se
 
 Both supplied 10-second MP4s contain scene/HUD pixels and no Alpha. They are motion references, not clean sprite exports: existing transparent key poses have been re-timed and composed for attacks, skills, hurt, victory and paired throws. Clean intermediate drawings and dedicated grab/victim angles remain needed. Source videos, hashes and the reproducible motion map are preserved.
 
-See [actual architecture](docs/PROJECT_ARCHITECTURE.md), [character/controls and throw rules](docs/CHARACTER_SPEC.md), [UI rules](docs/UI_STYLE_BIBLE.md) and [Phase 4.5 delivery](docs/PHASE4_5_8.15.0.md). This phase does not authorize GitHub publication or VPS deployment. Earlier deployment commands fetch older published versions until a separate release is authorized.
+See [actual architecture](docs/PROJECT_ARCHITECTURE.md), [character/controls and throw rules](docs/CHARACTER_SPEC.md), [UI rules](docs/UI_STYLE_BIBLE.md) and [Phase 4.5 delivery](docs/PHASE4_5_8.15.0.md). The 8.15.1 follow-up authorizes GitHub publication of this completed work; production VPS deployment stays manual.
 
 ## 8.14.1 — Player username and recovery code, without Email / domain services
 

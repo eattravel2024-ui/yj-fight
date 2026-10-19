@@ -52,7 +52,7 @@ chown -R "$OWNER:$OWNER" "$STAGING"
 say '在暫存目錄以專用非 root 帳號安裝鎖定的正式環境依賴'
 runuser -u "$OWNER" -- env npm_config_cache=/tmp/azhi71-npm-cache npm --prefix "$STAGING" ci --omit=dev --ignore-scripts --no-audit --no-fund
 [[ -d "$STAGING/node_modules/ws" ]] || fail '缺少 ws WebSocket 套件；舊版尚未變更。'
-say '檢查 PostgreSQL／郵件／OAuth 套件及 Argon2 原生執行檔'
+say '檢查 PostgreSQL 套件及 Argon2 原生執行檔（無需 Email／SMTP／OAuth）'
 (cd "$STAGING" && runuser -u "$OWNER" -- node deploy/runtime-check.cjs) || fail '新版正式依賴無法執行；舊版尚未變更。請確認 Node.js／CPU 平台並保留 npm optional dependencies。'
 active_before=0
 if systemctl is-active --quiet "$SERVICE";then active_before=1;fi

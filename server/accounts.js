@@ -7,6 +7,7 @@ const COOKIE='azhi_session',CSRF_COOKIE='azhi_csrf';
 const AVATARS=new Set(['azhi','sezi','gambler','winnie']);
 const PASSWORD_OPTIONS={algorithm:Algorithm.Argon2id,memoryCost:65536,timeCost:3,parallelism:1,outputLen:32};
 const SESSION_MS=7*24*60*60*1000;
+const PASSWORD_MIN=8,PASSWORD_MAX=128;
 const sha=value=>crypto.createHash('sha256').update(String(value)).digest('hex');
 const token=()=>crypto.randomBytes(32).toString('base64url');
 const error=(status,code,message)=>Object.assign(new Error(message),{status,code});
@@ -29,7 +30,7 @@ function nickname(value){
  if(typeof value!=='string')return null;const v=value.normalize('NFKC').trim().replace(/\s+/gu,' '),length=Array.from(v).length;
  return length>=2&&length<=16&&/^[\p{L}\p{N} _.-]+$/u.test(v)&&!/^(admin|administrator|moderator|staff|system|官方|管理員|系統|客服)$/iu.test(v)?v:null;
 }
-function password(value){return typeof value==='string'&&Array.from(value).length>=12&&Array.from(value).length<=128&&Buffer.byteLength(value)<=512;}
+function password(value){return typeof value==='string'&&Array.from(value).length>=PASSWORD_MIN&&Array.from(value).length<=PASSWORD_MAX&&Buffer.byteLength(value)<=512;}
 function validToken(value){return typeof value==='string'&&/^[A-Za-z0-9_-]{43}$/.test(value);}
 function preferences(value){
  if(!value||typeof value!=='object'||Array.isArray(value))throw error(400,'INVALID_PREFERENCES','偏好設定格式不正確');
@@ -67,7 +68,7 @@ function createAccounts({db,env=process.env}={}){
  function cookie(req,name,value,maxAge=SESSION_MS/1000){return `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${origin(req).startsWith('https:')?'; Secure':''}`;}
  function setSessionCookies(req,res,sessionToken,csrfToken){res.setHeader('Set-Cookie',[cookie(req,COOKIE,sessionToken),cookie(req,CSRF_COOKIE,csrfToken)]);}
  function clearSessionCookies(req,res){res.setHeader('Set-Cookie',[cookie(req,COOKIE,'',0),cookie(req,CSRF_COOKIE,'',0)]);}
- function capabilities(){return {accounts:!!db&&!configurationError,authMethod:'username',recovery:{enabled:true,oneTime:true},transport:{encrypted:!!configuredOrigin?.startsWith('https:'),insecureHttp:!!configuredOrigin?.startsWith('http:')},password:{minLength:12,maxLength:128},avatars:[...AVATARS]};}
+ function capabilities(){return {accounts:!!db&&!configurationError,unavailableReason:!db?'database':configurationError?'origin':null,authMethod:'username',emailRequired:false,httpsRequired:false,recovery:{enabled:true,oneTime:true},transport:{encrypted:!!configuredOrigin?.startsWith('https:'),insecureHttp:!!configuredOrigin?.startsWith('http:')},password:{minLength:PASSWORD_MIN,maxLength:PASSWORD_MAX,requireMixedCase:false,requireNumbers:false,requireSymbols:false},avatars:[...AVATARS]};}
  async function rate(req,purpose,account,{ipLimit=30,accountLimit=10,seconds=900}={}){
   // Deliberately use the TCP peer. Never trust arbitrary X-Forwarded-For. A proxy
   // can configure a separate trusted real-IP transport at deployment time.
@@ -99,9 +100,10 @@ function createAccounts({db,env=process.env}={}){
   return {sessionToken,csrfToken};
  }
  async function register(req,res,input){
-  const account=username(input.username),name=nickname(input.nickname);
+  const account=username(input.username),defaultNickname=input.nickname===undefined||typeof input.nickname==='string'&&!input.nickname.trim();
+  const name=nickname(defaultNickname?'玩家'+(account||'').slice(0,14):input.nickname);
   await rate(req,'register',account||'invalid',{ipLimit:15,accountLimit:5,seconds:3600});
-  if(!account||!name||!password(input.password)||Object.hasOwn(input,'email'))throw error(400,'INVALID_REGISTRATION','帳號需為 3–32 位英文字母、數字或底線；暱稱 2–16 字，密碼 12–128 字');
+  if(!account||!name||!password(input.password)||Object.hasOwn(input,'email'))throw error(400,'INVALID_REGISTRATION','帳號需為 3–32 位英文字母、數字或底線；密碼至少 8 碼、最多 128 碼，英文字母或數字即可；暱稱可不填（填寫時為 2–16 字）');
   const passwordHash=await hash(input.password,PASSWORD_OPTIONS),code=recoveryCode();
   const result=await db.transaction(async client=>{
    const created=await client.query(`INSERT INTO users(id,username,password_hash,display_name,avatar,recovery_code_hash,recovery_issued_at) VALUES($1,$2,$3,$4,'azhi',$5,now()) ON CONFLICT(username) DO NOTHING RETURNING *`,[crypto.randomUUID(),account,passwordHash,name,recoveryHash(code)]);
@@ -125,7 +127,7 @@ function createAccounts({db,env=process.env}={}){
  async function resetPassword(req,res,input){
   const account=username(input.username),supplied=recoveryHash(input.recoveryCode);
   await rate(req,'recovery',account||'invalid',{ipLimit:15,accountLimit:5,seconds:3600});
-  if(!password(input.password))throw error(400,'WEAK_PASSWORD','密碼需為 12–128 字');
+  if(!password(input.password))throw error(400,'WEAK_PASSWORD','密碼至少 8 碼、最多 128 碼，英文字母或數字即可，不要求混合大小寫或符號');
   if(!account||!supplied)throw error(400,'INVALID_RECOVERY','帳號或救援碼不正確，或救援碼已使用');
   const encoded=await hash(input.password,PASSWORD_OPTIONS),replacement=recoveryCode();
   await db.transaction(async client=>{

@@ -1,6 +1,6 @@
 # 陪公子練武 — 開發規範
 
-目前版本 **8.15.0 / Phase 4.5**；沿用現有 HTML Canvas／Node 專案，不重建引擎或另做展示對戰。
+目前版本 **8.15.1 / Phase 4.5 與簡易帳號註冊**；沿用現有 HTML Canvas／Node 專案，不重建引擎或另做展示對戰。
 
 ## 任務開始時
 
@@ -21,9 +21,9 @@
 4. 線上輸入、Ready、權限、勝負、RP/MMR 與正式結算由伺服器驗證；不接受前端 HP、勝負或積分。保留完整 30F 回滾結果確認窗口、交易與冪等結算。觀戰不得取得操作者權限。
 5. UI 大立繪不得取代戰鬥 Sprite；原始影片／PNG／透明姿勢圖保留，不覆寫。MP4 沒有 Alpha 時不得宣稱已可靠去背；不把場景／外部 HUD 混入角色圖。不引入未授權 KOF／SF 素材。公開發佈前仍須確認原始素材與肖像的發佈權。
 6. 四張正式地圖為嘴砲夜市、金沙賭城、天安門廣場、立法院；保留廣場與坦克。場景是單層完整圖片，不宣稱多層視差。地面 448、1v1 出生點 274／686、固定攝影機與角色比例不可默默更改；絨毛禁區為未實裝 STAGE 05。
-7. 帳號採玩家帳號／Argon2id 密碼／一次性救援碼；不恢復 Email、SMTP 或 Google 依賴。只存救援碼雜湊，禁止在日誌、GET／個人資料 API 或 localStorage 暴露明碼。保留 CSRF／Origin、會話撤銷、限流及舊帳號 Migration。公網 HTTP 必須明確設 `ALLOW_INSECURE_HTTP=true`，HTTPS Cookie 保留 Secure。
+7. 帳號僅需玩家帳號／至少 8 碼密碼（無組成要求）／一次性救援碼，暱稱選填；仍以 Argon2id 雜湊。不恢復 Email、SMTP 或 Google 依賴。只存救援碼雜湊，禁止在日誌、GET／個人資料 API 或 localStorage 暴露明碼。保留 CSRF／Origin、會話撤銷、限流及舊帳號 Migration。公網 HTTP 必須明確設 `ALLOW_INSECURE_HTTP=true`，HTTPS Cookie 保留 Secure。
 8. 不提交 `.env`、金鑰、帳號資料、DB 備份、正式日誌或部署憑證。測試只用隔離本機資料庫。不要將環境變數或憑證值印出。
-9. **本次禁止推送 GitHub、合併 main、連線正式 VPS、執行部署、改 Nginx／SSH／Docker／防火牆或重啟正式服務。** 之前版本的推送授權不適用本次 Phase 4.5。
+9. 使用者已於 8.15.1 明確授權將本次帳號修改連同已完成的 Phase 4.5 推送 GitHub，提供手動部署指令。不得合併 main、連線正式 VPS、執行部署、改 Nginx／SSH／Docker／防火牆或重啟正式服務；實際部署仍由使用者操作。
 
 ## 驗證與交付
 

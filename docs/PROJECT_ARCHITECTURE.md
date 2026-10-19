@@ -1,4 +1,4 @@
-# 實際技術架構 — 8.15.0
+# 實際技術架構 — 8.15.1
 
 本文件描述目前程式，歷史交付保留於 README 與既有各版文件。UI 規範見 [UI_STYLE_BIBLE.md](UI_STYLE_BIBLE.md)，角色／操作見 [CHARACTER_SPEC.md](CHARACTER_SPEC.md)。
 
@@ -41,6 +41,6 @@
 
 ## 帳號、資料與部署
 
-`server/services.js` 可選載入 PostgreSQL，未設定時訪客單機／原房間仍可用。`server/accounts.js` 使用玩家帳號、Argon2id、HttpOnly／SameSite Cookie、CSRF／Origin、登入限流及只存雜湊的一次性救援碼；不要求 SMTP、Email 或 Google。救援／輪換鎖定帳號資料列，重設密碼撤銷全部會話；保留 UUID、舊密碼雜湊、既有對戰／排名與相容 Migration。`server/db.js` 為 pg pool、交易與有校驗碼的遷移鎖；Phase 4.5 不新增帳號 Migration。`server/ranked.js` 負責唯一比賽預約、冪等結算、RP／隱藏 Elo、五場定位、五段位、分頁排行榜與賽季保存。前端不能提交結果或改 RP。
+`server/services.js` 可選載入 PostgreSQL，未設定時訪客單機／原房間仍可用。`server/accounts.js` 使用玩家帳號、Argon2id、HttpOnly／SameSite Cookie、CSRF／Origin、登入限流及只存雜湊的一次性救援碼；不要求 SMTP、Email 或 Google；註冊只需帳號與至少 8 碼密碼，暱稱選填，密碼不要求組成複雜度。救援／輪換鎖定帳號資料列，重設密碼撤銷全部會話；保留 UUID、舊密碼雜湊、既有對戰／排名與相容 Migration。`server/db.js` 為 pg pool、交易與有校驗碼的遷移鎖；Phase 4.5 不新增帳號 Migration。`server/ranked.js` 負責唯一比賽預約、冪等結算、RP／隱藏 Elo、五場定位、五段位、分頁排行榜與賽季保存。前端不能提交結果或改 RP。
 
-既有 VPS 為 `/opt/azhi71` 與 `azhi71.service`，原 Nginx 對外埠 18071 轉送 Node `/` 與 `/ws`。`deploy/upgrade-ubuntu.sh` 在獨立 staging 安裝與測試，保留原目錄、版本健康檢查失敗會回復；不操作其他站台或 DB。環境檔 `/etc/azhi71.env`、資料庫及備份在 release swap 外；IP／HTTP 帳號須明確 opt-in，未加密的風險不會因移除 Email 而消失。詳細步驟見 [ONLINE_DEPLOYMENT.md](ONLINE_DEPLOYMENT.md)。本階段禁止自動部署或推送。
+既有 VPS 為 `/opt/azhi71` 與 `azhi71.service`，原 Nginx 對外埠 18071 轉送 Node `/` 與 `/ws`。`deploy/upgrade-ubuntu.sh` 在獨立 staging 安裝與測試，保留原目錄、版本健康檢查失敗會回復；不操作其他站台或 DB。環境檔 `/etc/azhi71.env`、資料庫及備份在 release swap 外；IP／HTTP 帳號須明確 opt-in，未加密的風險不會因移除 Email 而消失。詳細步驟見 [ONLINE_DEPLOYMENT.md](ONLINE_DEPLOYMENT.md)。本次已授權推送 GitHub；VPS 仍禁止自動連線或部署。

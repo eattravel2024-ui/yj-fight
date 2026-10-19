@@ -1,3 +1,5 @@
+> 歷史交付：8.15.1 已將註冊／重設密碼下限改為 8 碼、暱稱選填；最新部署見 [ONLINE_DEPLOYMENT.md](ONLINE_DEPLOYMENT.md)。
+
 # 8.14.1 — 玩家帳號與一次性救援碼
 
 此版為 8.14.0 的後續修改，使用者已另行授權推送 GitHub；未部署 VPS。沿用 `feat/arcade-phase1`，不修改戰鬥引擎、角色數值、Sprite、Rollback 或既有遊戲模式。

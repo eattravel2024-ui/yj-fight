@@ -1,3 +1,24 @@
+# 8.15.1 — 簡易帳號與 Phase 4.5 正式交付
+
+使用者已授權推送目前 `feat/phase4-5-grapples`，包含 Phase 4.5、立法院及本次帳號調整。只需玩家帳號／至少 8 碼密碼（可純英文或純數字），暱稱選填；不需要 Email、SMTP 或 Google。保留一次性救援碼、舊帳號與所有遊戲模式。
+
+VPS 手動更新：
+
+```bash
+cd ~/azhi-update.lvccoe
+git fetch origin feat/phase4-5-grapples:refs/remotes/origin/feat/phase4-5-grapples
+git switch feat/phase4-5-grapples
+git pull --ff-only origin feat/phase4-5-grapples
+npm ci --ignore-scripts --no-fund
+sudo bash deploy/upgrade-ubuntu.sh
+curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+curl -fsS --max-time 5 http://127.0.0.1:31071/api/auth/capabilities
+```
+
+健康版本必須為 **8.15.1**；會員啟用後 capabilities 為 `accounts:true`、`authMethod:"username"`、`emailRequired:false`、`password.minLength:8`。Git 拒絕切換或 pull 時先保存本機修改，不要強制覆蓋。程式升級不會自行建立 PostgreSQL 或改正式環境檔；若尚未設定資料庫，先照 [首次 IP／HTTP 帳號啟用指令](ONLINE_DEPLOYMENT.md#first-time-iphttp-accounts) 完成設定。已啟用會員者不需新增 Migration，舊版尚未套用時仍須依序完成既有 001–003。無需網域／SMTP；公開 HTTP 未加密，請使用獨立遊戲密碼。資料庫與賽季保留於 release swap 之外。
+
+以下為歷史交付紀錄；8.15.0 當時未發佈的限制已由本次推送授權更新。
+
 # 8.15.0 — Phase 4.5 本機交付，尚未發佈
 
 本階段依使用者指示 **沒有推送 GitHub、部署 VPS 或修改正式資料庫**。目前工作分支為 `feat/phase4-5-grapples`，源自已發佈的 `feat/arcade-phase1` 8.14.1；現在從舊分支 `git pull` 不會取得 8.15.0。請勿將下方歷史更新命令當成此版已發佈的證明。

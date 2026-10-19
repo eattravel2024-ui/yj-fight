@@ -1,6 +1,6 @@
-# 8.14.1 — Username accounts and online competition (no domain / SMTP required)
+# 8.15.1 — 帳號密碼註冊與 IP／HTTP 部署（免 Email、SMTP、網域）
 
-No script in this change connects to a VPS, pushes Git or alters another project. Review the changes locally before publishing the branch. The current production version remains unchanged until the operator runs an update.
+此版已獲使用者授權推送 GitHub，分支為 `feat/phase4-5-grapples`，包含 Phase 4.5 與立法院。註冊只需帳號、至少 8 碼密碼，暱稱選填；不限制必須混合大小寫、數字或符號。保留救援碼與 PostgreSQL。以下命令僅由主機管理者手動執行；Codex 不會連線或部署正式 VPS。健康版本應為 **8.15.1**。
 
 ## Existing game only
 
@@ -8,9 +8,9 @@ After you publish this reviewed branch to GitHub, run in the **existing source c
 
 ```bash
 cd ~/azhi-update.lvccoe
-git fetch origin
-git switch feat/arcade-phase1
-git pull --ff-only
+git fetch origin feat/phase4-5-grapples:refs/remotes/origin/feat/phase4-5-grapples
+git switch feat/phase4-5-grapples
+git pull --ff-only origin feat/phase4-5-grapples
 npm ci --ignore-scripts --no-fund
 npm run check
 npm test
@@ -19,6 +19,73 @@ curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
 ```
 
 If Git reports a missing branch, stop and verify that the reviewed commit has actually been pushed. The update script installs reviewed dependencies in a separate staging directory and tests Argon2id before stopping **only** `azhi71.service`. It retains the old `/opt/azhi71.backup.TIMESTAMP` directory and restores it on startup/health failure. It does not modify Nginx, SSH, other Docker services, `.env`, the database or other game versions. Guest gameplay works without database configuration; account/competition functions report unavailable explicitly.
+
+## First-time IP/HTTP accounts
+
+**僅適用尚未建立本遊戲資料庫／環境檔的主機**。先依上方 Git 指令取得本版並完成 `npm ci`，不必先執行 upgrade。需要 Node.js 20+、已安裝 Docker Compose，以及原有 `/opt/azhi71`／`azhi71` 服務。已有 `/etc/azhi71.env`、資料庫或資料卷時，此流程會停止，請改沿用下方既有資料庫設定，勿刪除環境檔或資料卷重做。
+
+將第一行換成瀏覽器實際使用的 IP／Port，然後在 VPS 的遊戲原始碼目錄執行。腳本只建立專用資料庫、私密環境檔與本遊戲 systemd drop-in，不改 Nginx／SSH 或其他容器。使用 HTTP 未加密，請使用獨立遊戲密碼；HTTPS 可選，無需購買網域。
+
+```bash
+AZHI_GAME_ORIGIN='http://YOUR_VPS_IP:18071'
+sudo bash -s -- "$AZHI_GAME_ORIGIN" "$PWD" <<'BASH'
+set -euo pipefail
+export AZHI_GAME_ORIGIN="$1"
+cd "$2"
+id azhi71 >/dev/null
+docker info >/dev/null
+docker compose version >/dev/null
+command -v ss >/dev/null
+if [[ -n "$(ss -H -ltn 'sport = :15432')" ]]; then
+  echo '15432 已被使用；請依既有資料庫章節選其他 loopback Port。' >&2; exit 1
+fi
+if docker container inspect azhi-db >/dev/null 2>&1 || docker volume inspect azhi-db-data >/dev/null 2>&1; then
+  echo 'azhi-db 或資料卷已存在；請沿用原資料庫，不要重新初始化。' >&2; exit 1
+fi
+umask 077
+node <<'NODE'
+const fs=require('node:fs'),crypto=require('node:crypto');
+const files=['/etc/azhi71-db.env','/etc/azhi71.env'];
+for(const file of files)if(fs.existsSync(file))throw new Error(file+' 已存在；請沿用設定，未覆寫。');
+const origin=process.env.AZHI_GAME_ORIGIN,u=new URL(origin);
+if(!['http:','https:'].includes(u.protocol)||u.origin!==origin||/YOUR_VPS_IP/i.test(origin)||u.username||u.password)throw new Error('請填入正確的遊戲 Origin，例如 http://實際IP:18071，不含路徑。');
+const admin=crypto.randomBytes(32).toString('hex'),app=crypto.randomBytes(32).toString('hex');
+fs.writeFileSync(files[0],`POSTGRES_PASSWORD=${admin}
+AZHI_DB_PASSWORD=${app}
+AZHI_DB_BIND_PORT=15432
+`,{flag:'wx',mode:0o600});
+fs.writeFileSync(files[1],`NODE_ENV=production
+HOST=127.0.0.1
+PORT=31071
+APP_ORIGIN=${origin}
+ALLOW_INSECURE_HTTP=${u.protocol==='http:'}
+DATABASE_URL=postgresql://azhi_app:${app}@127.0.0.1:15432/azhi
+AZHI_REGION=asia
+`,{flag:'wx',mode:0o600});
+NODE
+chown root:azhi71 /etc/azhi71.env
+chmod 0640 /etc/azhi71.env
+docker compose --env-file /etc/azhi71-db.env -f deploy/postgres.compose.yml config --quiet
+docker compose --env-file /etc/azhi71-db.env -f deploy/postgres.compose.yml up -d postgres
+ready=0
+for attempt in $(seq 1 30); do
+  if docker exec azhi-db psql -U azhi_admin -d azhi -tAc 'SELECT 1' >/dev/null 2>&1; then ready=1; break; fi
+  sleep 2
+done
+[[ "$ready" == 1 ]] || { echo '專用 PostgreSQL 未就緒，已停止；保留資料與設定。' >&2; exit 1; }
+install -d -m 0700 /var/backups/azhi71
+bash deploy/backup-postgres.sh /var/backups/azhi71
+systemd-run --wait --pipe --collect -p EnvironmentFile=/etc/azhi71.env -p WorkingDirectory="$PWD" /usr/bin/node tools/db-migrate.cjs
+install -d /etc/systemd/system/azhi71.service.d
+install -m 0644 deploy/azhi71-env.conf.example /etc/systemd/system/azhi71.service.d/online.conf
+systemctl daemon-reload
+bash deploy/upgrade-ubuntu.sh
+curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+curl -fsS --max-time 5 http://127.0.0.1:31071/api/auth/capabilities
+BASH
+```
+
+確認 `version` 為 `8.15.1`、`accounts:true`、`authMethod:"username"`、`emailRequired:false` 與 `password.minLength:8`，再強制重新整理瀏覽器。密碼自動隨機產生並只寫入私密設定檔，命令不會列印憑證。這是首次設定，不是重試／密碼輪換工具；中途中斷請保留檔案與資料，依下方步驟續作。後續普通更新只需上方 Git／upgrade，不重建資料庫。排位另需設定實際賽季日期，註冊／登入／快速匹配不需要先啟用賽季。
 
 ## Enable persistent accounts and competitive matches
 
@@ -40,7 +107,7 @@ Copy `.env.example` to `/etc/azhi71.env` with permissions `root:azhi71 0640`, an
 - `APP_ORIGIN`: the exact browser-facing game origin, including the port: `http://YOUR_VPS_IP:18071` for the existing IP-only installation. Replace the placeholder with your own public IP. No path or trailing slash.
 - `ALLOW_INSECURE_HTTP=true` explicitly permits this public HTTP origin. HTTP does **not** encrypt passwords, session cookies or recovery codes; use unique game passwords and save recovery codes privately. HTTPS with an IP certificate remains optional; no domain is required by the account model.
 - `NODE_ENV=production`, existing `HOST=127.0.0.1` and `PORT=31071`.
-No SMTP, Email verification, Google OAuth or third-party account credentials are needed. Registration uses a unique case-insensitive username, a password and nickname. The UI presents a one-use recovery code once; PostgreSQL stores only its hash. Password recovery revokes all prior sessions, consumes the previous code and presents a replacement once. Logged-in players can rotate the code with their current password and CSRF verification. If both password and recovery code are lost, there is no automatic recovery.
+No SMTP, Email verification, Google OAuth or third-party account credentials are needed. Registration only requires a unique case-insensitive username and an 8–128 character password; nickname is optional (generated from the username when omitted) and remains editable. No password composition rules are enforced; existing passwords still work. The UI presents a one-use recovery code once; PostgreSQL stores only its hash. Password recovery revokes all prior sessions, consumes the previous code and presents a replacement once. Logged-in players can rotate the code with their current password and CSRF verification. If both password and recovery code are lost, there is no automatic recovery.
 
 Install the **new game's modules only**, load the protected environment via systemd, back up the DB, then migrate the reviewed schema. If an account service is already active, schedule maintenance and stop **only azhi71** for this identity migration; do not allow the old registration API to write during conversion. Install/start the new release after migration:
 
