@@ -18,6 +18,15 @@ def build(output=None, fighter='azhi'):
         raise ValueError('Unsupported reference fighter')
     profile_path = ROOT / 'assets' / fighter / ('reference-poses.json' if fighter in ('winnie', 'sezi') else 'video-poses.json')
     profile = json.loads(profile_path.read_text())
+    motion_path = ROOT / 'assets/source-video/phase4_5/motion-map.json'
+    if motion_path.is_file():
+        motion = json.loads(motion_path.read_text()).get('fighters', {}).get(fighter)
+        if motion:
+            expected = motion['sourceSheetSHA256']
+            import hashlib
+            if hashlib.sha256((profile_path.parent / profile['sourceSheet']).read_bytes()).hexdigest() != expected:
+                raise ValueError('Transparent source changed; review the Phase 4.5 motion map')
+            profile['actions'] = motion['actions']
     source = Image.open(profile_path.parent / profile['sourceSheet']).convert('RGBA')
     width, height = profile['frameWidth'], profile['frameHeight']
     scale, baseline = profile['scale'], profile['baseline']

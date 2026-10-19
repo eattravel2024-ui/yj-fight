@@ -1,0 +1,56 @@
+{
+  "scope": "User-authorized Phase 4.5: shared grapples, two fighter move/animation upgrades and video-referenced re-timing. No server/rollback/other fighter sprite edits.",
+  "changed": {
+    "public/core.js": {
+      "before": "586179c14e3548e5f581362c3b468f15378cdcff88929a0ff07bb70156b79b54",
+      "after": "0024092f1ced1b48149403d06c6c1586fa5fc521fa9c35941aa6b81691fbe84a"
+    },
+    "public/team-core.js": {
+      "before": "833677a5e6d2dfad6eca5b441a5f1bdf5005b068392c3c940d9583f18d44424b",
+      "after": "61547b9cd28478abdce260173bce653e8d056b2d0cd56b10c339889a69db3929"
+    },
+    "public/presentation.js": {
+      "before": "7d67db97fa1342ae46060dab0cb2c87508fc1c5bd327a87267220cc2390b183a",
+      "after": "2c2725495b1a0562b23decaf8bd3862f9cb58c0e3ecccf99e46d008c57b559f0"
+    },
+    "public/engine/frame-data.js": {
+      "before": "c0f793eae2a5b9b144b22d7656b35781f206305ce342c1efe20401a3c2d884ba",
+      "after": "f5e5ef1fed3d8ffb58de7d38def2c7c73d6af4abbaff5f30dbf53a9b27325451"
+    },
+    "public/engine/commands.js": {
+      "before": "cb8694331966a2957aa90a6df0c739c187228242fb4ee6bd2fc7c72d7711df9d",
+      "after": "42f1d10cf800ec67c610ab7a6d0f45daf208790435bb09e1d97d2a79c937d302"
+    },
+    "public/engine/ai.js": {
+      "before": "c8f48251cdafaa1937ecf0b356798b554708a2e873e6f9e1ec47685f20857df8",
+      "after": "35819e69cf34e17f1a61d36eae7fc67501cfca712aab10a3536362cd07315414"
+    },
+    "public/engine/boxes.js": {
+      "before": "9450060ed2e152cc2064f9c2e572ef084342211723327ba8ba4daa893df28710",
+      "after": "31b5086ebb5b5ccb8085d126774dc55bdc1e8ec8931ce42155bdc0edbc9b97a0"
+    },
+    "public/engine/animation.js": {
+      "before": "ceee810de4fd7ded26c3120560654d26d79bf54fbbb1e5817c8f684e485e2509",
+      "after": "ce36d66d0c678600fd608ca36f54fad327ac5799e6d3f49f679b901fbef02bc2"
+    },
+    "public/sprites/gambler.png": {
+      "before": "68ae677ee55f5a1cc7c1c3d7d19bcfa0d6f618516579a74fce1f67f8ad5737ea",
+      "after": "1910f78f6e5e25faa9da2065d2be8e7e7867d0b3e1401830cc845221775538d3"
+    },
+    "public/sprites/azhi.png": {
+      "before": "4cd8dcd81a7088459cbf8ab842e8bbfecb454140f0f96a3b85ee511bbb761631",
+      "after": "06b02134e2cca9ef9b52a73eb68a68880cbe697fac3ae02c2e7dc219aededd4c"
+    },
+    "public/sprites/manifest.json": {
+      "before": "00664af09d212f922965448ffcd9bea22f442c2fee419a93dfda55a50cabf485",
+      "after": "25055ccaaa6165d3d8f632df04410929a6afacd6cccd475f585cc4ef54ac8627"
+    },
+    "public/skill-vfx.js": {
+      "before": "209e634c273be5cbffb88357b5915d530f5ac08f34db7f0a7739c6676e0378cb",
+      "after": "b1c494719e8d50f2d0ea7e7f1be0323d66eb330b323ff35480681d4caa2279a1"
+    }
+  },
+  "added": {
+    "public/engine/grapples.js": "ad64f66527912c3a10c87d93e68c00d3e03aab40e4ce6b1d1999b50343b34380"
+  }
+}

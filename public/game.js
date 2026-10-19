@@ -48,7 +48,7 @@
   function selectionContext(){const online=mode==='online',r=lobby.roster,players=r?.players||[],enemy=mode==='practice'?'winnie':chapters[Math.min(save.chapter,chapters.length-1)].enemy;return {canSelect:!selectionBlocked(),online,selfSlot:slot,players,private:!!r?.private,spectatorsAllowed:r?.spectatorsAllowed!==false,phase:r?.phase,opponent:online?players.find(p=>p.slot!==slot):{char:enemy,name:mode==='practice'?'CPU 木樁':'CPU 對手',status:mode==='practice'?'自由練習 · 不還擊':save.chapter>=chapters.length?'街機挑戰 · 通關再戰':'街機挑戰 · 難度 '+chapters[Math.min(save.chapter,chapters.length-1)].difficulty},needed:r?.needed||2,opponentLabel:online?'對戰玩家':'CPU / OPPONENT'};}
   function renderCharacters(){$('selectionSummary').textContent='目前選擇：'+roster[selected].name+' · '+roster[selected].special;const box=$('characterList');box.textContent='';Object.entries(roster).forEach(([id,c])=>{const b=document.createElement('button');b.className='char-card'+(id===selected?' selected':'');b.type='button';b.dataset.char=id;b.disabled=selectionBlocked();b.setAttribute('aria-pressed',String(id===selected));b.style.setProperty('--role-color',c.accent||'#ffd17f');const chip=document.createElement('span');chip.className='char-number';chip.textContent=id===selected?'✓ 已選擇':'0'+(Object.keys(roster).indexOf(id)+1);b.append(chip);const img=document.createElement('img');img.loading='lazy';Art.bindImage(img,id,'portrait');const d=document.createElement('div');d.className='data';const title=document.createElement('strong');title.textContent=c.name;const tiny=document.createElement('small');tiny.textContent=c.special;d.append(title,tiny);const portrait=document.createElement('span');portrait.className='fighter-portrait';portrait.append(img);b.append(portrait,d);b.onclick=()=>selectCharacter(id);box.append(b)});$('charDescription').textContent=`${roster[selected].name}｜${roster[selected].title}：${roster[selected].desc}`;const art=$('moveShowcase');if(art){art.src='art/moves/'+selected+'.webp?v=8100';art.alt=roster[selected].name+'高解析招式展示圖'}renderFrameGuide();renderSignatureGuide();if(!ready&&!netSession)updateHUD(state||{players:[{char:selected,hp:100,meter:30},{char:mode==='practice'?'winnie':chapters[Math.min(save.chapter,chapters.length-1)].enemy,hp:100,meter:30}],time:75,round:1})}
 
- function renderFrameGuide(){const box=$('frameGuide');if(!box)return;box.textContent='';for(const name of ['light','heavy','kick','low','upper','throw','special','super']){const d=C.moveFor(selected,name),row=document.createElement('div');row.className='frame-row';const label=document.createElement('b');label.textContent=({light:'J 輕拳',heavy:'K 重拳',kick:'Q 踢擊',low:'E 掃腿',upper:'I 升龍',throw:'H 摔技',special:'U 必殺',super:'O 超必殺'}[name]);const value=document.createElement('span'),c=C.CHAR[selected],projectile=['special','super'].includes(name)&&c.projectile,spin=['special','super'].includes(name)&&selected==='sezi',base=projectile?(name==='super'?c.projectile.superDamage:c.projectile.damage):d.damage;value.textContent=`${d.startup} / ${d.active} / ${d.recovery} F · ${Math.round(base*c.power*(spin?.45:1))} 基礎傷害${spin?'／段（最多三段遞減）':''} · 命中 ${projectile?30:d.hitstun} F / 防禦 ${d.blockstun} F / 停頓 ${d.hitstop} F`;row.append(label,value);box.append(row)}}
+ function renderFrameGuide(){const box=$('frameGuide');if(!box)return;box.textContent='';for(const name of ['light','heavy','kick','low','upper','throw','special','super','rush','feint','chip','finisher'].filter(key=>C.moveFor(selected,key))){const d=C.moveFor(selected,name),row=document.createElement('div');row.className='frame-row';const label=document.createElement('b');label.textContent=({light:'J 輕拳',heavy:'K 重拳',kick:'Q 踢擊',low:'E 掃腿',upper:'I 升龍',throw:'H 摔技',special:'U 必殺',super:'O 超必殺',rush:'→＋K 三百起步',feint:'↓＋K 我沒梭哈',chip:'→＋U 籌碼衝擊',finisher:'→＋O 收工連打'}[name]);const value=document.createElement('span'),c=C.CHAR[selected],projectile=d.projectile||['special','super'].includes(name)&&c.projectile,spin=['special','super'].includes(name)&&selected==='sezi',base=d.projectile?d.damage:projectile?(name==='super'?c.projectile.superDamage:c.projectile.damage):d.damage;value.textContent=`${d.startup} / ${d.active} / ${d.recovery} F · ${Math.round(base*c.power*(spin?.45:1))} 基礎傷害${spin?'／段（最多三段遞減）':''} · 命中 ${projectile&&!d.projectile?30:d.hitstun} F / 防禦 ${d.blockstun} F / 停頓 ${d.hitstop} F`;row.append(label,value);box.append(row)}}
 
  function renderSignatureGuide(){const guide=$('signatureGuide');if(!guide)return;const fighter=roster[selected];guide.textContent='';const mini=document.createElement('div');mini.className='tagline';mini.textContent='ONE BUTTON / YOUR SIGNATURE';const h=document.createElement('strong');h.textContent='U · '+fighter.special;const p=document.createElement('p');p.textContent=fighter.skillDescription+' 按 U 即可發動（25 能量）；O 為「'+fighter.superName+'」（60 能量）：'+fighter.superDescription+' 接技：J → K → U；K 或 U 命中後可接 O。方向指令：↓ ↘ → + J 必殺、→ ↓ ↘ + K 升龍（方向隨角色朝向）。';guide.append(mini,h,p);updateSkillUI();}
   function updateSkillUI(player){
@@ -60,7 +60,7 @@
     for(const touch of document.querySelectorAll('[data-key="'+move+'"]')){touch.disabled=button.disabled;touch.classList.toggle('unavailable',!status.available);touch.setAttribute('aria-label',name+'，'+status.label);}
    }
   }
-  for(const move of ['special','super'])$(move+'Trigger').onclick=()=>{if(menuOpen()||(!ready&&mode!=='online'))return;if(mode==='online'&&(!netSession||netMatchComplete||slot<0))return;localPulses.push(move);keyReadout(move);if(audioEnabled)effects.unlock();canvas.focus({preventScroll:true})};
+  for(const move of ['special','super'])$(move+'Trigger').onclick=()=>{if(menuOpen()||(!ready&&mode!=='online'))return;if(mode==='online'&&(!netSession||netMatchComplete||slot<0))return;queuePulse(move);keyReadout(move);if(audioEnabled)effects.unlock();canvas.focus({preventScroll:true})};
   function renderPalettes(){const price={classic:0,violet:150,gold:300};for(const b of $('paletteButtons').querySelectorAll('button')){const id=b.dataset.palette;b.classList.toggle('selected',save.palette===id);b.textContent=({classic:'經典',violet:'紫電',gold:'黑金'}[id])+(save.purchased.includes(id)?'':` ${price[id]}G`);b.onclick=()=>{if(!save.purchased.includes(id)){if(save.coins<price[id]){toast('格鬥幣不足，請先完成街機關卡');return}save.coins-=price[id];save.purchased.push(id)}save.palette=id;updateProgress();toast('角色配色已切換')}}}
   function localPlan(options={}){
    const missionId=options?.missionId||chapters[Math.min(save.chapter,chapters.length-1)].id;
@@ -71,7 +71,7 @@
    const checked=localPlan({missionId:plan.missionId,stage:plan.stage});if(!checked||JSON.stringify(checked)!==JSON.stringify(plan))return false;
    const decoded=await Promise.all([stageArt.ready(plan.stage,{retry:true}),...new Set([plan.character,plan.enemy])].map(async item=>{
     if(typeof item==='boolean'||item?.then)return item;
-    const image=sprites[item];if(!image)return false;if(image.complete&&!image.naturalWidth)image.src='sprites/'+item+'.png?v=8120&retry='+Date.now();try{await image.decode();return !!image.naturalWidth;}catch{return false;}
+    const image=sprites[item];if(!image)return false;if(image.complete&&!image.naturalWidth)image.src='sprites/'+item+'.png?v=8150&retry='+Date.now();try{await image.decode();return !!image.naturalWidth;}catch{return false;}
    }));
    return decoded.every(Boolean);
   }
@@ -113,7 +113,7 @@
     else if(e.punish)combo('PUNISH!<small>抓到收招破綻</small>');
     else if(e.counter)combo('COUNTER!<small>反擊成功</small>');
   }
-  function eventsFrom(list){if(mode!=='online'){D.events(list,state);window.AzhiCombatHUD?.events(list,state);coach.events(list,state,0);}for(const e of list||[]){if(e.kind==='skill'&&(mode!=='online'||e.slot===slot||e.id)){const fighter=(mode==='online'?remote:state)?.players?.[e.slot];skillFX.emit({...e,direction:e.direction||fighter?.face||1},performance.now());if(e.slot!==(mode==='online'?slot:0))notify(e.name,900)}if(e.kind==='hit')addParticles(e);if(e.kind==='super'){superFlash=reducedMotion?0:18;activeCutin={char:e.char||selected,born:performance.now(),slot:e.slot};sound('special')}if(e.kind==='armor'){notify('ARMOR · 霸體防禦！',700);sound('block')}if(e.kind==='buff'){notify('黑金霸體啟動！',800)}if(e.kind==='fortune'){notify(e.fortune==='jackpot'?'JACKPOT · 黃金飛牌！':e.fortune==='blank'?'爛牌！出招失誤':'幸運牌發動！',700)}if(e.kind==='command'&&e.slot===(mode==='online'?slot:0)){notify(e.key==='upper'?'升龍指令！':'波動指令！',600)}if(e.kind==='swing'&&e.slot===(mode==='online'?slot:0))keyReadout(e.name);if(e.kind==='round'){notify(e.winner<0?'DRAW':e.winner===0?'PLAYER 1 WIN':'PLAYER 2 WIN',1200);sound('win')}if(e.kind==='finish'&&mode==='online')notify('MATCH OVER',1200)}}
+  function eventsFrom(list){if(mode!=='online'){D.events(list,state);window.AzhiCombatHUD?.events(list,state);coach.events(list,state,0);}for(const e of list||[]){if(e.kind==='skill'&&(mode!=='online'||e.slot===slot||e.id)){const fighter=(mode==='online'?remote:state)?.players?.[e.slot];skillFX.emit({...e,direction:e.direction||fighter?.face||1},performance.now());if(e.slot!==(mode==='online'?slot:0))notify(e.name,900)}if(e.kind==='throw_tech'&&(mode!=='online'||e.id)){notify('THROW TECH · 解摔成功',800);sound('parry')}if(e.kind==='grab'&&(mode!=='online'||e.id))sound('block');if(e.kind==='hit')addParticles(e);if(e.kind==='super'){superFlash=reducedMotion?0:18;activeCutin={char:e.char||selected,name:e.name||roster[e.char||selected]?.superName,born:performance.now(),slot:e.slot};sound('special')}if(e.kind==='armor'){notify('ARMOR · 霸體防禦！',700);sound('block')}if(e.kind==='buff'){notify('黑金霸體啟動！',800)}if(e.kind==='fortune'){notify(e.fortune==='jackpot'?'JACKPOT · 黃金飛牌！':e.fortune==='blank'?'爛牌！出招失誤':'幸運牌發動！',700)}if(e.kind==='command'&&e.slot===(mode==='online'?slot:0)){notify(({upper:'升龍指令！',special:'波動指令！',rush:'三百起步・突進拳',feint:'我沒梭哈・假動作',chip:'籌碼衝擊',finisher:'收工連打'}[e.key])||'追加招式',600)}if(e.kind==='swing'&&e.slot===(mode==='online'?slot:0))keyReadout(e.name);if(e.kind==='round'){notify(e.winner<0?'DRAW':e.winner===0?'PLAYER 1 WIN':'PLAYER 2 WIN',1200);sound('win')}if(e.kind==='finish'&&mode==='online')notify('MATCH OVER',1200)}}
   function tick(){if(mode==='online'){
    if(!netSession||!ws||ws.readyState!==WebSocket.OPEN||netMatchComplete||netPaused)return;
    if(performance.now()-lastPacketAt>5500){$('netMessage').textContent='超過 5 秒未收到伺服器影格資料，請檢查連線。';netFrozen=true;return;}
@@ -193,7 +193,7 @@
       // Hit receipts use only server-confirmed events, never prediction or replay.
       coach.events(newEvents,netSession.game,slot);D.events(newEvents,netSession.game);window.AzhiCombatHUD?.events(newEvents,netSession.game);
       // Server-confirmed events are used for pronounced finish/round cut-ins.
-      for(const e of newEvents)if(e.kind==='round'||e.kind==='finish'||(e.kind==='skill'&&e.slot!==slot))eventsFrom([e]);
+      for(const e of newEvents)if(['round','finish','grab','throw_tech'].includes(e.kind)||(e.kind==='skill'&&e.slot!==slot))eventsFrom([e]);
       onlineState();netStats();
       const current=netSession.game;
       if(current.status==='finished'&&!netMatchComplete){$('netMessage').textContent='等待伺服器確認最終結果…'}else if(current.status==='playing'){ready=true;$('battleOverlay').classList.add('hidden')}
@@ -217,15 +217,16 @@
   $('joinRoom').onclick=joinRoom;$('copySpectatorLink').onclick=()=>{if(!room)return;const u=new URL('/team.html',location.href);u.searchParams.set('room',room);u.searchParams.set('watch','1');if(navigator.clipboard?.writeText)navigator.clipboard.writeText(u.href).then(()=>toast('已複製只讀觀戰連結')).catch(()=>toast('複製失敗'));else{const t=document.createElement('textarea');t.value=u.href;document.body.append(t);t.select();document.execCommand('copy');t.remove();toast('已複製觀戰連結')}};$('copyRoom').onclick=()=>{const u=new URL(location.href);u.searchParams.set('room',room);if(navigator.clipboard?.writeText)navigator.clipboard.writeText(u.href).then(()=>toast('已複製好友邀請連結')).catch(()=>toast('複製失敗，請手動複製網址'));else{const t=document.createElement('textarea');t.value=u.href;document.body.append(t);t.select();try{document.execCommand('copy');toast('已複製邀請連結')}finally{t.remove()}}};$('leaveRoom').onclick=()=>{disconnect();setMode('online')};
   const bind={KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right',KeyW:'up',ArrowUp:'up',KeyS:'down',ArrowDown:'down',KeyJ:'light',KeyF:'light',Space:'light',KeyK:'heavy',KeyG:'heavy',KeyQ:'kick',KeyE:'low',KeyI:'upper',KeyH:'throw',KeyU:'special',KeyO:'super',KeyL:'guard',ShiftLeft:'dash',ShiftRight:'dash'};
   const attackKeys=new Set(C.ATTACKS);
+  function queuePulse(key){const p=(mode==='online'?netSession?.game:state)?.players?.[mode==='online'?slot:0]||{char:selected,face:1};localPulses.push(C.Commands.shortcut(p,key,pressed));}
   function sendInput(pulse){/* Network sends one frame-stamped input per 60Hz logical tick. */}
   function keyboard(e,isDown){const key=bind[e.code];if(!key)return;if(!isDown){pressed[key]=false;touchHeld[key]=false;sendInput(null);return}if(menuOpen())return;const el=document.activeElement;if(el&&(el.isContentEditable||el.tagName==='INPUT'||el.tagName==='TEXTAREA'||el.tagName==='SELECT'))return;if(e.metaKey||e.ctrlKey||e.altKey||(!ready&&!netSession)||(el?.tagName==='BUTTON'&&e.code==='Space'))return;e.preventDefault();if(isDown&&e.repeat&&attackKeys.has(key))return;
     const edge=isDown&&!pressed[key];pressed[key]=isDown;
-    if(edge){if(audioEnabled)effects.unlock();keyReadout(key);if(attackKeys.has(key))localPulses.push(key);try{audio?.resume()}catch{};sendInput(attackKeys.has(key)?key:null)}else if(!isDown)sendInput(null);
+    if(edge){if(audioEnabled)effects.unlock();keyReadout(key);if(attackKeys.has(key))queuePulse(key);try{audio?.resume()}catch{};sendInput(attackKeys.has(key)?key:null)}else if(!isDown)sendInput(null);
   }
   addEventListener('keydown',e=>keyboard(e,true),{capture:true});addEventListener('keyup',e=>keyboard(e,false),{capture:true});addEventListener('blur',clearInput);document.addEventListener('visibilitychange',()=>{if(document.hidden)clearInput()});
-  for(const b of document.querySelectorAll('[data-key]')){const k=b.dataset.key;b.addEventListener('pointerdown',e=>{if(menuOpen()||(!ready&&!netSession))return;e.preventDefault();b.setPointerCapture(e.pointerId);touchHeld[k]=true;pressed[k]=true;if(audioEnabled)effects.unlock();if(attackKeys.has(k))localPulses.push(k);keyReadout(k);sendInput(attackKeys.has(k)?k:null);b.classList.add('held')});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>{touchHeld[k]=false;pressed[k]=false;sendInput(null);b.classList.remove('held')})}
+  for(const b of document.querySelectorAll('[data-key]')){const k=b.dataset.key;b.addEventListener('pointerdown',e=>{if(menuOpen()||(!ready&&!netSession))return;e.preventDefault();b.setPointerCapture(e.pointerId);touchHeld[k]=true;pressed[k]=true;if(audioEnabled)effects.unlock();if(attackKeys.has(k))queuePulse(k);keyReadout(k);sendInput(attackKeys.has(k)?k:null);b.classList.add('held')});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>{touchHeld[k]=false;pressed[k]=false;sendInput(null);b.classList.remove('held')})}
   setInterval(()=>{if(!ws||ws.readyState!==WebSocket.OPEN||slot<0)return;lastPing=performance.now();ws.send(JSON.stringify({type:'ping',sentAt:lastPing}))},2000);
-  // 高解析度原創手繪風格的多影格角色：17 動作 × 10 張影格 × 5 人物。
+  // 高解析度原創手繪風格的多影格角色：17 動作 × 10 張影格 × 4 人物。
   const FRAME_W=Anim.WIDTH, FRAME_H=Anim.HEIGHT, FRAMES=Anim.FRAMES;
   let superFlash=0,activeCutin=null;const cutins={};for(const id of Object.keys(roster)){const image=new Image();image.src='art/cutins/'+id+'.webp?v=8100';cutins[id]=image}
   const artActions=Anim.ACTIONS;
@@ -237,7 +238,7 @@
   $('focusToggle').onclick=()=>{if(document.body.classList.contains('game-app'))return;focus=!focus;document.body.classList.toggle('fight-focus',focus);$('focusToggle').classList.toggle('on',focus);$('focusToggle').setAttribute('aria-pressed',String(focus));$('focusToggle').textContent=focus?'▣ 返回完整介面':'⛶ 專注戰鬥';canvas.focus({preventScroll:true})};
   document.querySelectorAll('.fighter-select-link').forEach(link=>link.addEventListener('click',event=>{if(window.AzhiShell){event.preventDefault();window.AzhiShell.open('fighters');return}if(focus)$('focusToggle').onclick()}));
   $('hitboxToggle').onclick=()=>{showBoxes=!showBoxes;$('hitboxToggle').classList.toggle('on',showBoxes);$('hitboxToggle').setAttribute('aria-pressed',String(showBoxes));canvas.focus({preventScroll:true});toast(showBoxes?'已顯示攻擊與受擊判定框':'已隱藏判定框')};
-  for(const id of Object.keys(roster)){const img=new Image();img.src='sprites/'+id+'.png?v=8100';sprites[id]=img}
+  for(const id of Object.keys(roster)){const img=new Image();img.src='sprites/'+id+'.png?v=8150';sprites[id]=img}
   function drawEnvironment(now){
     stageArt.draw(ctx,world);
     const t=theme[world]||theme.night;
@@ -248,7 +249,7 @@
   }
   function interpolateFighters(source,prev,alpha){return source.map((p,i)=>{const prevP=prev?.[i];if(!prevP||prevP.char!==p.char)return p;
    return {...p,x:bezier(prevP.x,p.x,alpha),y:bezier(prevP.y,p.y,alpha)};});}
-  function actionOf(p,prev){if(p.hp<=0)return 'ko';const game=mode==='online'?remote:state;if(game?.status==='finished'&&game.winner===p.slot)return 'win';if(p.move?.name)return p.move.name==='super'?'special':p.move.name;if((p.stun||0)>2||(p.flash||0)>0)return 'hurt';if(p.guard)return 'guard';if(p.y>1)return 'jump';if(p.dash>0)return 'dash';if(p.crouch)return 'low';if(prev&&Math.abs(p.x-prev.x)>1)return 'walk';return 'idle'}
+  function actionOf(p,prev){return Anim.actionFor(p,drawingGame,prev)}
   function animationFrame(p,action,now){return playback.spriteFrame(p,action,now,p.move?.name?C.moveFor(p,p.move.name):null,drawingGame)}
   function drawAttackFx(p,now){const move=p.move?.name;if(!move)return;const data=C.moveFor(p,move),f=p.move.frame||0;if(!data||f<data.start-1||f>=data.start+data.active+2)return;
    const alpha=f<data.start?.35:(f>data.start+data.active?0.22:1);
@@ -305,16 +306,16 @@
     if(['special','super'].includes(p.move?.name)){ctx.shadowBlur=32;ctx.shadowColor=roster[p.char]?.accent||'#40bcff'}if(p.armorTimer>0&&p.armorCharges>0){ctx.shadowBlur=29;ctx.shadowColor='#f2c25d'}
     if(index===0){ctx.filter=save.palette==='violet'?'hue-rotate(53deg) saturate(1.2)':save.palette==='gold'?'sepia(.33) saturate(1.35)':'none'}
     ctx.drawImage(im,col*fw,row*fh,fw,fh,-tw/2,-P.SPRITE_BASELINE*scale,tw,th);
-    ctx.restore();drawAttackFx(p,now);
+    ctx.restore();drawAttackFx(p,now);P.drawCombatAccent(ctx,p,now,reducedMotion);
   }
   function drawHitboxes(p){ctx.save();ctx.lineWidth=2;
    const hurt=C.Boxes.hurtbox(p),attack=p.move?.name?C.moveFor(p,p.move.name):null;
    const groundToCanvas=(v)=>448-v*.82;
    ctx.fillStyle='#42e7f825';ctx.strokeStyle='#56dafa';const y=groundToCanvas(hurt.y+hurt.h),h=hurt.h*.82;ctx.fillRect(hurt.x,y,hurt.w,h);ctx.strokeRect(hurt.x,y,hurt.w,h);
-   if(attack&&p.move.frame>=attack.start&&p.move.frame<attack.start+attack.active){const rect=C.Boxes.hitbox(p,attack);const ay=groundToCanvas(rect.y+rect.h),ah=rect.h*.82;ctx.fillStyle='#ff548b35';ctx.strokeStyle='#ff729f';ctx.fillRect(rect.x,ay,rect.w,ah);ctx.strokeRect(rect.x,ay,rect.w,ah)}
+   if(attack&&p.move.frame>=attack.start&&p.move.frame<attack.start+attack.active){const rect=C.Boxes.hitbox(p,attack);if(rect){const ay=groundToCanvas(rect.y+rect.h),ah=rect.h*.82;ctx.fillStyle='#ff548b35';ctx.strokeStyle='#ff729f';ctx.fillRect(rect.x,ay,rect.w,ah);ctx.strokeRect(rect.x,ay,rect.w,ah)}}
    ctx.restore()}
   function drawEffects(now){effects.front(ctx,now)}
-  function drawProjectiles(projectiles,now){for(const shot of projectiles||[]){
+  function drawProjectiles(projectiles,now){for(const shot of projectiles||[]){if(P.drawChip(ctx,shot,now))continue;
     const x=shot.x,y=448-(shot.y||110)*.82;
     if(shot.kind==='wave'){ctx.save();ctx.globalCompositeOperation='lighter';ctx.fillStyle='#ffce6a8f';ctx.shadowBlur=26;ctx.shadowColor='#f8bd49';ctx.beginPath();ctx.ellipse(x,y+10,49,17,0,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#fff4b2';ctx.lineWidth=5;ctx.beginPath();ctx.arc(x,y+20,27,Math.PI,Math.PI*1.95);ctx.stroke();ctx.restore();continue;}
     ctx.save();ctx.translate(x,y);ctx.rotate(now*14);ctx.shadowBlur=28;ctx.shadowColor='#b98cff';
@@ -332,9 +333,9 @@
     drawEffects(t);skillFX.draw(ctx,t,{groundY:448,yScale:.82});ctx.restore();P.drawEntrance(ctx,st,{reducedMotion});if(!reducedMotion)effects.screen(ctx,t);if(activeCutin){const age=performance.now()-activeCutin.born;if(age>=320){activeCutin=null}else{
       const intensity=reducedMotion?.8:age<60?age/60:age>230?(320-age)/90:1;
       const pic=cutins[activeCutin.char];ctx.save();ctx.globalAlpha=Math.min(1,Math.max(0,intensity));
-      ctx.fillStyle='rgba(3,6,24,.65)';ctx.fillRect(230,36,500,90);ctx.beginPath();ctx.rect(230,36,500,90);ctx.clip();
-      if(pic?.complete&&pic.naturalWidth)ctx.drawImage(pic,650,0,78,156);
-      const accent=roster[activeCutin.char]?.accent||'#ffe0aa';ctx.fillStyle=accent;ctx.font='900 italic 18px sans-serif';ctx.fillText('SUPER ART · 60 ENERGY',248,65);ctx.font='800 26px sans-serif';ctx.fillText(roster[activeCutin.char]?.superName||'',248,104);
+      ctx.fillStyle='rgba(3,6,24,.65)';ctx.fillRect(230,94,500,90);ctx.beginPath();ctx.rect(230,94,500,90);ctx.clip();
+      if(pic?.complete&&pic.naturalWidth)ctx.drawImage(pic,650,58,78,156);
+      const accent=roster[activeCutin.char]?.accent||'#ffe0aa';ctx.fillStyle=accent;ctx.font='900 italic 18px sans-serif';ctx.fillText('SUPER ART · 60 ENERGY',248,123);ctx.font='800 26px sans-serif';ctx.fillText(activeCutin.name||'',248,162);
       ctx.restore();
    }}if(superFlash>0){ctx.fillStyle='rgba(13,7,35,'+(Math.min(.48,superFlash*.025))+')';ctx.fillRect(0,0,960,540);superFlash--}if(flash>.015){ctx.fillStyle='rgba(255,245,210,'+(Math.min(.20,flash*.18))+')';ctx.fillRect(0,0,960,540);flash*=.79}
   }

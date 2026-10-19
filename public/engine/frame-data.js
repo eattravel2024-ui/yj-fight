@@ -19,6 +19,13 @@ const MOVE={
  special:{startup:14,active:13,recovery:31,reach:245,impactY:116,hitHeight:62,damage:20,knock:36,level:'mid',gain:0,cost:25,hitstun:44},
  super:{startup:18,active:15,recovery:42,reach:285,impactY:121,hitHeight:83,damage:34,knock:65,level:'mid',gain:0,cost:60,hitstun:49}
 };
+// Phase 4.5: additions retain the existing U/O signatures and use easy direction + button inputs.
+Object.assign(MOVE,{
+ rush:{startup:6,active:8,recovery:20,reach:108,impactY:108,hitHeight:34,damage:12,knock:12,level:'mid',gain:10,cost:0,hitstun:30,blockstun:14,hitstop:8,blockstop:4,travel:4.2,characters:['azhi'],label:'三百起步・突進拳'},
+ feint:{startup:5,active:1,recovery:9,reach:0,impactY:110,hitHeight:0,damage:0,knock:0,level:'mid',gain:0,cost:0,hitstun:0,blockstun:0,hitstop:0,blockstop:0,nonContact:true,cancelOnWhiff:true,characters:['gambler'],label:'我沒梭哈・假動作'},
+ chip:{startup:13,active:4,recovery:27,reach:260,impactY:110,hitHeight:28,damage:20,knock:26,level:'mid',gain:8,cost:25,hitstun:32,blockstun:16,hitstop:9,blockstop:5,projectile:'chip',characters:['gambler'],label:'籌碼衝擊',description:'向前射出一枚籌碼；站防／蹲防均可擋，命中一次後消失。'},
+ finisher:{startup:10,active:16,recovery:30,reach:124,impactY:112,hitHeight:44,damage:13,knock:5,level:'mid',gain:0,cost:60,hitstun:34,blockstun:16,hitstop:7,blockstop:4,repeatEvery:5,maxHits:3,travel:1.7,characters:['azhi'],label:'加滿三百・收工連打',description:'近身三段連打；逐段判定與傷害遞減，落空有完整收招硬直。'}
+});
 // Phase 4: one shared tuning source for both deterministic rulesets and selection UI.
 const PROFILES={
  azhi:{role:'高速近身連打',style:'rush',speed:3.8,power:1.0,desc:'高速貼身三連拳與短收招；加油幸運牌用來掩護接近。',combat:{},moves:{light:{startup:3,active:5,recovery:8,damage:6,knock:7},light2:{startup:3,recovery:8,knock:9},light3:{startup:5,recovery:16,knock:22},kick:{startup:7,recovery:15},special:{recovery:24},super:{hitstop:12}},projectile:{damage:12,superDamage:25}},
@@ -26,6 +33,9 @@ const PROFILES={
  gambler:{role:'技巧爆發／高風險高報酬',style:'balanced',speed:3.05,power:1,desc:'抓住對手收招破綻獲得 22% 傷害加成；全押必殺傷害高，落空後收招較長。',superDescription:'高傷害近身全押；起手短暫吸收一次輕拳，落空會留下長破綻。',combat:{punishBonus:1.22,armorWindow:8,superArmorWindow:12},moves:{special:{startup:15,damage:29,recovery:42},super:{startup:21,damage:42,recovery:52,hitstop:14}}},
  winnie:{role:'重量級高傷害壓制',style:'heavy',speed:2.45,power:1.14,desc:'移動較慢、重拳與投技威力最高；低空掌波封鎖地面，重擊落空可被反打。',combat:{},moves:{light:{startup:5,recovery:14,damage:8},heavy:{startup:14,recovery:30,damage:20,blockstun:21,hitstop:11},kick:{damage:14},throw:{damage:20},special:{recovery:38}},projectile:{damage:18,superDamage:33}}
 };
+PROFILES.azhi.combat.inputBuffer=12;
+Object.assign(PROFILES.azhi.moves,{upper:{...PROFILES.azhi.moves.upper,rise:4.1},throw:{startup:6,active:3,recovery:30,reach:76,damage:16}});
+Object.assign(PROFILES.gambler.moves,{light:{startup:3,active:4,recovery:10,reach:112,damage:5},throw:{startup:8,active:3,recovery:34,reach:80,damage:18}});
 for(const [id,profile] of Object.entries(PROFILES)){
  const c=CHAR[id];for(const key of ['role','style','speed','power','desc','superDescription'])if(profile[key]!==undefined)c[key]=profile[key];
  c.combat=Object.freeze(profile.combat);c.projectile=profile.projectile?Object.freeze(profile.projectile):null;
@@ -35,6 +45,9 @@ for(const [id,profile] of Object.entries(PROFILES)){
 const TIMING={light:[11,6,4],light2:[12,6,4],light3:[15,8,5],heavy:[18,10,5],kick:[14,7,4],low:[13,7,4],upper:[18,10,5],throw:[0,9,4],special:[18,10,5],super:[23,13,6]};
 for(const [key,[blockstun,hitstop,blockstop]] of Object.entries(TIMING))Object.assign(MOVE[key],{blockstun,hitstop,blockstop});
 const SPECIAL_STYLES={winnie:{mode:'shockwave',label:'重量壓制／低空掌波'},sezi:{mode:'spin',label:'精準防禦／旋風反擊'},gambler:{mode:'counter',label:'破綻懲罰／全押爆發'},azhi:{mode:'cards',label:'高速連打／幸運牌掩護'}};
+const GRAPPLES={azhi:{name:'加油站快摔',style:'fuel_toss',impactFrame:16,duration:29},gambler:{name:'莊家通吃・換位摔',style:'casino_flip',impactFrame:20,duration:34},winnie:{name:'全票通過・壓制摔',style:'heavy_slam',impactFrame:20,duration:34},sezi:{name:'港都迴旋摔',style:'vortex_toss',impactFrame:18,duration:32}};
+CHAR.gambler.superName='梭哈人生不回頭・ALL IN';
+for(const [id,c] of Object.entries(CHAR))c.grapple=Object.freeze(GRAPPLES[id]);
 for(const [id,v] of Object.entries(CHAR)){v.specialMode=SPECIAL_STYLES[id].mode;v.specialLabel=SPECIAL_STYLES[id].label;Object.freeze(v);}
 
 for(const key of Object.keys(MOVE)){

@@ -1,3 +1,11 @@
+# 8.15.0 — Phase 4.5 本機交付，尚未發佈
+
+本階段依使用者指示 **沒有推送 GitHub、部署 VPS 或修改正式資料庫**。目前工作分支為 `feat/phase4-5-grapples`，源自已發佈的 `feat/arcade-phase1` 8.14.1；現在從舊分支 `git pull` 不會取得 8.15.0。請勿將下方歷史更新命令當成此版已發佈的證明。
+
+此版無新增依賴、資料庫 Migration、Port 或服務。待另行授權發佈後，使用既有 `deploy/upgrade-ubuntu.sh` 手動 staging／備份／更新與回復流程，健康檢查應回報 **8.15.0**。原 PostgreSQL、`/etc/azhi71.env`、帳號與戰績維持；不需要 Email／SMTP／網域服務。公開 HTTP 帳號模式仍需原本明確 opt-in。詳見 [部署設定](ONLINE_DEPLOYMENT.md)、[本版交付與限制](PHASE4_5_8.15.0.md)。
+
+以下為已發佈歷史版本的指令。
+
 # 8.14.1 — 玩家帳號／一次性救援碼
 
 本版移除 Email、SMTP 與 Google 登入需求，使用玩家帳號／密碼與一次性救援碼。使用者已授權發佈至 `feat/arcade-phase1`；舊 `7745d9e` 是 8.14.0，不含此版修改。

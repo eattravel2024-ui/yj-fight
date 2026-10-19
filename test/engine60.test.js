@@ -7,7 +7,7 @@ test('shared 60Hz engine advances one second in 60 idle ticks',()=>{
 });
 test('frame-data is composable, action registry covers independent sprites',()=>{
  assert.equal(Object.keys(Data.CHAR).length,4);assert.equal(Ani.ACTIONS.length,17);
- for(const char of Object.keys(Data.CHAR)){for(const move of C.ATTACKS){const d=C.moveFor(char,move);assert.ok(d.startup>=1&&d.active>=1&&d.recovery>=1,`${char}.${move}`);assert.equal(d.start,d.startup);assert.ok(d.cancelStart<d.cancelEnd)}}
+ for(const char of Object.keys(Data.CHAR)){for(const move of C.ATTACKS){const d=C.moveFor(char,move);if(!d){assert.ok(Data.MOVE[move].characters&&!Data.MOVE[move].characters.includes(char));continue;}assert.ok(d.startup>=1&&d.active>=1&&d.recovery>=1,`${char}.${move}`);assert.equal(d.start,d.startup);assert.ok(d.cancelStart<d.cancelEnd)}}
 });
 test('separate hit and hurt boxes: standing hit confirmed and distant hit misses',()=>{
  const m=C.create('azhi','winnie');const [p,foe]=m.players;p.x=410;foe.x=490;

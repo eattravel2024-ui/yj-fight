@@ -15,8 +15,24 @@ const SKILL_POSES={
 };
 function seconds(clock){return Number.isFinite(clock)?Math.max(0,clock):0;}
 function sample(poses,progress){return poses[Math.min(poses.length-1,Math.floor(Math.max(0,progress)*poses.length))];}
+// Return existing atlas rows; new moves combine real poses without enlarging sheets.
+function actionFor(p,game,previous){
+ if(p.hp<=0)return 'ko';const winner=game?.ruleset==='team'?game.winnerTeam===(p.team??p.slot%2):game?.winner===p.slot;
+ if(game?.status==='finished'&&winner)return 'win';
+ if(p.grappleRole)return p.grappleRole==='attacker'?'throw':'hurt';
+ if(p.techFlash>0)return 'guard';
+ if(p.move){const n=p.move.name,f=p.move.frame||0;
+  if(n==='rush')return f<6?'dash':'heavy';if(n==='feint')return f<3?'heavy':'guard';if(n==='chip')return 'special';
+  if(n==='finisher')return f<10?'light':f<26?['light','light2','light3'][Math.min(2,Math.floor((f-10)/5))]:'light3';
+  return n==='super'?'special':n;
+ }
+ if(p.stun>2||p.flash>0)return 'hurt';if(p.guard)return 'guard';if(p.y>1)return 'jump';if(p.dash>0)return 'dash';if(p.crouch)return 'low';
+ return previous&&Math.abs(p.x-previous.x)>.35?'walk':'idle';
+}
 function spriteFrame(p,action,clock,move){
  const time=seconds(clock);
+ if(p?.grappleRole)return p.grappleRole==='attacker'?Math.min(7,3+Math.floor((p.grappleFrame||0)/5)):Math.min(5,Math.floor((p.grappleFrame||0)/4));
+ if(p?.techFlash>0)return 3;
  if(ENDING.has(action)){
   const start=Number.isFinite(p?.animationStartedAt)?p.animationStartedAt:0;
   return Math.min(FRAMES-1,Math.floor(Math.max(0,time-start)*(action==='ko'?10:7)));
@@ -51,5 +67,5 @@ function createPlayback(){
  }
  return {spriteFrame:frame,clear:()=>tracks.clear()};
 }
-return {ACTIONS,WIDTH,HEIGHT,FRAMES,frameSize,spriteFrame,createPlayback};
+return {ACTIONS,WIDTH,HEIGHT,FRAMES,frameSize,actionFor,spriteFrame,createPlayback};
 });

@@ -1,0 +1,23 @@
+{
+  "server.js": "097c5fa1f906e5c6c002e75b6da36c9a81ae5fb697b5c7d5f6355a82629ad781",
+  "public/core.js": "586179c14e3548e5f581362c3b468f15378cdcff88929a0ff07bb70156b79b54",
+  "public/team-core.js": "833677a5e6d2dfad6eca5b441a5f1bdf5005b068392c3c940d9583f18d44424b",
+  "public/rollback.js": "c0d9ef308333943de383998ec83abbcded164522aa47d5e2e47a1a8c35aaadb3",
+  "public/presentation.js": "7d67db97fa1342ae46060dab0cb2c87508fc1c5bd327a87267220cc2390b183a",
+  "public/engine/frame-data.js": "c0f793eae2a5b9b144b22d7656b35781f206305ce342c1efe20401a3c2d884ba",
+  "public/engine/commands.js": "cb8694331966a2957aa90a6df0c739c187228242fb4ee6bd2fc7c72d7711df9d",
+  "public/engine/ai.js": "c8f48251cdafaa1937ecf0b356798b554708a2e873e6f9e1ec47685f20857df8",
+  "public/engine/boxes.js": "9450060ed2e152cc2064f9c2e572ef084342211723327ba8ba4daa893df28710",
+  "public/engine/animation.js": "ceee810de4fd7ded26c3120560654d26d79bf54fbbb1e5817c8f684e485e2509",
+  "public/sprites/sezi.png": "a3c13deac844e91fa5b54c4de44e42bd1348eede7c2ade9d356d2b4b59506d8e",
+  "public/sprites/gambler.png": "68ae677ee55f5a1cc7c1c3d7d19bcfa0d6f618516579a74fce1f67f8ad5737ea",
+  "public/sprites/winnie.png": "3b023b1b79d6a1a955c5198c2bab49cc3cb1756d11ede15687d0cf4760734d7e",
+  "public/sprites/azhi.png": "4cd8dcd81a7088459cbf8ab842e8bbfecb454140f0f96a3b85ee511bbb761631",
+  "public/sprites/manifest.json": "00664af09d212f922965448ffcd9bea22f442c2fee419a93dfda55a50cabf485",
+  "public/art/night.svg": "e8dd39c879543616227d6c63ce955e8bb4b8ec92ecf9d51b01f17c965f961e76",
+  "public/art/garage.svg": "1e49d53b68edaef39c7fe4f77366a29848ab08e21f982bf131f38def1e8f260a",
+  "public/art/port-arena.svg": "26eca98d61f00e3f20e9009a2e6d0b3d014f1430f8f6a7474f5055c91ff6bc1c",
+  "public/art/harbor.svg": "643d0c16dbdbe18a53ba317ac4fd615147c3f660228cebb7b8d88ff060ad84e2",
+  "public/skill-vfx.js": "209e634c273be5cbffb88357b5915d530f5ac08f34db7f0a7739c6676e0378cb",
+  "public/vfx.js": "bdbd0542371e61ec7c6532d8a52c4048603b6aefe17d2fb0a6610660f33c0e19"
+}

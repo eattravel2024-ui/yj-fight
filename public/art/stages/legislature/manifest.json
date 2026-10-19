@@ -1,0 +1,52 @@
+{
+  "id": "legislature",
+  "name": "立法院",
+  "ready": true,
+  "layers": 1,
+  "source": {
+    "path": "assets/source-art/phase4/stages/立法院議場對決舞台.png",
+    "sha256": "90362cdf4455f943e2b050dcea66865b3d5514f8f5ba9c523a30612940479eb6",
+    "bytes": 2120439,
+    "width": 1672,
+    "height": 941
+  },
+  "assets": {
+    "background": {
+      "path": "art/stages/legislature/background.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 291412,
+      "sha256": "798628546083ccb23d2e47834e037e17f4b4b5dbc8083567b5d6aea3fa3d9aee"
+    },
+    "preview": {
+      "path": "art/stages/legislature/preview.webp",
+      "width": 640,
+      "height": 360,
+      "bytes": 58086,
+      "sha256": "c037c9289e8650f8f677e1818d988cd8a6648ab06906dda7058f4f12cfab0325"
+    },
+    "combat": {
+      "path": "art/stages/legislature/combat.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 214562,
+      "sha256": "b675682fa03228490461cc4424dc01c6d777867a30d28ff15d6e2b394b6c97b6"
+    }
+  },
+  "visuals": {
+    "saturation": 0.77,
+    "brightness": 0.85,
+    "contrast": 0.91,
+    "coolTint": 0.025
+  },
+  "geometry": {
+    "width": 960,
+    "height": 540,
+    "groundY": 448,
+    "spawns": [
+      274,
+      686
+    ]
+  },
+  "musicNote": "暫用現有原創 stage_fur_lab；未提供立法院專屬曲目。"
+}

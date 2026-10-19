@@ -68,7 +68,9 @@ function counter(ctx,b,t){
  for(let i=0;i<4;i++){ctx.save();ctx.translate(-28+i*25,35-Math.sin(t*Math.PI+i)*20);ctx.rotate(t+i);ctx.fillStyle=p.color;ctx.fillRect(-9,-9,18,18);ctx.fillStyle='#13202a';ctx.fillRect(-5,-5,3,3);ctx.fillRect(2,2,3,3);ctx.restore();}
  ctx.fillStyle=p.light;ctx.font='900 16px system-ui';ctx.fillText('膽量全押',-15,75);
 }
-const DRAWERS={shockwave:honey,spin,cards,counter};
+function chips(ctx,b,t){const p=b.palette;for(let i=0;i<6;i++){const x=20+t*90+i*8,y=Math.sin(i+t*4)*30;ctx.fillStyle=i%2?p.color:'#40285e';ctx.strokeStyle=p.light;ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,8+i%2*3,0,TAU);ctx.fill();ctx.stroke();}ctx.fillStyle=p.light;ctx.font='900 15px system-ui';ctx.fillText('籌碼衝擊',-20,68);}
+function flurry(ctx,b,t){const color='#57f2a5';for(let i=0;i<3;i++){const y=-35+i*32,x=35+t*65;arc(ctx,x,y,25+t*14,-1.5,1.5,5,color);ctx.strokeStyle='#eafff0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-40-i*10,y+10);ctx.lineTo(x+14,y);ctx.stroke();}ctx.fillStyle=color;ctx.font='900 15px system-ui';ctx.fillText('加滿三百！',-20,83);}
+const DRAWERS={shockwave:honey,spin,cards,counter,chips,flurry};
 function create(options={}){
  let quality=options.quality==='low'?'low':'high';
  let reducedMotion=options.reducedMotion===true;
@@ -77,10 +79,10 @@ function create(options={}){
  function trim(){const budget=limits();let count=bursts.reduce((n,b)=>n+b.count,0);while(bursts.length>budget.bursts||count>budget.particles){count-=bursts.shift().count;}}
  function prune(now){bursts=bursts.filter(b=>now-b.at<b.life);}
  function emit(event,at=clock()){
-  if(!event||event.kind!=='skill'||!Object.hasOwn(STYLES,event.char)||!['special','super'].includes(event.move)||!Number.isFinite(event.x)||!Number.isFinite(event.y)||!Number.isFinite(at))return false;
+  if(!event||event.kind!=='skill'||!Object.hasOwn(STYLES,event.char)||!['special','super','chip','finisher'].includes(event.move)||!Number.isFinite(event.x)||!Number.isFinite(event.y)||!Number.isFinite(at))return false;
   prune(at);
   const palette=STYLES[event.char];
-  bursts.push({char:event.char,style:palette.style,palette,x:cap(event.x,-1000,2000),y:cap(event.y,-1000,2000),direction:event.direction===-1||event.face===-1?-1:event.direction===1||event.face===1?1:(event.slot%2===1?-1:1),at,super:event.move==='super',life:event.move==='super'?1250:900,count:quality==='low'?Math.ceil(palette.count*.32):palette.count});
+  bursts.push({char:event.char,style:event.move==='chip'?'chips':event.move==='finisher'?'flurry':palette.style,palette,x:cap(event.x,-1000,2000),y:cap(event.y,-1000,2000),direction:event.direction===-1||event.face===-1?-1:event.direction===1||event.face===1?1:(event.slot%2===1?-1:1),at,super:event.move==='super'||event.move==='finisher',life:event.move==='super'||event.move==='finisher'?1250:900,count:quality==='low'?Math.ceil(palette.count*.32):palette.count});
   trim();return true;
  }
  function draw(ctx,now=clock(),view={}){

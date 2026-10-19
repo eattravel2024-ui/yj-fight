@@ -7,14 +7,14 @@ function arena(E,a='azhi',b='sezi'){
 }
 function strike(E,g,name='heavy'){
  const p=g.players[0];C.startMove(g,p,name);p.move.frame=C.moveFor(p,name).start-1;
- if(E===T){p.move.hitSlots=[];p.move.hitCounts={};}E.step(g);return g.events.find(e=>e.kind==='hit');
+ if(E===T){p.move.hitSlots=[];p.move.hitCounts={};}E.step(g);if(name==='throw')for(let i=0;i<60&&!g.events.some(e=>e.kind==='hit');i++)E.step(g);return g.events.find(e=>e.kind==='hit');
 }
 test('Phase 4 roles are real combat data, preserving four original one-button skills',()=>{
  assert.equal(C.INPUT_BUFFER,10);assert.ok(C.CHAR.azhi.speed>C.CHAR.sezi.speed);
  assert.ok(C.moveFor('azhi','light').recovery<C.moveFor('winnie','light').recovery);
  assert.ok(C.CHAR.winnie.power>C.CHAR.gambler.power);
  assert.ok(C.moveFor('gambler','special').recovery>C.moveFor('sezi','special').recovery);
- for(const id of Object.keys(C.CHAR))for(const key of C.ATTACKS){const d=C.moveFor(id,key);assert.ok(d.hitstun>0&&d.blockstun>=0&&d.hitstop>0&&d.blockstop>0);assert.ok(d.hitstop<=15);}
+ for(const id of Object.keys(C.CHAR))for(const key of C.ATTACKS){const d=C.moveFor(id,key);if(!d){assert.ok(C.MOVE[key].characters&&!C.MOVE[key].characters.includes(id));continue;}if(d.nonContact){assert.equal(d.damage,0);assert.equal(d.gain,0);continue;}assert.ok(d.hitstun>0&&d.blockstun>=0&&d.hitstop>0&&d.blockstop>0);assert.ok(d.hitstop<=15);}
  assert.equal(C.CHAR.azhi.special,'加油加300');assert.equal(C.CHAR.sezi.special,'高雄發大財');
 });
 for(const [label,E] of [['1v1',C],['2v2',T]]){

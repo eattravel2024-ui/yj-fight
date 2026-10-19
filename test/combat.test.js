@@ -13,7 +13,7 @@ test('characters and independent frame-data available',()=>{
 test('light punch hitbox reduces opponent health',()=>{const m=attack('light');assert.ok(m.players[1].hp<100);assert.ok(m.players[1].hp>=90)});
 test('heavy punch causes greater damage than light',()=>{assert.ok(attack('heavy').players[1].hp<attack('light').players[1].hp)});
 test('standing guard reduces mid attacks',()=>{const m=C.create('azhi','winnie');m.players[0].x=455;m.players[1].x=535;C.input(m,1,{guard:true});C.input(m,0,{heavy:true});for(let i=0;i<18;i++){if(i>0)C.input(m,0,{});C.step(m)}assert.ok(m.players[1].hp>85, 'blocked damage should be small')});
-test('throw bypasses guarding',()=>{const m=C.create('azhi','winnie');m.players[0].x=460;m.players[1].x=515;C.input(m,1,{guard:true});C.input(m,0,{throw:true});for(let i=0;i<17;i++){if(i>0)C.input(m,0,{});C.step(m)}assert.ok(m.players[1].hp<92)});
+test('throw bypasses guarding',()=>{const m=C.create('azhi','winnie');m.players[0].x=460;m.players[1].x=515;C.input(m,1,{guard:true});C.input(m,0,{throw:true});for(let i=0;i<70;i++){if(i>0)C.input(m,0,{});C.step(m)}assert.ok(m.players[1].hp<92);assert.equal(m.grapples.length,0)});
 test('one-button special accepts exactly 25 meter and rejects 24',()=>{
  for(const meter of [24,25]){
   const m=C.create('azhi','winnie');m.players[0].meter=meter;
@@ -57,7 +57,7 @@ test('hitstop pauses frames while retaining input in the buffer',()=>{
 });
 
 test('attack frames have separate startup active recovery windows and real height data',()=>{
- for(const key of C.ATTACKS){const m=C.MOVE[key];assert.ok(m.start>0&&m.active>0&&m.recovery>0);assert.ok(m.hitHeight>0&&m.impactY>0)}
+ for(const key of C.ATTACKS){const m=C.MOVE[key];assert.ok(m.start>0&&m.active>0&&m.recovery>0);if(m.nonContact){assert.equal(m.damage,0);assert.equal(C.Boxes.hitbox({x:400,y:0,face:1},m),null)}else assert.ok(m.hitHeight>0&&m.impactY>0)}
  assert.ok(C.MOVE.kick.reach>C.MOVE.light.reach);
  assert.ok(C.MOVE.low.impactY<C.MOVE.upper.impactY);
 });

@@ -1,6 +1,6 @@
 # 陪公子練武 — Spar With the Young Master
 
-> GitHub/Codex development baseline: **8.14.1**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> Local development: **8.15.0 / Phase 4.5** (not published). Remote baseline: **8.14.1**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
 
@@ -17,6 +17,16 @@ npm start
 
 Open `http://127.0.0.1:31071/` (main game) or `http://127.0.0.1:31071/team.html` (2v2 / spectator UI).
 
+## 8.15.0 — Phase 4.5 throws, fighter additions and Legislature
+
+All four fighters share real grounded throws and 10F H throw-tech, one-time impact damage, whiff recovery and wake-up protection in 1v1/2v2. Azhi adds forward+K rush, rising I anti-air and forward+O three-hit finisher; Gambler adds down+K feint and forward+U chip projectile while retaining his O ALL IN. Easy direction modifiers are captured at key-down, with character/energy validation in the shared authoritative core. Cancel paths cannot loop back into jabs.
+
+The supplied Legislature original is now preserved and imported into STAGE 04 selection, previews, VS, battle, online stage rotation and the arcade finale. Four maps are playable; fur_lab is a separate planned STAGE 05. Geometry/camera remain unchanged; Legislature temporarily reuses the existing original stage_fur_lab music.
+
+Both supplied 10-second MP4s contain scene/HUD pixels and no Alpha. They are motion references, not clean sprite exports: existing transparent key poses have been re-timed and composed for attacks, skills, hurt, victory and paired throws. Clean intermediate drawings and dedicated grab/victim angles remain needed. Source videos, hashes and the reproducible motion map are preserved.
+
+See [actual architecture](docs/PROJECT_ARCHITECTURE.md), [character/controls and throw rules](docs/CHARACTER_SPEC.md), [UI rules](docs/UI_STYLE_BIBLE.md) and [Phase 4.5 delivery](docs/PHASE4_5_8.15.0.md). This phase does not authorize GitHub publication or VPS deployment. Earlier deployment commands fetch older published versions until a separate release is authorized.
+
 ## 8.14.1 — Player username and recovery code, without Email / domain services
 
 Register and log in using a case-insensitive player username and password. Keep nickname/avatar, real quick/ranked matches and persistent records. Email, verification mail, password-reset mail and Google login are removed. A 192-bit one-use recovery code is shown once at registration; only its hash is stored. Recovery consumes the old code, revokes all existing sessions and shows a replacement once. Profile code rotation requires the current password and CSRF. Save the code privately: losing both it and the password prevents self-service recovery.
@@ -25,7 +35,7 @@ PostgreSQL and explicit season dates remain required. Run additive migration `00
 
 No domain or SMTP is required. For the existing public IP/HTTP site, set the exact `APP_ORIGIN=http://YOUR_VPS_IP:18071` and explicitly opt in with `ALLOW_INSECURE_HTTP=true`. HTTP does not encrypt passwords/cookies/recovery codes; use a unique game password. HTTPS remains supported, including IP-based certificates, and automatically uses Secure cookies. See [current deployment steps](docs/ONLINE_DEPLOYMENT.md) and [8.14.1 delivery](docs/ACCOUNTS_8.14.1.md). The user authorized publishing this follow-up on `feat/arcade-phase1`; VPS deployment remains manual.
 
-The sections below describe historical releases; their SMTP/Email requirements no longer apply to 8.14.1.
+The sections below describe historical releases; their SMTP/Email requirements no longer apply. The old Phase 4 missing-Legislature-art note was resolved in 8.15.0.
 
 ## 8.14.0 — Official Arcade UI v2 and online players
 

@@ -13,7 +13,7 @@ function fighter(id,slot){
 }
 function create(chars=['azhi','winnie','sezi','gambler'],opts={}){
  const players=Array.from({length:4},(_,slot)=>fighter(chars[slot]||'azhi',slot));
- return {ruleset:'team',players,tick:0,round:1,time:90,status:'playing',pause:0,events:[],difficulty:1,stage:opts.stage||'night',seed:opts.seed||1729,hitstop:0,projectiles:[],scores:[0,0],winnerTeam:null,introDuration:C.introLength(opts.introFrames),introFrames:C.introLength(opts.introFrames)};
+ return {ruleset:'team',players,tick:0,round:1,time:90,status:'playing',pause:0,events:[],difficulty:1,stage:opts.stage||'night',seed:opts.seed||1729,hitstop:0,grapples:[],projectiles:[],scores:[0,0],winnerTeam:null,introDuration:C.introLength(opts.introFrames),introFrames:C.introLength(opts.introFrames)};
 }
 function rng(m){m.seed=(Math.imul(m.seed,1664525)+1013904223)>>>0;return m.seed/4294967296;}
 function input(m,slot,keys){C.input(m,slot,keys)}
@@ -28,7 +28,10 @@ function startMove(m,p,name){
  return true;
 }
 function hit(m,attacker,target,data,move=attacker.move,source=attacker,defence=target){
- if(!target||move.hitSlots.includes(target.slot)||!B.hits(source,defence,data))return;
+ if(!target||C.Grapples.locked(attacker)||move.hitSlots.includes(target.slot))return;
+ if(data.level==='throw'){if(C.Grapples.tryGrab(m,attacker,target,move,data))move.hitSlots.push(target.slot);return;}
+ if(!B.hits(source,defence,data))return;
+ if(data.maxHits&&(move.hitCounts?.[target.slot]||0)>=data.maxHits)return;
  const spin=attacker.char==='sezi'&&['special','super'].includes(move.name);
  if(spin&&(move.hitCounts?.[target.slot]||0)>=3)return;
  if(data.level==='throw'&&(source.y>0||defence.y>8))return;
@@ -46,9 +49,9 @@ function spawnProjectile(m,p){
 function updateProjectiles(m,snapshots=C.combatSnapshots(m)){for(let i=m.projectiles.length-1;i>=0;i--){const shot=m.projectiles[i];shot.x+=shot.vx;shot.life--;
  const owner=m.players[shot.owner];const box={x:shot.x-shot.w/2,y:shot.y-shot.h/2,w:shot.w,h:shot.h};
  const defence=snapshots.filter(q=>q.hp>0&&q.team===1-shot.team&&B.intersect(box,B.hurtbox(q))).sort((a,b)=>Math.abs(a.x-shot.x)-Math.abs(b.x-shot.x)||a.slot-b.slot)[0],foe=defence?m.players[defence.slot]:null;
- if(foe){const blocked=defence.guard&&(shot.level==='low'?defence.crouch:!defence.crouch),name=shot.fromMove||'special';
+ if(foe){const blocked=defence.guard&&(shot.kind==='chip'||(shot.level==='low'?defence.crouch:!defence.crouch)),name=shot.fromMove||'special';
   const move=owner.move?.name===name&&owner.move.serial===shot.activation?owner.move:{name,riposte:!!shot.riposte};
-  C.applyContact(m,owner,foe,move,{...C.moveFor(owner,name),damage:shot.damage,knock:24,gain:8,hitstun:30},{defence,block:blocked,projectile:true,face:Math.sign(shot.vx)||owner.face});
+  C.applyContact(m,owner,foe,move,{...C.moveFor(owner,name),damage:shot.damage,knock:24,gain:8,hitstun:shot.kind==='chip'?C.moveFor(owner,name).hitstun:30},{defence,block:blocked,projectile:true,face:Math.sign(shot.vx)||owner.face});
   m.projectiles.splice(i,1);continue;}
 
  if(shot.life<=0||shot.x<-50||shot.x>1010)m.projectiles.splice(i,1);
@@ -63,13 +66,13 @@ function finishRound(m){if(m.status!=='playing')return;
  if(!red.length&&blue.length)winner=1;else if(!blue.length&&red.length)winner=0;
  else if(!red.length&&!blue.length)winner=-1;
  else if(m.time<=0)winner=total(0)===total(1)?-1:total(0)>total(1)?0:1;
- if(winner===null)return;
+ if(winner===null)return;C.Grapples.clear(m);
  if(winner>=0)m.scores[winner]++;
  m.events.push({kind:'round',winner,round:m.round,team:winner});
  if(m.scores.some(n=>n>=2)){m.status='finished';m.winnerTeam=m.scores[0]>m.scores[1]?0:1;m.events.push({kind:'finish',winnerTeam:m.winnerTeam});return}
  m.status='between';m.pause=120;
 }
-function resetRound(m){m.introFrames=m.introDuration||0;m.round++;m.tick=0;m.time=90;m.status='playing';m.pause=0;m.hitstop=0;m.projectiles=[];
+function resetRound(m){C.Grapples.clear(m);m.introFrames=m.introDuration||0;m.round++;m.tick=0;m.time=90;m.status='playing';m.pause=0;m.hitstop=0;m.projectiles=[];
  m.players=m.players.map(p=>fighter(p.char,p.slot));m.events.push({kind:'text',text:'ROUND '+m.round});
 }
 function step(m){
@@ -83,16 +86,19 @@ function step(m){
   const foe=nearest(m,p);if(foe)p.face=p.x<=foe.x?1:-1;
  }
  for(const p of m.players)if(p.hp>0)C.prepareFighter(p,m.tick);
- for(const p of m.players){if(p.hp<=0)continue;
+ C.Grapples.step(m,C.applyContact,C.moveFor);
+ for(const p of m.players){if(p.hp<=0||C.Grapples.locked(p))continue;
   if(p.move){const name=p.move.name,d=C.moveFor(p,name);p.move.frame++;
    if(p.move.frame>=d.start&&p.move.frame<d.start+d.active){
-    if((name==='special'||name==='super')&&['cards','shockwave'].includes(CHAR[p.char].specialMode)){
+    if(d.travel)p.x=clamp(p.x+p.face*d.travel,48,912);if(d.rise&&p.move.frame===d.start){p.vy=d.rise;p.y=1;}
+    if(d.repeatEvery&&(p.move.frame-d.start)%d.repeatEvery===0)p.move.hitSlots=[];
+    if(d.projectile||(name==='special'||name==='super')&&['cards','shockwave'].includes(CHAR[p.char].specialMode)){
       if(!p.move.spawned){spawnProjectile(m,p);p.move.spawned=true}
     }else{
       if((name==='special'||name==='super')&&p.char==='sezi')p.x=clamp(p.x+p.face*3.3,48,912);
       if((name==='special'||name==='super')&&p.char==='sezi'&&(p.move.frame-d.start)%4===0){p.move.hitSlots=[]}
       if(p.move.frame===d.start&&(name==='heavy'||name==='upper'))p.x=clamp(p.x+p.face*11,48,912);
-      for(const target of living(m,1-p.team))pending.push({p,target,d,move:p.move});
+      if(!d.nonContact)for(const target of living(m,1-p.team))pending.push({p,target,d,move:p.move});
     }
    }
    if(p.move&&p.move.frame>=d.start+d.active+d.recovery){p.move=null;p.chain=0}
@@ -107,10 +113,11 @@ function step(m){
   p.x=clamp(p.x,48,912);
  }
  const snapshots=C.combatSnapshots(m);
- for(const {p,target,d,move} of pending)hit(m,p,target,d,move,snapshots[p.slot],snapshots[target.slot]);
+ for(const throwPass of [true,false])for(const {p,target,d,move} of pending)if((move.name==='throw')===throwPass)hit(m,p,target,d,move,snapshots[p.slot],snapshots[target.slot]);
+ for(const p of m.players)if(p.move?.name==='throw'&&!p.move.hit){const d=C.moveFor(p,'throw');if(p.move.frame===d.start+d.active-1)m.events.push({kind:'throw_whiff',slot:p.slot,name:CHAR[p.char].grapple.name});}
  updateProjectiles(m,snapshots);for(const p of m.players)C.resolveCancels(m,p,startMove);
  resolveAll(m);finishRound(m);
 }
-function serialize(m){return {ruleset:'team',type:'state',status:m.status,round:m.round,time:Math.max(0,Math.ceil(m.time)),tick:m.tick,introDuration:m.introDuration||0,introFrames:m.introFrames||0,serverHz:FPS,stage:m.stage,scores:m.scores.slice(),winnerTeam:m.winnerTeam,hitstop:m.hitstop,projectiles:m.projectiles.map(p=>({...p})),players:m.players.map(p=>({slot:p.slot,team:p.team,char:p.char,x:p.x,y:p.y,hp:p.hp,meter:p.meter,face:p.face,guard:p.guard,crouch:p.crouch,stun:p.stun,blockstun:p.blockstun,move:p.move?{name:p.move.name,frame:p.move.frame,hit:p.move.hit,blocked:p.move.blocked,riposte:!!p.move.riposte}:null,flash:p.flash,combo:p.combo,dash:p.dash,vy:p.vy,armorTimer:p.armorTimer,armorCharges:p.armorCharges,riposteFrames:p.riposteFrames})),events:m.events.splice(0,50)};}
+function serialize(m){return {ruleset:'team',type:'state',status:m.status,round:m.round,time:Math.max(0,Math.ceil(m.time)),tick:m.tick,introDuration:m.introDuration||0,introFrames:m.introFrames||0,serverHz:FPS,stage:m.stage,scores:m.scores.slice(),winnerTeam:m.winnerTeam,hitstop:m.hitstop,projectiles:m.projectiles.map(p=>({...p})),players:m.players.map(p=>({slot:p.slot,team:p.team,char:p.char,x:p.x,y:p.y,hp:p.hp,meter:p.meter,face:p.face,guard:p.guard,crouch:p.crouch,stun:p.stun,blockstun:p.blockstun,move:p.move?{name:p.move.name,frame:p.move.frame,hit:p.move.hit,blocked:p.move.blocked,riposte:!!p.move.riposte}:null,flash:p.flash,combo:p.combo,dash:p.dash,vy:p.vy,armorTimer:p.armorTimer,armorCharges:p.armorCharges,riposteFrames:p.riposteFrames,throwInvuln:p.throwInvuln,techFlash:p.techFlash,grappleWith:p.grappleWith,grappleRole:p.grappleRole,grappleFrame:p.grappleFrame,grappleStyle:p.grappleStyle})),grapples:(m.grapples||[]).map(g=>({...g})),events:m.events.splice(0,50)};}
 return {FPS,CHAR,teams,ATTACKS,create,input,step,serialize,nearest,living};
 });

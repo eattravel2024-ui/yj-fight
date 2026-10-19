@@ -69,3 +69,4 @@ test('animation playback isolates slots, clears on new matches, and preserves si
  for(const [frame,expected] of [[0,0],[5,3],[9,7],[10,8],[17,9]])assert.equal(playback.spriteFrame({slot:0,move:{frame}},'special',20,move),expected);
  playback.clear();assert.equal(playback.spriteFrame({slot:0,char:'azhi'},'ko',30),0);
 });
+test('Phase 4.5 chip and finisher use distinct bounded original effects and respect reduced motion',()=>{const fx=VFX.create({reducedMotion:true});assert.equal(fx.emit(event('gambler',{move:'chip'}),100),true);assert.equal(fx.emit(event('azhi',{move:'finisher'}),100),true);assert.deepEqual(fx.snapshot(100).map(b=>b.style),['chips','flurry']);const a=recordingContext(),b=recordingContext();fx.draw(a.ctx,250);fx.draw(b.ctx,500);const geometry=calls=>calls.filter(c=>!(c[0]==='set'&&c[1]==='globalAlpha'));assert.deepEqual(geometry(a.calls),geometry(b.calls));assert.ok(fx.stats(100).particles<=fx.stats(100).budget.particles);});

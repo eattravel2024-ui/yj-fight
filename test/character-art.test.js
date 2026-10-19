@@ -22,16 +22,20 @@ test('all supplied originals retain exact bytes and optimized role assets exist 
  }
  assert.equal(count,12);assert.ok(outputs<sources*.1,'UI derivatives avoid shipping original-resolution PNGs');
 });
-test('protected combat files match the reviewed baseline, including authorized Phase 4 tuning and Phase 5 server lifecycle',()=>{
+test('protected combat files match the reviewed baseline, including authorized Phase 4/4.5 tuning and Phase 5 server lifecycle',()=>{
  const protectedFiles=require('../assets/source-art/phase1_5/protected-combat-sha256.json');
  const before=require('../assets/source-art/phase4/protected-before-8.12.0.json'),audit=require('../assets/source-art/phase4/authorized-combat-changes.json');
  const phase4=require('../assets/source-art/phase5/protected-before-8.13.0.json'),online=require('../assets/source-art/phase5/authorized-online-changes.json');
+ const latest=require('../assets/source-art/phase4_5/protected-before-8.14.1.json'),grapples=require('../assets/source-art/phase4_5/authorized-combat-changes.json');
  assert.deepEqual(Object.keys(online.changed),['server.js']);
+ assert.deepEqual(Object.keys(grapples.changed).sort(),['public/core.js','public/team-core.js','public/presentation.js','public/engine/frame-data.js','public/engine/commands.js','public/engine/ai.js','public/engine/boxes.js','public/engine/animation.js','public/sprites/azhi.png','public/sprites/gambler.png','public/sprites/manifest.json','public/skill-vfx.js'].sort());
+ for(const [file,hash]of Object.entries(grapples.added))assert.equal(sha(fs.readFileSync(path.join(root,file))),hash,file);
  assert.deepEqual(Object.keys(audit.changed).sort(),['server.js','public/core.js','public/team-core.js','public/engine/frame-data.js','public/engine/ai.js','public/vfx.js'].sort());
  assert.ok(Object.keys(protectedFiles).length>=15);
  for(const [file,hash] of Object.entries(protectedFiles)){
   assert.equal(sha(fs.readFileSync(path.join(root,file))),hash,file);
   const intermediate=phase4[file];if(audit.changed[file]){assert.equal(audit.changed[file].before,before[file]);assert.equal(audit.changed[file].after,intermediate);}else assert.equal(intermediate,before[file],file+' must retain the Phase 3 bytes');
-  if(online.changed[file]){assert.equal(online.changed[file].before,intermediate);assert.equal(online.changed[file].after,hash);}else assert.equal(hash,intermediate,file+' must retain the Phase 4 bytes');
+  if(online.changed[file]){assert.equal(online.changed[file].before,intermediate);assert.equal(online.changed[file].after,latest[file]);}else assert.equal(latest[file],intermediate,file+' must retain the Phase 4 bytes');
+  if(grapples.changed[file]){assert.equal(grapples.changed[file].before,latest[file]);assert.equal(grapples.changed[file].after,hash);}else assert.equal(hash,latest[file],file+' must retain the 8.14.1 bytes');
  }
 });

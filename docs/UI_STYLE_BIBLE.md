@@ -59,7 +59,7 @@ Seat changes use brief entry feedback. Ready feedback comes only after a roster 
 
 The scene preview is dominant; the thumbnail strip is navigation. Stage number, title/theme and real BGM/availability accompany it. Preview switches cancel previous tweens. Practice stage choice passes through the existing encounter plan; arcade missions keep the real campaign progress and CPU definitions.
 
-Three formal source maps currently exist: `night` 嘴砲夜市, `garage` 金沙賭城, `harbor` 天安門廣場. Keep the square architecture and tanks. STAGE 04 `legislature` 立法院 remains unavailable until the real original image can be imported; do not show another scene as its preview. `fur_lab` is a separate future plan, not STAGE 04.
+Four formal source maps now exist: `night` 嘴砲夜市, `garage` 金沙賭城, `harbor` 天安門廣場 and STAGE 04 `legislature` 立法院. Keep the square architecture/tanks and the supplied Legislature chamber. Legislature uses its own imported preview and combat derivative; its music temporarily reuses the existing original `stage_fur_lab`. `fur_lab` remains a separately planned STAGE 05, without substitute art.
 
 Maps are single complete images. Do not claim multilayer parallax. Background-only preprocessed readability variants stay separate from character/HUD colors. Keep existing ground, spawn points and camera geometry.
 
@@ -68,6 +68,8 @@ Maps are single complete images. Do not claim multilayer parallax. Background-on
 VS uses real selected fighters, actual names and the chosen stage, with cyan/pink sides, gold VS, fast speed-line composition and existing audio. Asset readiness is a real Promise/ACK, never a fake loading timer. Cancellation must not launch a hidden local match. Online VS is presentation over the authoritative intro; it cannot pause or change the online stage.
 
 Reuse `combat-hud.js/css`: true instantaneous HP with visual damage trails, real timer/round wins, bottom energy and compact skill hints. Keep the fitted 16:9 stage and original sprite animations. Do not invent a second HP/meter model. Online KO/result/RP must wait for the authoritative rollback window and persisted server settlement. Client predictions never award points.
+
+Combat additions use the same compact coach and receipts: →+K/→+O for Azhi, ↓+K/→+U for Gambler, H throw/tech for all. Forward is relative to the fighter. Show only legal cancel routes and actual costs/hits/HP removed; distinguish a zero-damage feint from a strike. Grabbed players see remaining simulation frames for H tech; confirmed tech uses a zero-damage receipt and existing parry sound. Hold/toss effects follow the paired roots and grappleFrame, respect reduced motion and never alter collision geometry. Re-timed key poses must not be described as newly drawn in-betweens or clean video extractions.
 
 Results reflect actual engine outcomes. Arcade next/retry/full clear uses the existing campaign. Competition result cards use the saved settlement, including placement/RP changes and rank-up/down. No client-submitted winners, arbitrary HP or RP modification endpoints exist.
 

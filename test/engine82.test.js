@@ -3,11 +3,9 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path');
 const C=require('../public/core.js');
 function step(m,n=1){for(let i=0;i<n;i++)C.step(m)}
-test('input buffer accepts exactly 10 simulation frames and expires after the window',()=>{
+test('input buffer defaults to 10F, Azhi uses 12F, and both expire deterministically',()=>{
  assert.equal(C.INPUT_BUFFER,10);
- let m=C.create(),p=m.players[0];C.input(m,0,{pulses:['light']});
- assert.equal(p.buffer[0].until-m.tick,10);
- step(m,11);assert.equal(p.buffer.length,0);
+ for(const [char,window]of [['azhi',12],['gambler',10],['sezi',10],['winnie',10]]){const m=C.create(char),p=m.players[0];p.stun=30;C.input(m,0,{pulses:['light']});assert.equal(p.buffer[0].until-m.tick,window);step(m,window+1);assert.equal(p.buffer.length,0);}
 });
 test('buffered button during the final 6 frames of recovery executes automatically',()=>{
  const m=C.create(),p=m.players[0];m.players[1].x=880;
