@@ -32,6 +32,7 @@ async function openPanel(p,panel){
 }
 async function chooseMode(p,mode){
  await openPanel(p,'home');await p.locator('[data-menu-entry="'+mode+'"]').click();await p.locator('#arcadeEnter').click();
+ if(mode==='practice'){await p.waitForFunction(()=>AzhiShell.currentPanel==='training');await p.locator('#trainingFree').click();}
  await p.waitForFunction(panel=>window.AzhiShell.currentPanel===panel,mode==='online'?'room':'fighters');
 }
 async function assertViewport(p,canvasSelector,hudSelector,viewport){
@@ -74,7 +75,7 @@ test('main-menu navigation retains the chosen fighter across mode routes without
  await p.locator('[data-custom-mode="spectator"]').click();assert.equal(await p.locator('#teamCharacters button:disabled').count(),4);
  await openPanel(p,'home');await p.locator('[data-menu-entry="practice"]').click();
  assert.equal(new URL(p.url()).pathname,'/team.html');await p.locator('#arcadeEnter').click();
- await p.waitForURL('**/?mode=practice**');await p.waitForFunction(()=>window.AzhiShell?.currentPanel==='fighters');
+ await p.waitForFunction(()=>AzhiShell.currentPanel==='training');await p.locator('#trainingFree').click();await p.waitForURL('**/?mode=practice**');await p.waitForFunction(()=>AzhiShell.currentPanel==='training');await p.locator('#trainingFree').click();await p.waitForFunction(()=>AzhiShell.currentPanel==='fighters');
  assert.match(await p.locator('#appConfirmSummary').textContent(),/金沙賭神/);
  await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());await p.waitForFunction(()=>window.AzhiDebug.local?.practice===true);
  assert.equal(await p.evaluate(()=>window.AzhiDebug.local.players[0].char),'gambler');
@@ -113,7 +114,7 @@ test('desktop practice: four fighters, easy skill and no classic entry',async()=
  const p=await page({viewport:{width:1440,height:1000}});await p.goto(base);await p.waitForFunction(()=>window.AzhiDebug);
  assert.equal(await p.locator('#characterList button').count(),4);
  assert.equal(await p.locator('a[href*="adventure-legacy"]').count(),0);
- await p.locator('[data-menu-entry="practice"]').focus();await p.keyboard.press('Space');await p.waitForFunction(()=>window.AzhiShell.currentPanel==='fighters');assert.equal(await p.evaluate(()=>window.AzhiDebug.mode),'practice');await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());
+ await p.locator('[data-menu-entry="practice"]').focus();await p.keyboard.press('Space');await p.waitForFunction(()=>AzhiShell.currentPanel==='training');await p.locator('#trainingFree').click();await p.waitForFunction(()=>window.AzhiShell.currentPanel==='fighters');assert.equal(await p.evaluate(()=>window.AzhiDebug.mode),'practice');await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>!AzhiShell.isOpen());
  await p.waitForFunction(()=>window.AzhiDebug.local?.practice===true);
  await p.waitForFunction(()=>window.AzhiDebug.local.introFrames===0);await p.locator('#stage').focus();await p.keyboard.press('KeyU');
  await p.waitForFunction(()=>window.AzhiDebug.local?.players[0].meter<100);

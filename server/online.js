@@ -3,12 +3,13 @@ const crypto=require('node:crypto');
 const Combat=require('../public/core');
 const RB=require('../public/rollback');
 const Stages=require('../public/stage-registry');
+const Matching=require('./matchmaking');
 const digest=value=>crypto.createHash('sha256').update(String(value)).digest('hex');
 const fail=(code,message,status=400)=>{throw Object.assign(new Error(message),{code,status});};
 /* Transport adapter for the existing authoritative engine. No HTTP/client result API. */
 function createOnline({services,rooms,send,all,begin,finalize,roster,env=process.env}){
  const queue=new Map(),occupied=new Map();let mutation=Promise.resolve(),closed=false;
- const grace=30000,queueTimeout=120000,acceptTimeout=20000,loadTimeout=15000;
+ const grace=30000,queueTimeout=Matching.LIMITS.timeout,acceptTimeout=20000,loadTimeout=15000;
  const serial=fn=>{const work=mutation.then(fn);mutation=work.catch(err=>{if(!err.status||err.status>=500)console.error('[online] operation failed:',err.code||err.name)});return work;};
  const error=(ws,err)=>send(ws,{type:'error',code:err.code||'ONLINE_UNAVAILABLE',message:err.status?err.message:'線上服務暫時無法使用，請稍後重試'});
  const service=()=>{if(!services.competition||!services.healthy)fail('ONLINE_NOT_CONFIGURED','線上競技尚未設定或資料庫無法連線',503);return services.competition;};
@@ -18,7 +19,7 @@ function createOnline({services,rooms,send,all,begin,finalize,roster,env=process
  function tokenFor(player){const value=crypto.randomBytes(32).toString('base64url');player.resumeHash=digest(value);return value;}
  function attach(ws,req){ws.request=req;ws.rtt=null;ws.pingAt=0;ws.auth=null;ws.initialized=services.ready.then(()=>services.accounts.authenticateRequest(req)).then(value=>{ws.auth=value;}).catch(()=>{});probe(ws);}
  function probe(ws){if(ws.readyState!==1)return;ws.pingAt=Date.now();ws.pingValue=crypto.randomBytes(6).toString('hex');try{ws.ping(ws.pingValue);}catch{}}
- function pong(ws,data){if(!data)return;if(data.toString()!==ws.pingValue)return;const sample=Math.max(1,Date.now()-ws.pingAt);ws.rtt=ws.rtt===null?sample:Math.round(ws.rtt*.7+sample*.3);}
+ function pong(ws,data){if(!data)return;if(data.toString()!==ws.pingValue)return;const sample=Math.max(1,Date.now()-ws.pingAt);ws.rtt=ws.rtt===null?sample:Math.round(ws.rtt*.7+sample*.3);if(ws.auth&&queue.get(ws.auth.user.id)?.ws===ws)serial(matchQueue).catch(()=>{});}
  async function cancel(ws,state='cancelled',message='已取消搜尋'){
   const id=ws.auth?.user.id,entry=id&&queue.get(id);if(!entry||entry.ws!==ws){send(ws,{type:'queue_status',state});return;}
   queue.delete(id);await services.db.query('DELETE FROM matchmaking_queue WHERE user_id=$1',[id]);send(ws,{type:'queue_status',state,kind:entry.kind,message});
@@ -49,20 +50,21 @@ function createOnline({services,rooms,send,all,begin,finalize,roster,env=process
   const now=Date.now();for(const entry of [...queue.values()]){
    if(entry.ws.readyState!==1){await cancel(entry.ws);continue;}
    if(now-entry.since>=queueTimeout){await cancel(entry.ws,'expired','搜尋逾時，請稍後再試');continue;}
-   if(entry.ws.rtt!==null&&entry.ws.rtt>250){await cancel(entry.ws,'error','目前實測延遲超過 250ms，請改善網路後再試');continue;}
+   if(entry.ws.rtt!==null&&entry.ws.rtt>Matching.LIMITS.rtt){await cancel(entry.ws,'error','目前實測延遲超過 250ms，請改善網路後再試');continue;}
+   if(now-entry.ws.pingAt>=Matching.LIMITS.probeEvery)probe(entry.ws);
   }
   const entries=[...queue.values()].sort((a,b)=>a.since-b.since);
   for(const a of entries){if(!queue.has(a.user.id)||a.ws.rtt===null)continue;
-   const range=Math.min(600,150+Math.floor((now-a.since)/10000)*75);
-   const b=entries.filter(b=>b.user.id!==a.user.id&&queue.has(b.user.id)&&b.kind===a.kind&&b.ws.rtt!==null&&b.ws.rtt<=250&&Math.abs(a.ws.rtt-b.ws.rtt)<=120&&Math.abs(a.mmr-b.mmr)<=range).sort((x,y)=>(Math.abs(a.mmr-x.mmr)+2*Math.abs(a.ws.rtt-x.ws.rtt))-(Math.abs(a.mmr-y.mmr)+2*Math.abs(a.ws.rtt-y.ws.rtt))||x.since-y.since)[0];
+   const b=Matching.opponent(a,entries.filter(e=>queue.has(e.user.id)),now);
    if(b){try{await reservePair(a,b);}catch(err){for(const entry of[a,b]){await cancel(entry.ws,'error',err.status?err.message:'匹配暫時無法完成');}}}
   }
+  for(const entry of queue.values()){const info=Matching.status(entry,[...queue.values()],now),key=JSON.stringify([info.searchingPlayers,info.reason,info.expanded]);if(entry.statusKey!==key){entry.statusKey=key;send(entry.ws,{type:'queue_status',...info});}}
  }
  async function enqueue(ws,msg){
   const user=await auth(ws);service();
   if(!['quick','ranked'].includes(msg.kind)||typeof msg.char!=='string'||!Object.hasOwn(Combat.CHAR,msg.char))fail('INVALID_QUEUE','請選擇有效模式及角色');
   if(ws.record||occupied.has(user.id))fail('PLAYER_BUSY','請先完成或離開目前的房間',409);
-  const old=queue.get(user.id);if(old){if(old.ws!==ws)fail('PLAYER_BUSY','此帳號正在其他分頁搜尋對手',409);send(ws,{type:'queue_status',state:'searching',kind:old.kind,queueSince:old.since});return;}
+  const old=queue.get(user.id);if(old){if(old.ws!==ws)fail('PLAYER_BUSY','此帳號正在其他分頁搜尋對手',409);send(ws,{type:'queue_status',...Matching.status(old,[...queue.values()],Date.now())});return;}
   if(queue.size>=200)fail('QUEUE_FULL','目前搜尋人數已滿，請稍後再試',503);
   const season=await service().currentSeason();if(msg.kind==='ranked'&&!season)fail('SEASON_CLOSED','目前沒有開放中的排位賽季',409);
   if(ws.rtt!==null&&ws.rtt>250)fail('LATENCY_HIGH','目前實測延遲超過 250ms，請改善網路後再試');
@@ -70,7 +72,7 @@ function createOnline({services,rooms,send,all,begin,finalize,roster,env=process
   const rating=await service().internalMatchmakingStats(user.id,msg.kind),since=Date.now();
   const inserted=await services.db.query("INSERT INTO matchmaking_queue(user_id,mode,season_id,character_id,stage,region,latency_ms,mmr,expires_at) SELECT $1,$2,$3,$4,'auto',$5,$6,$7,$8 WHERE NOT EXISTS(SELECT 1 FROM active_match_users WHERE user_id=$1) ON CONFLICT(user_id) DO NOTHING RETURNING user_id",[user.id,msg.kind,msg.kind==='ranked'?season.id:null,msg.char,env.AZHI_REGION||'auto',Math.min(2000,ws.rtt||2000),rating.mmr,new Date(since+queueTimeout)]);
   if(!inserted.rowCount)fail('PLAYER_BUSY','此帳號已有搜尋或比賽預約',409);
-  queue.set(user.id,{ws,user,char:msg.char,kind:msg.kind,mmr:rating.mmr,since});send(ws,{type:'queue_status',state:'searching',kind:msg.kind,queueSince:since});await matchQueue();
+  queue.set(user.id,{ws,user,char:msg.char,kind:msg.kind,mmr:rating.mmr,since});await matchQueue();
  }
  async function prepare(room){
   if(room.players.some(p=>!p.loaded||!p.ws))return;

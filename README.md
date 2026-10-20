@@ -1,8 +1,12 @@
 # 陪公子練武 — Spar With the Young Master
 
-> Current release: **8.15.2 / custom player avatars**. Self-hosted Node.js + HTML Canvas 2D fighting game.
+> Current release: **8.16.0 / online matchmaking & training camp**. Self-hosted Node.js + HTML Canvas 2D fighting game.
 
 Features: 60 Hz deterministic simulation, 1v1 WebSocket rooms, 2v2 same-stage multiplayer, spectators, rollback input replay, named players/rooms, four playable characters and a single-player practice/arcade experience.
+
+Homepage starts with **Online Match**: Quick Match keeps separate casual ratings without RP, while Ranked uses the existing season/RP rules. Quick expands its skill range faster; both keep measured latency limits and match only real players. Queue status reports same-mode search population and connection checks.
+
+**Training Camp** combines six engine-verified lessons (movement, light hit, guard, combo, signature, throw), the existing move handbook, and Free Practice. Practice adds dummy controls, reset, hitboxes and live frame phases. Local lesson checkmarks are saved in this browser; they never affect accounts or ranked results.
 
 ## Quick start
 

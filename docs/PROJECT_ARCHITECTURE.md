@@ -1,4 +1,4 @@
-# 實際技術架構 — 8.15.2
+# 實際技術架構 — 8.16.0
 
 本文件描述目前程式，歷史交付保留於 README 與既有各版文件。UI 規範見 [UI_STYLE_BIBLE.md](UI_STYLE_BIBLE.md)，角色／操作見 [CHARACTER_SPEC.md](CHARACTER_SPEC.md)。
 
@@ -48,3 +48,11 @@
 Migration `004_custom_player_avatars.sql` 新增 `player_avatars`（一帳號一筆 BYTEA、內容雜湊、外鍵），並擴充既有 `users.avatar` 的受限相對路徑格式。持有帳號資料列鎖後，交易內更新圖片與頭像 URL；換回角色預設時刪除圖片。GET／HEAD `/api/avatars/:uid/:digest.webp` 提供公開靜態頭像，限制同源使用、nosniff／ETag／內容版本快取；前端只接受此路徑格式與既有角色 ID，不接受外部網址。這是玩家個人資料／排行榜頭像，戰鬥角色 Sprite 與角色肖像規格未改。頭像包含於原 PostgreSQL 備份，不需要 uploads 目錄或額外服務；新版啟動會檢查 Migration 004。
 
 既有 VPS 為 `/opt/azhi71` 與 `azhi71.service`，原 Nginx 對外埠 18071 轉送 Node `/` 與 `/ws`。`deploy/upgrade-ubuntu.sh` 在獨立 staging 安裝與測試，保留原目錄、版本健康檢查失敗會回復；不操作其他站台或 DB。環境檔 `/etc/azhi71.env`、資料庫及備份在 release swap 外；IP／HTTP 帳號須明確 opt-in，未加密的風險不會因移除 Email 而消失。詳細步驟見 [ONLINE_DEPLOYMENT.md](ONLINE_DEPLOYMENT.md)。本次已授權推送 GitHub；VPS 仍禁止自動連線或部署。
+
+## 8.16 匹配與本機訓練
+
+`server/matchmaking.js` 集中配對策略：quick 初始 ±400 MMR，每 5 秒增加 200、上限 ±1200；ranked 維持初始 ±150、每 10 秒增加 75、上限 ±600。兩者維持 RTT ≤250ms、雙方 RTT 差 ≤120ms、120 秒逾時；不同模式不混配。`server/online.js` 沿用序列化佇列、帳號／DB 唯一預約與正式結算，每 5 秒重測搜尋中的 WebSocket RTT，有效 pong 立即觸發配對。狀態只傳本模式真實搜尋人數、量測／等人／擴大範圍原因及自己的 RTT，不公開 MMR 或捏造 ETA。人數少時仍可能找不到真人對手。
+
+`public/training.js` 是 practice 專用 adapter／課程資料／UI：`game.js` 只在本機 practice 分支取樣木樁輸入，呼叫原 `Core.input/step` 後觀察真實 hit/block/combo/throw 事件。課程開場近距離位置僅用於訓練；重置重新 `Core.create`，能量沿用既有 practice 規則。線上、街機、60Hz 核心、回滾與戰鬥數值不變。`AzhiGame.setTrainingLesson/setTrainingDummy/resetTraining` 在非 practice 或已有 WebSocket 時拒絕操作。`azhi_bootcamp_v1` 只儲存本機課程 ID 勾選，與會員／排名無關。
+
+`game-shell.js` 讓 `training` 成為獨立場景，首頁的 `practice` 項目先開課程／自由練習入口；舊 `?mode=practice&panel=fighters` 仍可直接選角，`open(guide)` 轉到訓練營並展開招式手冊。原招式、幀表節點與按鍵 ID 保留。`training.css` 限制提示在 HUD 下方與角色上方，原 Combat HUD 不另造副本。參考使用者提供的 60 FPS HUD HTML 的階段讀值、木樁控制與簡潔資訊層級；沒有複製其人物方塊、按鍵映射、戰鬥邏輯或勝負資料。訓練營沿用 OST training 配樂。搜尋中使用獨立等待場景，取消鍵與真實人數不放到排名卡片下方；在 WebSocket 尚處 CONNECTING 時也可取消，會關閉舊連線並阻止送出 queue_join。此版本不新增 DB Migration。

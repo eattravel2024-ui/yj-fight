@@ -39,8 +39,8 @@
  function route({panel,open,game,mode}){
   const scene=open?panel:'battle',key=scene+':'+mode+':'+(match?.id||'')+':'+!!match?.finished+':'+!!game;
   if(key===routeKey)return;routeKey=key;if(lastPanel!==scene){preview=null;A.stopLane('preview');}lastPanel=scene;
-  if(['home','fighters','missions','stages'].includes(scene)){for(const lane of ['announcer','intro','ko','result'])A.stopLane(lane);}
-  defaultMusic=scene==='fighters'?'character_select':scene==='missions'?'mission_select':scene==='stages'?'stage_select':scene==='versus'?null:scene==='results'?'results':scene==='battle'&&game&&match?(match.finished?'results':match.track):scene==='battle'&&!game&&mode==='arcade'?'mission_select':scene==='battle'&&!game&&mode==='practice'?'training':['room','competition'].includes(scene)&&game&&match?.finished?'results':'menu';
+  if(['home','fighters','missions','stages','training'].includes(scene)){for(const lane of ['announcer','intro','ko','result'])A.stopLane(lane);}
+  defaultMusic=scene==='training'?'training':scene==='fighters'?'character_select':scene==='missions'?'mission_select':scene==='stages'?'stage_select':scene==='versus'?null:scene==='results'?'results':scene==='battle'&&game&&match?(match.finished?'results':match.track):scene==='battle'&&!game&&mode==='arcade'?'mission_select':scene==='battle'&&!game&&mode==='practice'?'training':['room','competition'].includes(scene)&&game&&match?.finished?'results':'menu';
   A.setMusic(defaultMusic);
  }
  function setScene(id){preview=null;return A.setMusic(id);}

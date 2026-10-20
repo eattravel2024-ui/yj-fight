@@ -11,6 +11,7 @@
 - Two-device/4-device end-to-end tests with latency, jitter and disconnect injection. Do not mark complete without real network evidence.
 
 ## P1 — user experience and core mechanics
+- [x] 8.16.0: one leading Online Match menu entry; distinct quick/ranked queues, mode-specific search widening, repeated RTT probes and real queue status. Six actual-combat Training Camp lessons integrate the skill handbook, Free Practice, dummy controls, reset, hitboxes and live phases. Follow-up: regional concurrency measurements, anti-air/throw-tech lessons and controller support.
 - [x] 8.11.3: unobstructed home artwork, five main entries and unified Custom Match with explicit create/join, real seat/Ready data and strict missing-room errors. All modern modes retained.
 - [x] 8.14.0 player IDs/accounts, real quick/ranked queues and persistent server-only settlement. Follow-up: operational monitoring, moderation, regional/load tests.
 - [x] 8.9.5: shared full-window shell and in-game lobby/selection/rooms/settings/guide in both 1v1 and 2v2/spectator clients; preserves named rooms, invitations, Ready and rematch. Follow-up: public room discovery, reconnect and private-room permissions.

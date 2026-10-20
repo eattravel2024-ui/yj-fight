@@ -1,6 +1,6 @@
-# 8.15.2 — 帳號密碼註冊與 IP／HTTP 部署（免 Email、SMTP、網域）
+# 8.16.0 — 帳號密碼註冊與 IP／HTTP 部署（免 Email、SMTP、網域）
 
-此版已獲使用者授權推送 GitHub，分支為 `feat/phase4-5-grapples`，包含 Phase 4.5 與立法院。註冊只需帳號、至少 8 碼密碼，暱稱選填；不限制必須混合大小寫、數字或符號。保留救援碼與 PostgreSQL。以下命令僅由主機管理者手動執行；Codex 不會連線或部署正式 VPS。健康版本應為 **8.15.2**。
+目前工作分支為 `feat/phase4-5-grapples`，保留 Phase 4.5、立法院與自訂頭像。8.16.0 增加匹配及訓練營，沒有新增資料庫 Migration；使用者已授權將審核過的 8.16.0 提交至此分支，依下方指令抓取明確分支後更新。註冊只需帳號、至少 8 碼密碼，暱稱選填；不限制必須混合大小寫、數字或符號。保留救援碼與 PostgreSQL。以下命令僅由主機管理者手動執行；Codex 不會連線或部署正式 VPS。健康版本應為 **8.16.0**。
 
 ## Avatar upgrade from 8.15.1
 
@@ -8,18 +8,26 @@
 
 ## Existing game only
 
-After you publish this reviewed branch to GitHub, run in the **existing source checkout** on the VPS:
+After the reviewed 8.16.0 commit is published, run in the **existing source checkout** on the VPS. Explicit FETCH_HEAD merging supports detached checkouts and single-branch clones without requiring upstream tracking. From 8.15.2, no new database migration or configuration change is needed:
 
 ```bash
+bash <<'BASH'
+set -euo pipefail
 cd ~/azhi-update.lvccoe
-git fetch origin feat/phase4-5-grapples:refs/remotes/origin/feat/phase4-5-grapples
-git switch feat/phase4-5-grapples
-git pull --ff-only origin feat/phase4-5-grapples
+
+git fetch origin refs/heads/feat/phase4-5-grapples
+if git show-ref --verify --quiet refs/heads/feat/phase4-5-grapples; then
+  git switch feat/phase4-5-grapples
+  git merge --ff-only FETCH_HEAD
+else
+  git switch --no-track -c feat/phase4-5-grapples FETCH_HEAD
+fi
+
+node -e 'const v=require("./package.json").version;if(v!=="8.16.0"){console.error("停止：取得的版本為 "+v+"，預期 8.16.0");process.exit(1)}'
 npm ci --ignore-scripts --no-fund
-npm run check
-npm test
 sudo bash deploy/upgrade-ubuntu.sh
 curl -fsS --max-time 5 http://127.0.0.1:31071/healthz
+BASH
 ```
 
 If Git reports a missing branch, stop and verify that the reviewed commit has actually been pushed. The update script installs reviewed dependencies in a separate staging directory and tests Argon2id before stopping **only** `azhi71.service`. It retains the old `/opt/azhi71.backup.TIMESTAMP` directory and restores it on startup/health failure. It does not modify Nginx, SSH, other Docker services, `.env`, the database or other game versions. Guest gameplay works without database configuration; account/competition functions report unavailable explicitly.
@@ -89,7 +97,7 @@ curl -fsS --max-time 5 http://127.0.0.1:31071/api/auth/capabilities
 BASH
 ```
 
-確認 `version` 為 `8.15.2`、`accounts:true`、`authMethod:"username"`、`emailRequired:false` 與 `password.minLength:8`，再強制重新整理瀏覽器。密碼自動隨機產生並只寫入私密設定檔，命令不會列印憑證。這是首次設定，不是重試／密碼輪換工具；中途中斷請保留檔案與資料，依下方步驟續作。後續普通更新只需上方 Git／upgrade，不重建資料庫。排位另需設定實際賽季日期，註冊／登入／快速匹配不需要先啟用賽季。
+確認 `version` 為 `8.16.0`、`accounts:true`、`authMethod:"username"`、`emailRequired:false` 與 `password.minLength:8`，再強制重新整理瀏覽器。密碼自動隨機產生並只寫入私密設定檔，命令不會列印憑證。這是首次設定，不是重試／密碼輪換工具；中途中斷請保留檔案與資料，依下方步驟續作。後續普通更新只需上方 Git／upgrade，不重建資料庫。排位另需設定實際賽季日期，註冊／登入／快速匹配不需要先啟用賽季。
 
 ## Enable persistent accounts and competitive matches
 

@@ -28,14 +28,15 @@ async function choose(p,entry,rapid=false){
  await p.locator('[data-menu-entry="'+entry+'"]').click();assert.equal(await p.evaluate(()=>window.AzhiShell.currentPanel),'home');
  if(rapid){const transitions=await p.locator('#arcadeEnter').evaluate(button=>{const panels=[],listener=event=>panels.push(event.detail.panel);addEventListener('azhi:menu',listener);button.click();button.click();removeEventListener('azhi:menu',listener);return panels;});assert.deepEqual(transitions,['fighters'],'a queued second confirmation does not repeat the transition');}
  else await p.locator('#arcadeEnter').click();
+ if(entry==='practice'&&!await p.evaluate(()=>AzhiGame.busy)){await waitPanel(p,'training');const wasTeam=await p.evaluate(()=>['team','spectator'].includes(AzhiGame.mode));await p.locator('#trainingFree').click();if(wasTeam){await p.waitForURL('**/?mode=practice**');await waitPanel(p,'training');await p.locator('#trainingFree').click();}await waitPanel(p,'fighters');}
 }
 async function backHome(p){await p.keyboard.press('Escape');await waitPanel(p,'home');}
 
 test('Phase 1 five main-menu entries reach real existing panels without automatically starting combat',async()=>{
  const p=await page({viewport:{width:1366,height:768}});await p.goto(base);await waitPanel(p,'home');
- assert.deepEqual(await p.locator('.arcade-option').evaluateAll(nodes=>nodes.map(node=>node.dataset.menuEntry)),['arcade','practice','online','quick','ranked','team','account','settings','guide']);
+ assert.deepEqual(await p.locator('.arcade-option').evaluateAll(nodes=>nodes.map(node=>node.dataset.menuEntry)),['quick','arcade','practice','online','team','account','settings']);
  await p.evaluate(()=>{delete window.AzhiDebug;delete window.AzhiTeamDebug;});
- for(const [entry,panel] of [['arcade','fighters'],['practice','fighters'],['online','room'],['settings','settings'],['guide','guide']]){
+ for(const [entry,panel] of [['arcade','fighters'],['practice','fighters'],['online','room'],['settings','settings'],['quick','competition']]){
   await choose(p,entry,entry==='arcade');await waitPanel(p,panel);
   assert.equal(await p.evaluate(()=>window.AzhiGame.game),null,'entering '+entry+' does not initialize a match');
   assert.equal(await p.evaluate(()=>window.AzhiGame.busy),false,'entering '+entry+' does not connect automatically');
@@ -53,13 +54,13 @@ test('Phase 1 five main-menu entries reach real existing panels without automati
 
 test('Phase 1 keyboard selection, back and resume preserve local battle and release menu inputs',async()=>{
  const p=await page({viewport:{width:1366,height:768}});await p.goto(base);await waitPanel(p,'home');
- await p.keyboard.press('ArrowDown');assert.equal(await p.locator('.arcade-option.is-selected').getAttribute('data-menu-entry'),'practice');
- await p.keyboard.press('KeyW');assert.equal(await p.locator('.arcade-option.is-selected').getAttribute('data-menu-entry'),'arcade');
- await p.keyboard.press('KeyS');await p.keyboard.press('KeyU');await p.keyboard.press('Enter');await waitPanel(p,'fighters');
+ await p.keyboard.press('ArrowDown');assert.equal(await p.locator('.arcade-option.is-selected').getAttribute('data-menu-entry'),'arcade');
+ await p.keyboard.press('KeyW');assert.equal(await p.locator('.arcade-option.is-selected').getAttribute('data-menu-entry'),'quick');
+ await p.keyboard.press('KeyS');await p.keyboard.press('KeyS');await p.keyboard.press('KeyU');await p.keyboard.press('Enter');await waitPanel(p,'training');await p.locator('#trainingFree').click();await waitPanel(p,'fighters');
  assert.equal(await p.evaluate(()=>window.AzhiGame.game),null);
  await p.locator('#characterList [data-char="gambler"]').click();await backHome(p);
  assert.equal(await p.locator('.arcade-option.is-selected').getAttribute('data-menu-entry'),'practice');
- await p.keyboard.press('Space');await waitPanel(p,'fighters');
+ await p.keyboard.press('Space');await waitPanel(p,'training');await p.locator('#trainingFree').click();await waitPanel(p,'fighters');
  assert.equal(await p.locator('#characterList [aria-pressed="true"]').getAttribute('data-char'),'azhi','return cancels an unconfirmed preview');await p.locator('#characterList [data-char="gambler"]').click();
  await p.locator('#mainAction').click();await enterLocalBattle(p);await p.waitForFunction(()=>window.AzhiGame.game?.introFrames===0);
  assert.equal(await p.evaluate(()=>window.AzhiGame.game.players[0].meter),100,'menu U was not queued into combat');
@@ -130,7 +131,7 @@ test('Phase 1 desktop main menu has a full-window key visual, five visible slant
 
 test('Phase 1 reduced-motion mobile menu remains touchable with no horizontal overflow',async()=>{
  const p=await page({viewport:{width:390,height:844},isMobile:true,hasTouch:true,reducedMotion:'reduce'});await p.goto(base);await waitPanel(p,'home');await p.locator('.arcade-hero').evaluate(image=>image.decode());
- assert.equal(await p.locator('.arcade-option').count(),9);
+ assert.equal(await p.locator('.arcade-option').count(),7);
  for(const button of await p.locator('.arcade-option').all())assert.ok((await button.boundingBox()).height>=44);
  assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
  const animations=await p.locator('.arcade-home').evaluate(element=>element.getAnimations({subtree:true}).filter(animation=>animation.effect.getTiming().duration>10).length);assert.equal(animations,0,'reduced motion disables menu entrance and selection animations');
